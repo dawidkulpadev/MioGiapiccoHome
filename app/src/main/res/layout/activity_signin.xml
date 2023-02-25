@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.SignInActivity"
+    android:padding="48dp">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/untitled"
+        android:alpha="0.15"/>
+
+    <TextView
+        android:id="@+id/login_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/label_signin"
+        android:textSize="26sp"
+        android:visibility="gone"
+        android:textAlignment="center"
+        android:layout_marginTop="48dp"/>
+
+    <EditText
+        android:id="@+id/login_edit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:layout_below="@id/login_label"
+        android:hint="@string/hint_login"
+        android:visibility="gone"
+        android:layout_marginTop="12dp"/>
+    <EditText
+        android:id="@+id/pass_edit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPassword"
+        android:layout_below="@id/login_edit"
+        android:hint="@string/hint_pass"
+        android:visibility="gone"
+        android:textAlignment="center"
+        android:layout_marginTop="8dp"/>
+
+    <Button
+        android:id="@+id/signin_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/pass_edit"
+        android:layout_marginTop="24dp"
+        android:text="@string/button_signin"
+        android:visibility="gone"
+        android:background="@drawable/button_default"
+        android:onClick="onSignInClick"/>
+
+    <Button
+        android:id="@+id/signup_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:background="@drawable/button_default"
+        android:text="@string/button_signup"
+        android:textAllCaps="false"
+        android:textSize="13sp"
+        android:visibility="gone"
+        android:onClick="onSignUpClick"/>
+
+    <ProgressBar
+        android:id="@+id/progressbar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="visible"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="24dp"/>
+
+
+</RelativeLayout>

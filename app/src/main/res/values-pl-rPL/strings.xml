@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Mio Giapicco Home</string>
+    <string name="action_settings">Ustawienia</string>
+    <string name="channel_name">Powiadomienia stanu urządzeń</string>
+    <string name="channel_description">Powiadom gdy wykryte zostanie uszkodzonie urządzenia</string>
+    <string name="malfunction_detected">Znaleziono uszkodzone urządzenie</string>
+    <string name="button_signin">Zaloguj</string>
+    <string name="button_signup">Stwórz nowe konto!</string>
+    <string name="button_start">Rozpocznij</string>
+    <string name="button_connect">Połącz</string>
+    <string name="button_retry">Ponów</string>
+    <string name="button_config_device">Zapisz ustawienia</string>
+    <string name="button_finish">Kończymy</string>
+    <string name="button_set">Ustaw</string>
+    <string name="button_cancel">Anuluj</string>
+    <string name="label_signin">Logowanie</string>
+    <string name="label_addnewdevice_step1">1) Włącz swoje nowe urządzenie oraz bluetooth w telefonie</string>
+    <string name="label_addnewdevice_step2">2) Połącz się ze swoim nowym urządzeniem</string>
+    <string name="label_addnewdevice_searching">Szukam twojego urządzenia...</string>
+    <string name="label_addnewdevice_found">Znaleziono</string>
+    <string name="label_addnewdevice_notfound">Nie znalazłem żadnego urządzenia :(</string>
+    <string name="label_addnewdevice_connected">Połączono z</string>
+    <string name="label_addnewdevice_step3">3) Ustaw dane access pointa i nazwę urządzenia</string>
+    <string name="hint_login">Login</string>
+    <string name="hint_pass">Hasło</string>
+    <string name="hint_ssid">Nazwa wifi</string>
+    <string name="hint_psk">Hasło</string>
+    <string name="hint_device_label">Nazwa urządzenia</string>
+    <string name="message_change_dli">Ustaw nową wartość jasności światła (0 – 100%)</string>
+    <string name="info_login_pass_empty">Wypełnij pola login i hasło</string>
+    <string name="info_signin_failed">Błędny login lub hasło</string>
+    <string name="info_seconds_ago">Sekundę temu</string>
+    <string name="info_min_ago">%d min temu</string>
+    <string name="info_hours_ago">%d godzin temu</string>
+    <string name="info_days_ago">%d dni temu</string>
+    <string name="message_change_plant_name">Ustaw nową nazwę rośliny</string>
+    <string name="hint_plants_name">Nazwa rośliny</string>
+    <string name="info_no_devices_bind">Brak przypisanych urządzeń</string>
+    <string name="title_create_plant_dialog">Nowa roślina</string>
+    <string name="info_seen_long_ago">Daaawno temu się odzywał</string>
+    <string name="label_add_new_plant">Nowa roślina…</string>
+</resources>

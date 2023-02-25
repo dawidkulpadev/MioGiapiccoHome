@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:animateLayoutChanges="true">
+
+    <TextView
+        android:id="@+id/ld_title_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Light"/>
+
+    <TextView
+        android:id="@+id/ld_last_seen_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="9 min ago"
+        android:layout_marginStart="16dp"
+        android:layout_alignParentEnd="true" />
+
+    <RelativeLayout
+        android:layout_below="@id/ld_title_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:id="@+id/sunrise_box"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_default"
+            android:layout_marginStart="16dp"
+            android:layout_alignParentStart="true">
+            <ImageView
+                android:id="@+id/sunrise_icon"
+                android:layout_width="@dimen/details_light_icon_size"
+                android:layout_height="@dimen/details_light_icon_size"
+                android:src="@drawable/sunrise"
+                android:layout_centerHorizontal="true"/>
+            <TextView
+                android:id="@+id/sunrise_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/textPrimary"
+                android:textSize="@dimen/details_light_font_size"
+                android:text="12:00"
+                android:layout_below="@id/sunrise_icon"
+                android:layout_centerHorizontal="true"/>
+        </RelativeLayout>
+
+
+        <RelativeLayout
+            android:id="@+id/sun_box"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_default"
+            android:layout_toEndOf="@id/sunrise_box"
+            android:layout_marginStart="16dp">
+            <ImageView
+                android:id="@+id/sun_icon"
+                android:layout_width="@dimen/details_light_icon_size"
+                android:layout_height="@dimen/details_light_icon_size"
+                android:src="@drawable/sun"
+                android:layout_centerHorizontal="true"/>
+            <TextView
+                android:id="@+id/sun_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/details_light_font_size"
+                android:textColor="@color/textPrimary"
+                android:text="13:00"
+                android:layout_below="@id/sun_icon"
+                android:layout_centerHorizontal="true"/>
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/dli_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="6dp"
+            android:textSize="@dimen/details_light_font_size"
+            android:textColor="@color/textPrimary"
+            android:layout_centerInParent="true"
+            android:background="@drawable/button_default"
+            android:text="100%"/>
+
+        <RelativeLayout
+            android:id="@+id/sunset_box"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@id/moon_box"
+            android:background="@drawable/button_default"
+            android:layout_marginEnd="16dp">
+            <ImageView
+                android:id="@+id/sunset_icon"
+                android:layout_width="@dimen/details_light_icon_size"
+                android:layout_height="@dimen/details_light_icon_size"
+                android:src="@drawable/sunset"
+                android:layout_centerHorizontal="true"/>
+            <TextView
+                android:id="@+id/sunset_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/details_light_font_size"
+                android:textColor="@color/textPrimary"
+                android:text="20:00"
+                android:layout_below="@id/sunset_icon"
+                android:layout_centerHorizontal="true"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/moon_box"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:background="@drawable/button_default"
+            android:layout_marginEnd="16dp">
+            <ImageView
+                android:id="@+id/moon_icon"
+                android:layout_width="@dimen/details_light_icon_size"
+                android:layout_height="@dimen/details_light_icon_size"
+                android:src="@drawable/moon"
+                android:layout_centerHorizontal="true"/>
+            <TextView
+                android:id="@+id/moon_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/details_light_font_size"
+                android:textColor="@color/textPrimary"
+                android:text="21:00"
+                android:layout_below="@id/moon_icon"
+                android:layout_centerHorizontal="true"/>
+        </RelativeLayout>
+
+    </RelativeLayout>
+</RelativeLayout>

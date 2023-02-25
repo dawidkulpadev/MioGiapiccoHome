@@ -1,0 +1,7 @@
+<resources>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="details_light_font_size">17sp</dimen>
+    <dimen name="details_light_icon_size">28dp</dimen>
+    <dimen name="details_sensor_font_size">17sp</dimen>
+    <dimen name="details_sensor_icon_size">28dp</dimen>
+</resources>
