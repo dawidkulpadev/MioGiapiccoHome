@@ -2,7 +2,6 @@ package pl.dawidkulpa.miogiapiccohome.adapters;
 
 import android.app.TimePickerDialog;
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +20,7 @@ import java.util.Locale;
 import pl.dawidkulpa.miogiapiccohome.API.Plant;
 import pl.dawidkulpa.miogiapiccohome.API.LightDevice;
 import pl.dawidkulpa.miogiapiccohome.R;
-import pl.dawidkulpa.miogiapiccohome.API.SensorDevice;
+import pl.dawidkulpa.miogiapiccohome.API.SoilDevice;
 
 public class PlantsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public static final int VIEW_TYPE_PLANT=0;
@@ -105,7 +104,7 @@ public class PlantsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             }
         }
 
-        void setSensorDeviceDetails(SensorDevice sd){
+        void setSensorDeviceDetails(SoilDevice sd){
             if(sd!=null){
                 Context context= root.getContext();
 

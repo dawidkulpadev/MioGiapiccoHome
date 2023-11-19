@@ -6,14 +6,18 @@ import org.json.JSONObject;
 import java.text.ParseException;
 
 public class LightDevice extends Device{
+    private static final String JSON_TAG_DLI="dli";
+    private static final String JSON_TAG_DS="ds";
+    private static final String JSON_TAG_SRD="srd";
+    private static final String JSON_TAG_DE="de";
+    private static final String JSON_TAG_SSD="ssd";
+
     public static final int FIELD_DS_ID=1;
     public static final int FIELD_DE_ID=2;
     public static final int FIELD_SSS_ID=3;
     public static final int FIELD_SRE_ID=4;
     public static final int FIELD_SRD_ID=5;
     public static final int FIELD_SSD_ID=6;
-
-    private Plant parent;
 
     private int dli;
     private int dayStartAt;
@@ -32,19 +36,15 @@ public class LightDevice extends Device{
     public int getSrd() {return sunriseEndAt-dayStartAt;}
     public int getSsd() {return dayEndAt-sunsetStartAt;}
 
-    public LightDevice(Plant parent, JSONObject jobj) throws JSONException, ParseException{
+    public LightDevice(JSONObject jobj) throws JSONException, ParseException {
         super(jobj);
-        this.parent= parent;
-        dli= jobj.getInt("DLI");
 
-        dayStartAt= jobj.getInt("DS");
-        sunriseEndAt= dayStartAt+jobj.getInt("SRD");
-        dayEndAt= jobj.getInt("DE");
-        sunsetStartAt= dayEndAt-jobj.getInt("SSD");
-    }
+        dli = jobj.getInt(JSON_TAG_DLI);
 
-    public Plant getParent(){
-        return parent;
+        dayStartAt = jobj.getInt(JSON_TAG_DS);
+        sunriseEndAt = dayStartAt + jobj.getInt(JSON_TAG_SRD);
+        dayEndAt = jobj.getInt(JSON_TAG_DE);
+        sunsetStartAt = dayEndAt - jobj.getInt(JSON_TAG_SSD);
     }
 
     public String getStringDs(){

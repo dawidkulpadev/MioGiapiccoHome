@@ -8,32 +8,23 @@ import org.json.JSONObject;
 import java.text.ParseException;
 
 public class Plant {
+    private static final String JSON_TAG_ID="id";
+    private static final String JSON_TAG_NAME="n";
+    private static final String JSON_TAG_SOIL_DEVICE="sd";
+
     private final int id;
     private String name;
 
-    private LightDevice lightDevice=null;
-    private SensorDevice sensorDevice=null;
+    private SoilDevice soilDevice =null;
 
     private boolean showingDetails= false;
 
     public Plant(JSONObject jobj) throws JSONException, ParseException {
-        this.id= jobj.getInt("id");
-        this.name= jobj.getString("name");
+        this.id= jobj.getInt(JSON_TAG_ID);
+        this.name= jobj.getString(JSON_TAG_NAME);
 
-        if(!jobj.isNull("ld")){
-            lightDevice= new LightDevice(this, jobj.getJSONObject("ld"));
-        }
-
-        if(!jobj.isNull("sd")){
-            sensorDevice= new SensorDevice(this, jobj.getJSONObject("sd"));
-        }
-    }
-
-    public void update(Plant other){
-        if(other.id==this.id){
-            this.name= other.name;
-            this.lightDevice= other.lightDevice;
-            this.sensorDevice= other.sensorDevice;
+        if(!jobj.isNull(JSON_TAG_SOIL_DEVICE)){
+            soilDevice = new SoilDevice(this, jobj.getJSONObject(JSON_TAG_SOIL_DEVICE));
         }
     }
 
@@ -52,31 +43,18 @@ public class Plant {
     }
 
     public int getLastLastSeen() {
-        int ldLastSeen=Integer.MAX_VALUE;
-        int sdLastSeen=Integer.MAX_VALUE;
-
-        if(lightDevice!=null)
-            ldLastSeen= lightDevice.getLastSeen();
-
-        if(sensorDevice!=null)
-            sdLastSeen= sensorDevice.getLastSeen();
-
-        if(lightDevice==null && sensorDevice==null)
+        if(soilDevice ==null)
             return -1;
 
-        return Integer.min(ldLastSeen, sdLastSeen);
+        return soilDevice.getLastSeen();
     }
 
-    public LightDevice getLightDevice(){
-        return lightDevice;
-    }
-
-    public SensorDevice getSensorDevice(){
-        return sensorDevice;
+    public SoilDevice getSensorDevice(){
+        return soilDevice;
     }
 
     public boolean hasAnyDevice(){
-        return (lightDevice!=null) || (sensorDevice!=null);
+        return (soilDevice !=null);
     }
 
 

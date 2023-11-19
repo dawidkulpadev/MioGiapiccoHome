@@ -5,14 +5,14 @@ import org.json.JSONObject;
 
 import java.text.ParseException;
 
-public class SensorDevice extends Device {
+public class SoilDevice extends Device {
     private Plant parent;
     int airHumidity;
     int airTemperature;
     int soilHumidity;
     int batteryLevel;
 
-    public SensorDevice(Plant parent, JSONObject jobj) throws JSONException, ParseException {
+    public SoilDevice(Plant parent, JSONObject jobj) throws JSONException, ParseException {
         super(jobj);
         this.parent= parent;
         airHumidity= jobj.getInt("AH");
