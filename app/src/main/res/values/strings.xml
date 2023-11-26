@@ -53,8 +53,16 @@
     <string name="info_days_ago">%d days ago</string>
     <string name="info_no_devices_bind">No devices connected</string>
     <string name="info_seen_long_ago">Seen looong time ago</string>
+    <string name="info_no_soil_device_assigned">No soil device</string>
+    <string name="info_light_state_change">-> %s</string>
 
     <string name="title_create_plant_dialog">New plant</string>
+
+    <string name="value_temperature" translatable="false">%.1f&#xb0;C</string>
+    <string name="value_humidity" translatable="false">%.1f%%</string>
+    <string name="value_no_humidity" translatable="false">-%%</string>
+    <string name="value_no_temperature" translatable="false">-&#xb0;C</string>
+    <string name="value_co2_ppm" translatable="false">%dppm</string>
 
     <string-array name="timezones_names">
         <item>Africa/Abidjan</item>
@@ -913,14 +921,14 @@
         <item>&lt;+12>-12</item>
         <item>&lt;+12>-12</item>
     </string-array>
-    <string name="title_activity_main2">Main2Activity</string>
+    <string name="title_activity_main2" translatable="false">Main2Activity</string>
     <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
+    <string name="first_fragment_label" translatable="false">First Fragment</string>
+    <string name="second_fragment_label" translatable="false">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
 
-    <string name="lorem_ipsum">
+    <string name="lorem_ipsum" translatable="false">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
         volutpat, dolor id interdum ullamcorper, risus dolor egestas lectus, sit amet mattis purus
         dui nec risus. Maecenas non sodales nisi, vel dictum dolor. Class aptent taciti sociosqu ad

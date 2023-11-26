@@ -1,5 +1,7 @@
 package pl.dawidkulpa.miogiapiccohome.API;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,11 +28,29 @@ public class Room {
         JSONArray jSectors= jObj.getJSONArray(JSON_TAG_SECTORS);
 
         for(int i=0; i<jAirDevs.length(); i++){
-            airDevices.add(new AirDevice(jAirDevs.getJSONObject(i)));
+            Log.d("Room "+id, "Parsing Air device "+i+" "+jAirDevs.getJSONObject(i).toString());
+            airDevices.add(new AirDevice(jAirDevs.getJSONObject(i), id, Device.DEVICE_NO_PARENT_ID));
         }
 
         for(int i=0; i<jSectors.length(); i++){
+            Log.d("Room "+id, "Parsing sector "+i+" "+jSectors.getJSONObject(i).toString());
             sectors.add(new Sector(jSectors.getJSONObject(i)));
         }
+    }
+
+    public int getId(){
+        return id;
+    }
+
+    public String getName(){
+        return name;
+    }
+
+    public ArrayList<Sector> getSectors(){
+        return sectors;
+    }
+
+    public ArrayList<AirDevice> getAirDevices(){
+        return airDevices;
     }
 }

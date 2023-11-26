@@ -3,6 +3,7 @@ package pl.dawidkulpa.miogiapiccohome.activities;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -20,6 +21,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -39,12 +41,15 @@ import com.google.android.material.snackbar.Snackbar;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import pl.dawidkulpa.miogiapiccohome.API.Device;
 import pl.dawidkulpa.miogiapiccohome.API.Plant;
+import pl.dawidkulpa.miogiapiccohome.API.Room;
+import pl.dawidkulpa.miogiapiccohome.API.Sector;
 import pl.dawidkulpa.miogiapiccohome.API.User;
+import pl.dawidkulpa.miogiapiccohome.API.UserData;
 import pl.dawidkulpa.miogiapiccohome.BluetoothLeService;
 import pl.dawidkulpa.miogiapiccohome.R;
 
@@ -53,12 +58,13 @@ public class NewDeviceActivity extends AppCompatActivity {
     /** Constants */
     public static final String MG_SSID_PREFIX = "MioGiapicco";
 
-    public static final int ACTION_TIMEOUT_GATT_CONNECTION              = 5000;
+    public static final int ACTION_TIMEOUT_GATT_CONNECTION              = 15000;
     public static final int ACTION_TIMEOUT_READ_CHARACTERISTICS         = 5000;
     public static final int ACTION_TIMEOUT_ENABLE_NOTIFICATIONS         = 4000;
     public static final int ACTION_TIMEOUT_REGISTER_DEVICE              = 10000;
     public static final int ACTION_TIMEOUT_WRITE_CHARACTERISTICS        = 6000;
     public static final int ACTION_TIMEOUT_DEVICE_CONFIGURED_RESPONSE   = 4000;
+    public static final int ACTION_TIMEOUT_DEVICE_SEARCH                = 120000;
 
     public static final String SERVICE_UUID                  = "952cb13b-57fa-4885-a445-57d1f17328fd";
     public static final String CHARACTERISTIC_UUID_WIFI_SSID = "345ac506-c96e-45c6-a418-56a2ef2d6072";
@@ -86,7 +92,9 @@ public class NewDeviceActivity extends AppCompatActivity {
     private String configWifiSSID;
     private String configWifiPSK;
     private String configPicklock;
-    private int configPlantId;
+    private int configRoomIdx;
+    private int configSectorIdx;
+    private int configPlantIdx;
     private String configUID;
     private String configMAC;
     private String configTimezone;
@@ -99,13 +107,12 @@ public class NewDeviceActivity extends AppCompatActivity {
     private boolean configTimezoneWritten= false;
 
     private User user;
-    private enum PlantsReceiveState {WaitingForResponse, Success, Failed}
-    private PlantsReceiveState plantsReceiveState;
-    private final ArrayList<Plant> userPlants= new ArrayList<>();
-    private final ArrayList<String> plantNames= new ArrayList<>();
-    private final ArrayList<Integer> plantIds= new ArrayList<>();
+    private enum UserDataReceiveState {WaitingForResponse, Success, Failed}
+    private UserDataReceiveState userDataReceiveState;
     private final ArrayList<String> timezones= new ArrayList<>();
     private String[] timezoneCodes;
+
+    private Device.Type connectedDevType= Device.Type.Unknown;
 
     private BluetoothLeScanner bluetoothLeScanner;
     private BluetoothLeService bluetoothService;
@@ -130,6 +137,8 @@ public class NewDeviceActivity extends AppCompatActivity {
 
     EditText wifiSSIDEdit;
     EditText wifiPskEdit;
+    Spinner roomsSpinner;
+    Spinner sectorsSpinner;
     Spinner plantSpinner;
     Spinner timezonesSpinner;
 
@@ -141,6 +150,7 @@ public class NewDeviceActivity extends AppCompatActivity {
     // Device scan callback.
     private final ScanCallback leScanCallback =
             new ScanCallback() {
+
                 @SuppressLint("MissingPermission")
                 @Override
                 public void onScanResult(int callbackType, ScanResult result) {
@@ -247,14 +257,22 @@ public class NewDeviceActivity extends AppCompatActivity {
             } else if(systemState==SystemState.EnablingNotifications){
                 if(action.equals(BluetoothLeService.ACTION_DESCR_WRITE_COMPLETE)) {
                     stopTimeoutWatchdog();
-                    if(plantsReceiveState!=PlantsReceiveState.Success){
+                    if(userDataReceiveState!= UserDataReceiveState.Success){
                         systemState= SystemState.APICommunicationFailed;
                         finishBLE();
                         prepareNextStep(UIState.Failed);
                     } else {
                         systemState = SystemState.WaitingForUserInput;
                         Log.d("NewDeviceActivity", "System state: WaitingForUserInput");
-                        preparePlantsListAdapter();
+
+                        if(bleName.contains("Light"))
+                            connectedDevType= Device.Type.Light;
+                        else if(bleName.contains("Soil")){
+                            connectedDevType= Device.Type.Soil;
+                        } else if (bleName.contains("Air"))
+                            connectedDevType= Device.Type.Air;
+
+                        prepareRoomsListAdapter();
                         prepareNextStep(UIState.SetupWiFi);
                     }
                 }
@@ -376,6 +394,8 @@ public class NewDeviceActivity extends AppCompatActivity {
         wifiPskEdit= findViewById(R.id.wifi_psk_edit);
         nextButton= findViewById(R.id.next_step_button);
         progressBar= findViewById(R.id.progressbar);
+        roomsSpinner= findViewById(R.id.rooms_list_spinner);
+        sectorsSpinner= findViewById(R.id.sectors_list_spinner);
         plantSpinner= findViewById(R.id.plants_list_spinner);
         timezonesSpinner= findViewById(R.id.timezone_list_spinner);
 
@@ -386,31 +406,95 @@ public class NewDeviceActivity extends AppCompatActivity {
 
         prepareNextStep(UIState.PrepareBluetooth);
 
-        user.setGetPlantsListener((success, plants) -> {
-            if(success) {
-                userPlants.addAll(plants);
-                plantsReceiveState = PlantsReceiveState.Success;
-            } else {
-                plantsReceiveState = PlantsReceiveState.Failed;
-            }
-        });
-        plantsReceiveState= PlantsReceiveState.WaitingForResponse;
-        user.getPlantsList();
+        userDataReceiveState= UserDataReceiveState.WaitingForResponse;
+        user.downloadData(this::onDownloadUserDataResult);
 
         systemState=SystemState.CheckingPermissions;
         Log.d("NewDeviceActivity", "System state: CheckingPermissions");
         checkAndRequestPermissions();
     }
 
-    public void preparePlantsListAdapter(){
-        for(Plant p: userPlants){
-            if(bleName.contains("Sensor") && p.getSensorDevice()==null) {
-                plantNames.add(p.getName());
-                plantIds.add(p.getId());
-            } else if(bleName.contains("Light") && p.getLightDevice()==null) {
-                plantNames.add(p.getName());
-                plantIds.add(p.getId());
+    private void onDownloadUserDataResult(boolean success, UserData userData){
+        if(success) {
+            userDataReceiveState = UserDataReceiveState.Success;
+        } else {
+            userDataReceiveState = UserDataReceiveState.Failed;
+        }
+    }
+
+    private void prepareRoomsListAdapter(){
+        ArrayList<String> roomNames= new ArrayList<>();
+
+        ArrayList<Room> userRooms= user.getDataHandler().getRooms();
+        for(Room r: userRooms){
+            roomNames.add(r.getName());
+        }
+        roomNames.add(getString(R.string.label_add_new_plant));
+
+        ArrayAdapter<String> roomsListAdapter= new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, roomNames);
+        roomsListAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        roomsSpinner.setAdapter(roomsListAdapter);
+        roomsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
+                onRoomItemSelected(pos);
             }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                configPlantIdx= -1;
+            }
+        });
+    }
+
+    private void onRoomItemSelected(int pos){
+        if(pos < user.getDataHandler().getRooms().size()) {
+            configRoomIdx= pos;
+            prepareSectorsListAdapter(pos);
+        }
+    }
+
+    private void prepareSectorsListAdapter(int roomId){
+        ArrayList<String> sectorNames= new ArrayList<>();
+        ArrayList<Sector> userSectors= user.getDataHandler().getSectors(roomId);
+        for(Sector s: userSectors){
+            sectorNames.add(s.getName());
+        }
+        sectorNames.add(getString(R.string.label_add_new_plant));
+
+        ArrayAdapter<String> sectorsListAdapter= new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, sectorNames);
+        sectorsListAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        sectorsSpinner.setAdapter(sectorsListAdapter);
+        sectorsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
+                onSectorItemSelected(pos);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                configPlantIdx= -1;
+            }
+        });
+    }
+
+    private void onSectorItemSelected(int pos){
+        if(pos < user.getDataHandler().getRooms().get(configRoomIdx).getSectors().size()){
+            configSectorIdx= pos;
+            if(connectedDevType== Device.Type.Soil)
+                preparePlantsListAdapter(configRoomIdx, configSectorIdx);
+        }
+    }
+
+    public void preparePlantsListAdapter(int roomId, int sectorId){
+        ArrayList<String> plantNames= new ArrayList<>();
+        ArrayList<Plant> userPlants= user.getDataHandler().getPlants(roomId, sectorId);
+        for(Plant p: userPlants){
+            plantNames.add(p.getName());
         }
         plantNames.add(getString(R.string.label_add_new_plant));
 
@@ -422,14 +506,21 @@ public class NewDeviceActivity extends AppCompatActivity {
         plantSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
-                configPlantId= plantIds.get(pos);
+                onPlantsItemSelected(pos);
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
-                configPlantId= -1;
+                configPlantIdx= -1;
             }
         });
+    }
+
+    private void onPlantsItemSelected(int pos){
+        if(pos < user.getDataHandler().getRooms().get(configRoomIdx).getSectors()
+                .get(configSectorIdx).getPlants().size()){
+            configPlantIdx= pos;
+        }
     }
 
     private void prepareTimezoneListAdapter(){
@@ -506,12 +597,14 @@ public class NewDeviceActivity extends AppCompatActivity {
                     ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED;
             boolean bluetoothScanPermited=
                     ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED;
+            boolean fineLocationPermited=
+                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
 
-            if(!bluetoothConnectPermited || !bluetoothScanPermited){
+            if(!bluetoothConnectPermited || !bluetoothScanPermited || !fineLocationPermited){
                 systemState= SystemState.WaitingForPermissionsUserResponse;
                 Log.d("NewDeviceActivity", "System state: WaitingForPermissionsUserResponse");
                 requestPermissions(
-                        new String[]{Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT},
+                        new String[]{Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.ACCESS_FINE_LOCATION},
                         1);
             } else {
                 startConnectingSystem();
@@ -523,15 +616,16 @@ public class NewDeviceActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if(requestCode==1){
-            int granted=0;
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 1) {
+            int granted = 0;
 
-            for(int g : grantResults){
-                if(g==PackageManager.PERMISSION_GRANTED)
+            for (int g : grantResults) {
+                if (g == PackageManager.PERMISSION_GRANTED)
                     granted++;
             }
 
-            if(granted==grantResults.length)
+            if (granted == grantResults.length)
                 startConnectingSystem();
         }
     }
@@ -551,7 +645,7 @@ public class NewDeviceActivity extends AppCompatActivity {
                 scanning = false;
                 bluetoothLeScanner.stopScan(leScanCallback);
                 onActionTimeout();
-            }, 10000);
+            }, ACTION_TIMEOUT_DEVICE_SEARCH);
 
             scanning = true;
             bluetoothLeScanner.startScan(leScanCallback);
@@ -561,7 +655,8 @@ public class NewDeviceActivity extends AppCompatActivity {
     }
 
     public void connect(String address){
-        registerReceiver(gattUpdateReceiver, makeGattUpdateIntentFilter());
+        ContextCompat.registerReceiver(this, gattUpdateReceiver, makeGattUpdateIntentFilter(), ContextCompat.RECEIVER_EXPORTED);
+
         bleAddress= address;
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
@@ -664,14 +759,33 @@ public class NewDeviceActivity extends AppCompatActivity {
         configWifiSSID = wifiSSIDEdit.getText().toString();
         configWifiPSK = wifiPskEdit.getText().toString();
 
-        if(configWifiPSK.isEmpty() || configWifiSSID.isEmpty() || configPlantId==-1 || configTimezone.isEmpty()){
-            Snackbar.make(wifiSSIDEdit, "Set SSID and PSK and name your device", BaseTransientBottomBar.LENGTH_SHORT).show();
+        if(configWifiPSK.isEmpty() || configWifiSSID.isEmpty() || configRoomIdx==-1
+                || (connectedDevType== Device.Type.Light && configSectorIdx==-1)
+                || (connectedDevType== Device.Type.Soil && configPlantIdx==-1)
+                || configTimezone.isEmpty()){
+            Snackbar.make(wifiSSIDEdit, "Set your WiFi SSID, PSK and name your device", BaseTransientBottomBar.LENGTH_SHORT).show();
         } else {
             systemState=SystemState.RegisteringDevice;
             Log.d("NewDeviceActivity", "System state: RegisteringDevice");
             progressBar.setVisibility(View.VISIBLE);
             startTimeoutWatchdog(ACTION_TIMEOUT_REGISTER_DEVICE);
-            registerDevice(configMAC);
+
+            int roomId= user.getDataHandler().getRooms().get(configRoomIdx).getId();;
+            int sectorId= -1;
+            int plantId= -1;
+
+            if(configSectorIdx!=-1){
+                sectorId= user.getDataHandler().getRooms().get(configRoomIdx).getSectors()
+                        .get(configSectorIdx).getId();
+            }
+
+            if(configPlantIdx!=-1){
+                plantId= user.getDataHandler().getRooms().get(configRoomIdx).getSectors()
+                        .get(configSectorIdx).getPlants().get(configPlantIdx).getId();
+            }
+
+            user.registerDevice(configMAC, roomId, sectorId, plantId, connectedDevType,
+                    this::onDeviceRegisterResult);
         }
     }
 
@@ -689,25 +803,21 @@ public class NewDeviceActivity extends AppCompatActivity {
         bluetoothService.writeCharacteristic(picklockCharacteristic);
     }
 
-    private void registerDevice(final String id){
-        user.setRegisterDeviceListener(success -> {
-            if(success){
-                stopTimeoutWatchdog();
-                systemState=SystemState.WritingCharacteristics;
-                Log.d("NewDeviceActivity", "System state: WritingCharacteristics");
-                Log.d("NewDeviceActivity", "Populate device in database success");
-                writeCharacteristics();
-                startTimeoutWatchdog(ACTION_TIMEOUT_WRITE_CHARACTERISTICS);
-            } else {
-                stopTimeoutWatchdog();
-                systemState=SystemState.ConnectionFailed;
-                Log.e("NewDeviceActivity", "System state: ConnectionFailed");
-                Log.e("NewDeviceActivity", "Populate device in database failed");
-                onConnectionFailed();
-            }
-        });
-
-        user.registerDevice(id, configPlantId, bleName);
+    private void onDeviceRegisterResult(boolean success){
+        if(success){
+            stopTimeoutWatchdog();
+            systemState=SystemState.WritingCharacteristics;
+            Log.d("NewDeviceActivity", "System state: WritingCharacteristics");
+            Log.d("NewDeviceActivity", "Populate device in database success");
+            writeCharacteristics();
+            startTimeoutWatchdog(ACTION_TIMEOUT_WRITE_CHARACTERISTICS);
+        } else {
+            stopTimeoutWatchdog();
+            systemState=SystemState.ConnectionFailed;
+            Log.e("NewDeviceActivity", "System state: ConnectionFailed");
+            Log.e("NewDeviceActivity", "Populate device in database failed");
+            onConnectionFailed();
+        }
     }
 
     private void onFinishClick(){

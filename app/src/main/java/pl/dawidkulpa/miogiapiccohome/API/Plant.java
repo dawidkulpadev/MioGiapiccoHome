@@ -1,5 +1,7 @@
 package pl.dawidkulpa.miogiapiccohome.API;
 
+import android.util.Log;
+
 import androidx.annotation.Nullable;
 
 import org.json.JSONException;
@@ -24,6 +26,7 @@ public class Plant {
         this.name= jobj.getString(JSON_TAG_NAME);
 
         if(!jobj.isNull(JSON_TAG_SOIL_DEVICE)){
+            Log.e("Plant "+id, "Parsing Soil device "+jobj.getJSONObject(JSON_TAG_SOIL_DEVICE).toString());
             soilDevice = new SoilDevice(this, jobj.getJSONObject(JSON_TAG_SOIL_DEVICE));
         }
     }
@@ -42,14 +45,7 @@ public class Plant {
         return name;
     }
 
-    public int getLastLastSeen() {
-        if(soilDevice ==null)
-            return -1;
-
-        return soilDevice.getLastSeen();
-    }
-
-    public SoilDevice getSensorDevice(){
+    public SoilDevice getSoilDevice(){
         return soilDevice;
     }
 

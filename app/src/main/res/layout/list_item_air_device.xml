@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:cardBackgroundColor="#D8FBFF">
+
+        <RelativeLayout
+            android:padding="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true">
+
+            <TextView
+                android:id="@+id/ad_name_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Air Device"/>
+
+            <TextView
+                android:id="@+id/ad_last_seen_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="9 min ago"
+                android:layout_marginStart="16dp"
+                android:layout_alignParentEnd="true" />
+
+            <TextView
+                android:id="@+id/ad_hum_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="50%"
+                android:layout_marginStart="16dp"
+                android:layout_alignParentStart="true"
+                android:layout_below="@id/ad_name_text"/>
+            <TextView
+                android:id="@+id/ad_temp_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="25degC"
+                android:layout_marginStart="16dp"
+                android:layout_below="@id/ad_name_text"
+                android:layout_toEndOf="@id/ad_hum_text"/>
+            <TextView
+                android:id="@+id/ad_hwl_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="50%"
+                android:layout_marginStart="16dp"
+                android:layout_below="@id/ad_name_text"
+                android:layout_alignParentEnd="true"/>
+
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
+</androidx.constraintlayout.widget.ConstraintLayout>

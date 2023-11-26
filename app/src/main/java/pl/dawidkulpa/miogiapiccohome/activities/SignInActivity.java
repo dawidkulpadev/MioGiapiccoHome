@@ -26,7 +26,7 @@ public class SignInActivity extends AppCompatActivity {
         SharedPreferences prefs= PreferenceManager.getDefaultSharedPreferences(this);
         String login= prefs.getString("login", "");
         String pass= prefs.getString("pass", "");
-        if(!login.isEmpty() && !pass.isEmpty()) {
+        if(login!=null && pass!=null && !login.isEmpty() && !pass.isEmpty()) {
             performSignIn(login, pass);
         } else {
             showSignInForm();
@@ -62,14 +62,7 @@ public class SignInActivity extends AppCompatActivity {
             findViewById(R.id.progressbar).setVisibility(View.VISIBLE);
 
             user = new User(login, pass);
-            user.setSingInUpListener(new User.SingInUpListener() {
-                @Override
-                public void onFinished(User user, boolean success) {
-                    onSignInResult(user, success);
-                }
-            });
-
-            user.signUp();
+            user.signUp(this::onSignInResult);
         }
     }
 
@@ -81,14 +74,7 @@ public class SignInActivity extends AppCompatActivity {
             findViewById(R.id.progressbar).setVisibility(View.VISIBLE);
 
             user = new User(login, pass);
-            user.setSingInUpListener(new User.SingInUpListener() {
-                @Override
-                public void onFinished(User user, boolean success) {
-                    onSignInResult(user, success);
-                }
-            });
-
-            user.signIn();
+            user.signIn(this::onSignInResult);
         }
     }
 

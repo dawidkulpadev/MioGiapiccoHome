@@ -1,5 +1,6 @@
 package pl.dawidkulpa.miogiapiccohome.activities;
 
+import android.Manifest;
 import android.animation.ObjectAnimator;
 import android.app.AlarmManager;
 import android.app.NotificationChannel;
@@ -7,6 +8,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -16,11 +18,13 @@ import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,22 +33,26 @@ import android.widget.ProgressBar;
 import java.util.ArrayList;
 import java.util.Objects;
 
+import pl.dawidkulpa.miogiapiccohome.API.AirDevice;
 import pl.dawidkulpa.miogiapiccohome.API.LightDevice;
 import pl.dawidkulpa.miogiapiccohome.API.Plant;
+import pl.dawidkulpa.miogiapiccohome.API.SoilDevice;
 import pl.dawidkulpa.miogiapiccohome.API.StateWatcher;
 import pl.dawidkulpa.miogiapiccohome.API.User;
+import pl.dawidkulpa.miogiapiccohome.API.UserData;
 import pl.dawidkulpa.miogiapiccohome.adapters.CreatePlantDialog;
-import pl.dawidkulpa.miogiapiccohome.adapters.PlantsListAdapter;
+import pl.dawidkulpa.miogiapiccohome.adapters.RoomsListAdapter;
 import pl.dawidkulpa.miogiapiccohome.R;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements RoomsListAdapter.DataChangeListener {
 
     public static final String CHANNEL_ID= "dev_notifs";
 
-    private PlantsListAdapter adapter;
-    private ArrayList<Plant> plants;
+    private RoomsListAdapter adapter;
 
     private User user;
+
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,16 +61,17 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        checkAndRequestPermissions();
+
         user= getIntent().getParcelableExtra("UserAPI");
         if(user==null){
+            Log.e("MainActivity", "User is null!");
             Intent intent= new Intent(this, SignInActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
             startActivity(intent);
         }
 
         Objects.requireNonNull(getSupportActionBar()).setTitle(user.getLogin());
-
-        plants= new ArrayList<>();
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> onFABClick());
@@ -71,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
 
         final SwipeRefreshLayout srl= findViewById(R.id.swipe_refresh_layout);
         srl.setOnRefreshListener(() -> {
-            user.getPlantsList();
+            startUserDataDownload();
             srl.setRefreshing(false);
         });
 
@@ -80,65 +89,38 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView rv= findViewById(R.id.dev_list);
         rv.setLayoutManager(layoutManager);
         rv.setHasFixedSize(true);
-        adapter= new PlantsListAdapter(this, plants, new PlantsListAdapter.DataChangeListener() {
-            @Override
-            public void onPlantNameChanged(Plant p) {
-                user.updatePlantName(p);
-            }
-
-            @Override
-            public void onLightDataChanged(LightDevice d) {
-                user.updateLightDevice(d);
-            }
-        });
+        adapter= new RoomsListAdapter(this, user.getDataHandler().getRooms(), this);
         rv.setAdapter(adapter);
 
-        ProgressBar progressBar = findViewById(R.id.progressbar);
-        user.setProgressBar(progressBar);
+        progressBar = findViewById(R.id.progressbar);
 
-
-        user.setGetPlantsListener((success, newPlantsList) -> {
-            if(success) {
-                processReceivedPlantData(newPlantsList);
-            } else {
-                Snackbar.make(findViewById(R.id.dev_list), "Server error :(", BaseTransientBottomBar.LENGTH_SHORT).show();
-            }
-        });
-        user.setUpdateDeviceListener(success -> {
-            if(success) {
-                user.getPlantsList();
-            } else {
-                Snackbar.make(findViewById(R.id.dev_list), "Server error :(", BaseTransientBottomBar.LENGTH_SHORT).show();
-            }
-        });
-
-        user.getPlantsList();
+        startUserDataDownload();
     }
 
-    private void processReceivedPlantData(ArrayList<Plant> newPlantsList){
-        int i=0;
+    public void checkAndRequestPermissions(){
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            boolean postNotifPermited=
+                    ActivityCompat.checkSelfPermission(this, "android.permission.POST_NOTIFICATIONS") == PackageManager.PERMISSION_GRANTED;
 
-        // Remove not received
-        while(i<plants.size()){
-            if(!newPlantsList.contains(plants.get(i))){
-                plants.remove(i);
-                adapter.notifyItemRemoved(i);
-            } else {
-                i++;
+            if(!postNotifPermited){
+                Log.d("MainActivity", "System state: WaitingForPermissionsUserResponse");
+                requestPermissions(
+                        new String[]{"android.permission.POST_NOTIFICATIONS"},
+                        1);
             }
         }
+    }
 
-        // Update existing and add new
-        for (i = 0; i < newPlantsList.size(); i++) {
-            int inOld = plants.indexOf(newPlantsList.get(i));
-            if (inOld >= 0) {
-                plants.get(inOld).update(newPlantsList.get(i));
-                adapter.notifyItemChanged(inOld);
-            } else {
-                plants.add(newPlantsList.get(i));
-                adapter.notifyItemInserted(plants.size()-1);
-            }
-        }
+    public void startUserDataDownload(){
+        progressBar.setVisibility(View.VISIBLE);
+        user.downloadData(this::onDownloadDataResult);
+    }
+
+
+
+    private void processReceivedUserData(UserData userData){
+        adapter.updateList(userData.getRooms());
+        adapter.notifyDataSetChanged();
     }
 
 
@@ -203,14 +185,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void onAddPlantClick(){
-        CreatePlantDialog createPlantDialog= new CreatePlantDialog(v -> user.createPlant(v, success -> {
-            if(success) {
-                user.getPlantsList();
-            } else {
-                Snackbar.make(findViewById(R.id.dev_list), "Server error :(", BaseTransientBottomBar.LENGTH_SHORT).show();
-            }
-        }));
+        CreatePlantDialog createPlantDialog= new CreatePlantDialog(this::onCreatePlantDialogPositiveClick);
+
         createPlantDialog.show(this);
+    }
+
+    private void onCreatePlantDialogPositiveClick(String v){
+        progressBar.setVisibility(View.VISIBLE);
+        user.createPlant(v, this::onCreatePlantResult);
     }
 
     private void onRegisterDeviceClick(){
@@ -252,5 +234,46 @@ public class MainActivity extends AppCompatActivity {
         alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HALF_HOUR,
                 AlarmManager.INTERVAL_HALF_HOUR, pi);
+    }
+
+    public void onDownloadDataResult(boolean success, UserData userData) {
+        if(success)
+            processReceivedUserData(userData);
+        else
+            Snackbar.make(findViewById(R.id.dev_list), "Server error :(", BaseTransientBottomBar.LENGTH_SHORT).show();
+        progressBar.setVisibility(View.INVISIBLE);
+    }
+
+    private void onCreatePlantResult(boolean success){
+        if(success) {
+            startUserDataDownload();
+        } else {
+            Snackbar.make(findViewById(R.id.dev_list), "Server error :(", BaseTransientBottomBar.LENGTH_SHORT).show();
+            progressBar.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    private void onUpdateLightDeviceResult(boolean success){
+        if(success) {
+            startUserDataDownload();
+        } else {
+            Snackbar.make(findViewById(R.id.dev_list), "Server error :(", BaseTransientBottomBar.LENGTH_SHORT).show();
+            progressBar.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    @Override
+    public void onLightDeviceDataChanged(LightDevice d) {
+        user.updateLightDevice(d, this::onUpdateLightDeviceResult);
+    }
+
+    @Override
+    public void onSoilDeviceDataChanged(SoilDevice d) {
+
+    }
+
+    @Override
+    public void onAirDeviceDataChanged(AirDevice d) {
+
     }
 }

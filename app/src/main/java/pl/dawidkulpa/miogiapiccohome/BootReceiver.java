@@ -7,17 +7,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.SystemClock;
 
+import java.util.Objects;
+
 import pl.dawidkulpa.miogiapiccohome.API.StateWatcher;
 
 public class BootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
+        if (Objects.equals(intent.getAction(), "android.intent.action.BOOT_COMPLETED")) {
             AlarmManager alarmManager =
                     (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
             Intent i = new Intent(context, StateWatcher.class);
-            PendingIntent pi= PendingIntent.getBroadcast(context,0,i,0);
+            PendingIntent pi= PendingIntent.getBroadcast(context,0,i, PendingIntent.FLAG_IMMUTABLE);
 
             alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                     SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HALF_HOUR,

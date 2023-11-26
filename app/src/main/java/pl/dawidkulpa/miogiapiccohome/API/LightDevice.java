@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import java.text.ParseException;
 
 public class LightDevice extends Device{
+    private static final String JSON_TAG_NAME="n";
     private static final String JSON_TAG_DLI="dli";
     private static final String JSON_TAG_DS="ds";
     private static final String JSON_TAG_SRD="srd";
@@ -18,6 +19,10 @@ public class LightDevice extends Device{
     public static final int FIELD_SRE_ID=4;
     public static final int FIELD_SRD_ID=5;
     public static final int FIELD_SSD_ID=6;
+
+    private int sectorParentId;
+
+    private String name;
 
     private int dli;
     private int dayStartAt;
@@ -36,8 +41,11 @@ public class LightDevice extends Device{
     public int getSrd() {return sunriseEndAt-dayStartAt;}
     public int getSsd() {return dayEndAt-sunsetStartAt;}
 
-    public LightDevice(JSONObject jobj) throws JSONException, ParseException {
+    public LightDevice(JSONObject jobj, int plantId) throws JSONException, ParseException {
         super(jobj);
+
+        sectorParentId= plantId;
+        name= jobj.getString(JSON_TAG_NAME);
 
         dli = jobj.getInt(JSON_TAG_DLI);
 
@@ -69,6 +77,10 @@ public class LightDevice extends Device{
         textTime+=min;
 
         return textTime;
+    }
+
+    public int getSectorParentId(){
+        return sectorParentId;
     }
 
     public String getStringSss() {
@@ -137,5 +149,9 @@ public class LightDevice extends Device{
             default:
                 return 0;
         }
+    }
+
+    public String getName(){
+        return name;
     }
 }
