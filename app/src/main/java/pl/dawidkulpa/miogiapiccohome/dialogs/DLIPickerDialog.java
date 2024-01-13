@@ -1,4 +1,4 @@
-package pl.dawidkulpa.miogiapiccohome.adapters;
+package pl.dawidkulpa.miogiapiccohome.dialogs;
 
 import android.app.AlertDialog;
 import android.content.Context;

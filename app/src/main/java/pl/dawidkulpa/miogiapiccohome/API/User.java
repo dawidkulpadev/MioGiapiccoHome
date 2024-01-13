@@ -19,15 +19,7 @@ public class User implements Parcelable {
         void onFinished(User user, boolean success);
     }
 
-    public interface RegisterDeviceListener {
-        void onFinished(boolean success);
-    }
-
-    public interface UpdateDeviceListener {
-        void onFinished(boolean success);
-    }
-
-    public interface CreatePlantListener {
+    public interface ActionListener {
         void onFinished(boolean success);
     }
 
@@ -94,15 +86,16 @@ public class User implements Parcelable {
 
     }
 
-    public void createPlant(String name, CreatePlantListener createPlantListener){
+
+    public void createRoom(String name, ActionListener actionListener){
         ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
                 ServerRequest.METHOD_POST,
                 ServerRequest.RESPONSE_TYPE_JSON,
                 ServerRequest.TIMEOUT_DEFAULT,
                 (respCode, jObject) -> {
-                    if(createPlantListener !=null){
+                    if(actionListener !=null){
                         Log.e("CODE", String.valueOf(respCode));
-                        createPlantListener.onFinished(respCode == 200);
+                        actionListener.onFinished(respCode == 200);
                     }
                 });
 
@@ -110,19 +103,58 @@ public class User implements Parcelable {
         sr.addRequestDataPair("pass", pass);
         sr.addRequestDataPair("name", name);
 
-        sr.start("https://dawidkulpa.pl/apis/miogiapicco/user/createplant.php");
+        sr.start("https://dawidkulpa.pl/apis/miogiapicco/user/createroom.php");
     }
-
-    public void registerDevice(String id, int roomId, int sectorId, int plantId,
-                               Device.Type devType,
-                               RegisterDeviceListener registerDeviceListener){
+    public void createSector(String name, int roomId, ActionListener actionListener){
         ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
                 ServerRequest.METHOD_POST,
                 ServerRequest.RESPONSE_TYPE_JSON,
                 ServerRequest.TIMEOUT_DEFAULT,
                 (respCode, jObject) -> {
-                    if(registerDeviceListener !=null){
-                        registerDeviceListener.onFinished(respCode == 200);
+                    if(actionListener !=null){
+                        Log.e("CODE", String.valueOf(respCode));
+                        actionListener.onFinished(respCode == 200);
+                    }
+                });
+
+        sr.addRequestDataPair("login", login);
+        sr.addRequestDataPair("pass", pass);
+        sr.addRequestDataPair("name", name);
+        sr.addRequestDataPair("roomid", roomId);
+
+        sr.start("https://dawidkulpa.pl/apis/miogiapicco/user/createsector.php");
+    }
+
+    public void createPlant(String name, int secId, ActionListener actionListener){
+        ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
+                ServerRequest.METHOD_POST,
+                ServerRequest.RESPONSE_TYPE_JSON,
+                ServerRequest.TIMEOUT_DEFAULT,
+                (respCode, jObject) -> {
+                    if(actionListener !=null){
+                        Log.e("CODE", String.valueOf(respCode));
+                        actionListener.onFinished(respCode == 200);
+                    }
+                });
+
+        sr.addRequestDataPair("login", login);
+        sr.addRequestDataPair("pass", pass);
+        sr.addRequestDataPair("name", name);
+        sr.addRequestDataPair("secid", secId);
+
+        sr.start("https://dawidkulpa.pl/apis/miogiapicco/user/createplant.php");
+    }
+
+    public void registerDevice(String id, int roomId, int sectorId, int plantId, String name,
+                               Device.Type devType,
+                               ActionListener actionListener){
+        ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
+                ServerRequest.METHOD_POST,
+                ServerRequest.RESPONSE_TYPE_JSON,
+                ServerRequest.TIMEOUT_DEFAULT,
+                (respCode, jObject) -> {
+                    if(actionListener !=null){
+                        actionListener.onFinished(respCode == 200);
                     }
                 });
 
@@ -140,6 +172,7 @@ public class User implements Parcelable {
         sr.addRequestDataPair("roomId", roomId);
         sr.addRequestDataPair("sectorId", sectorId);
         sr.addRequestDataPair("plantId", plantId);
+        sr.addRequestDataPair("name", name);
 
         sr.start("https://dawidkulpa.pl/apis/miogiapicco/user/registerdevice.php");
     }
@@ -159,7 +192,7 @@ public class User implements Parcelable {
                         }
                     } else {
                         if(ddl!=null){
-                            Log.d("ASD", "ASD1");
+                            Log.d("User", "downloadData: http response code= "+ respCode);
                             ddl.onResult(false, null);
                         }
                     }
@@ -171,20 +204,14 @@ public class User implements Parcelable {
         sr.start("https://dawidkulpa.pl/apis/miogiapicco/user/getdata.php");
     }
 
-    public void updateLightDevice(LightDevice d, UpdateDeviceListener updateDeviceListener){
+    public void updateLightDevice(LightDevice d, ActionListener actionListener){
         ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
                 ServerRequest.METHOD_POST,
                 ServerRequest.RESPONSE_TYPE_JSON,
                 ServerRequest.TIMEOUT_DEFAULT,
                 (respCode, jObject) -> {
-                    if(respCode==200){
-                        if(updateDeviceListener!=null){
-                            updateDeviceListener.onFinished(true);
-                        }
-                    } else {
-                        if(updateDeviceListener!=null){
-                            updateDeviceListener.onFinished(false);
-                        }
+                    if(actionListener!=null){
+                        actionListener.onFinished(respCode==200);
                     }
                 });
 
@@ -203,22 +230,15 @@ public class User implements Parcelable {
         sr.start("https://dawidkulpa.pl/apis/miogiapicco/user/updatelightdevice.php");
     }
 
-    public void updatePlantName(Plant p, UpdateDeviceListener updateDeviceListener){
+    public void updatePlantName(Plant p, ActionListener actionListener){
         ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
                 ServerRequest.METHOD_POST,
                 ServerRequest.RESPONSE_TYPE_JSON,
                 ServerRequest.TIMEOUT_DEFAULT,
                 (respCode, jObject) -> {
-                    if(respCode==200){
-                        if(updateDeviceListener!=null){
-                            updateDeviceListener.onFinished(true);
-                        }
-                    } else {
-                        if(updateDeviceListener!=null){
-                            updateDeviceListener.onFinished(false);
-                        }
+                    if(actionListener!=null){
+                        actionListener.onFinished(respCode==200);
                     }
-
                 });
 
         sr.addRequestDataPair("id", p.getId());

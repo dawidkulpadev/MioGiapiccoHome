@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 
 import pl.dawidkulpa.miogiapiccohome.API.Plant;
 import pl.dawidkulpa.miogiapiccohome.R;
+import pl.dawidkulpa.miogiapiccohome.dialogs.PlantNamePickerDialog;
 
 public class PlantsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -20,35 +22,31 @@ public class PlantsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         View root;
 
         TextView nameText;
-
-        TextView lastSeenText;
-        TextView soilDevIdText;
         TextView soilDevHumText;
+        ImageView stateIcon;
 
         PlantViewHolder(View v){
             super(v);
             root= v;
 
             nameText= v.findViewById(R.id.plant_name_text);
-            lastSeenText= v.findViewById(R.id.plant_lastseen_text);
-
-            soilDevIdText= v.findViewById(R.id.plant_soil_dev_id_text);
             soilDevHumText= v.findViewById(R.id.plant_soil_dev_hum_text);
+            stateIcon= v.findViewById(R.id.plant_state_icon);
         }
 
+        void createUI(Plant p, RoomsListAdapter.DataChangeListener dataChangeListener){
+            nameText.setOnLongClickListener(v -> {
+                openNameChangeDialog(p, dataChangeListener);
+                return false;
+            });
 
-        void setLastSeenText(int t){
-            if (t == 0) {
-                lastSeenText.setText(R.string.info_seconds_ago);
-            } else if (t < 60) {
-                lastSeenText.setText(root.getContext().getString(R.string.info_min_ago, t));
-            } else if (t < 60*24){
-                lastSeenText.setText(root.getContext().getString(R.string.info_hours_ago, t/60));
-            } else if (t < 60*24*30) {
-                lastSeenText.setText(root.getContext().getString(R.string.info_days_ago, t/(60*24)));
-            } else {
-                lastSeenText.setText(R.string.info_seen_long_ago);
-            }
+        }
+
+        void openNameChangeDialog(Plant p, RoomsListAdapter.DataChangeListener dataChangeListener){
+            PlantNamePickerDialog pnpd= new PlantNamePickerDialog(p, (plant, nn) -> {
+                p.setName(nn);
+                dataChangeListener.onPlantDataChanged(p);
+            });
         }
     }
 
@@ -76,14 +74,13 @@ public class PlantsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         h.nameText.setText(plants.get(position).getName());
 
         if(plants.get(position).getSoilDevice()!=null) {
-            h.setLastSeenText(plants.get(position).getSoilDevice().getLastSeen());
-            h.soilDevIdText.setText(plants.get(position).getSoilDevice().getId());
+            h.soilDevHumText.setVisibility(View.VISIBLE);
             h.soilDevHumText.setText(String.valueOf(plants.get(position).getSoilDevice().getSoilHumidity()));
         } else {
-            h.lastSeenText.setText("");
-            h.soilDevIdText.setText(R.string.info_no_soil_device_assigned);
-            h.soilDevHumText.setText("");
+            h.soilDevHumText.setVisibility(View.GONE);
         }
+
+        h.createUI(plants.get(position), dataChangeListener);
     }
 
     @Override

@@ -24,6 +24,8 @@
     <string name="button_finish">Finish</string>
     <string name="button_set">Set</string>
     <string name="button_cancel">Cancel</string>
+    <string name="button_unbind">Unbind</string>
+    <string name="button_start_upgrade">Start upgrade</string>
 
     <string name="label_signin">Sign in</string>
     <string name="label_addnewdevice_step1">1) Power on your device and enable bluetooth then tap Start</string>
@@ -33,7 +35,11 @@
     <string name="label_addnewdevice_connected">Connected with</string>
     <string name="label_addnewdevice_step3">3) Config access point settings and label your device</string>
     <string name="label_addnewdevice_searching">Looking for your device…</string>
+    <string name="label_add_new_room">New room…</string>
+    <string name="label_add_new_sector">New sector…</string>
     <string name="label_add_new_plant">New plant…</string>
+    <string name="label_timezone">Timezone:</string>
+    <string name="label_placement">Placement:</string>
 
     <string name="hint_login">Login</string>
     <string name="hint_pass">Password</string>
@@ -41,9 +47,16 @@
     <string name="hint_psk">Password</string>
     <string name="hint_device_label">Device label</string>
     <string name="hint_plants_name">Plants name</string>
+    <string name="hint_rooms_name">Rooms name</string>
+    <string name="hint_new_room_name">New room\'s name</string>
+    <string name="hint_new_sector_name">New sector\'s name</string>
+    <string name="hint_new_plant_name">New plant\'s name</string>
 
     <string name="message_change_dli">Set new daylight intensity (0 – 100%)</string>
-    <string name="message_change_plant_name">Set new plant\'s name</string>
+    <string name="message_change_plant_name">Set new plants name</string>
+    <string name="message_change_devices_name">Set new devices name</string>
+    <string name="message_set_rooms_name">Set new rooms name</string>
+    <string name="message_unbind_light_device">Do you really want to unbind this Light Device? It will be still assigned to your account.</string>
 
     <string name="info_login_pass_empty">Fill up login and password fields</string>
     <string name="info_signin_failed">Wrong login or password</string>
@@ -57,12 +70,17 @@
     <string name="info_light_state_change">-> %s</string>
 
     <string name="title_create_plant_dialog">New plant</string>
+    <string name="title_create_room_dialog">New room</string>
+    <string name="title_create_sector_dialog">New sector</string>
 
     <string name="value_temperature" translatable="false">%.1f&#xb0;C</string>
     <string name="value_humidity" translatable="false">%.1f%%</string>
     <string name="value_no_humidity" translatable="false">-%%</string>
     <string name="value_no_temperature" translatable="false">-&#xb0;C</string>
     <string name="value_co2_ppm" translatable="false">%dppm</string>
+    <string name="value_dli" translatable="false">%d%%</string>
+
+    <string name="cont_descr_plant_state_icon">Plant state icon</string>
 
     <string-array name="timezones_names">
         <item>Africa/Abidjan</item>

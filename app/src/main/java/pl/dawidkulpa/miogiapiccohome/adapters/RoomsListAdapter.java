@@ -14,6 +14,7 @@ import java.util.ArrayList;
 
 import pl.dawidkulpa.miogiapiccohome.API.AirDevice;
 import pl.dawidkulpa.miogiapiccohome.API.LightDevice;
+import pl.dawidkulpa.miogiapiccohome.API.Plant;
 import pl.dawidkulpa.miogiapiccohome.API.Sector;
 import pl.dawidkulpa.miogiapiccohome.API.SoilDevice;
 import pl.dawidkulpa.miogiapiccohome.R;
@@ -25,6 +26,10 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         void onLightDeviceDataChanged(LightDevice d);
         void onSoilDeviceDataChanged(SoilDevice d);
         void onAirDeviceDataChanged(AirDevice d);
+
+        void onPlantDataChanged(Plant p);
+        void onRoomDataChanged(Room r);
+        void onSectorDataChanged(Sector s);
     }
 
     static class RoomViewHolder extends RecyclerView.ViewHolder{

@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activities.MainActivity"
-    android:animateLayoutChanges="true">
+    android:animateLayoutChanges="true"
+    android:background="@color/backgroundColor">
 
     <ImageView
         android:layout_width="match_parent"
@@ -38,12 +39,12 @@
         app:srcCompat="@drawable/icon_add"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_add_plant"
+        android:id="@+id/fab_add_room"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@drawable/icon_plant_20"
+        app:srcCompat="@drawable/icon_room_20"
         android:visibility="invisible"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

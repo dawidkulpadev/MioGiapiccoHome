@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -16,34 +17,62 @@ import java.util.Calendar;
 
 import pl.dawidkulpa.miogiapiccohome.API.LightDevice;
 import pl.dawidkulpa.miogiapiccohome.R;
+import pl.dawidkulpa.miogiapiccohome.dialogs.DLIPickerDialog;
+import pl.dawidkulpa.miogiapiccohome.dialogs.LightDeviceUnbindDialog;
 
 public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     static class LightDeviceViewHolder extends RecyclerView.ViewHolder{
         View root;
 
+        // Main box data
         TextView nameText;
-
         TextView changeTimeText;
         ImageView stateIcon;
 
-        TextView dliText;
+        // Config box data
+        ConstraintLayout configsBox;
+        TextView configsDliText;
+        TextView configsDsText;
+        TextView configsDeText;
+        TextView configsSreText;
+        TextView configsSssText;
 
         LightDeviceViewHolder(View v){
             super(v);
             root= v;
 
             nameText= v.findViewById(R.id.ld_name_text);
-
             stateIcon= v.findViewById(R.id.ld_state_icon);
             changeTimeText= v.findViewById(R.id.ld_change_time_text);
 
-            dliText= v.findViewById(R.id.dli_text);
+            configsBox= v.findViewById(R.id.ld_config_box);
+            configsDsText= v.findViewById(R.id.ld_ds_text);
+            configsSreText= v.findViewById(R.id.ld_sre_text);
+            configsSssText= v.findViewById(R.id.ld_sss_text);
+            configsDeText= v.findViewById(R.id.ld_de_text);
+            configsDliText= v.findViewById(R.id.ld_dli_text);
         }
 
         void setLightDeviceDetails(LightDevice ld, RoomsListAdapter.DataChangeListener dataChangeListener){
             nameText.setText(String.valueOf(ld.getName()));
+            configsDliText.setText(root.getContext().getString(R.string.value_dli, ld.getDli()));
+            configsDsText.setText(ld.getStringDs());
+            configsSreText.setText(ld.getStringSre());
+            configsSssText.setText(ld.getStringSss());
+            configsDeText.setText(ld.getStringDe());
+            setStateData(ld);
+            setConfigsUI(ld, dataChangeListener);
 
+            root.setOnClickListener(v -> {
+                if(configsBox.getVisibility()==View.GONE)
+                    configsBox.setVisibility(View.VISIBLE);
+                else
+                    configsBox.setVisibility(View.GONE);
+            });
+        }
+
+        private void setStateData(LightDevice ld){
             // Set state icon and next change time text
             Calendar cn= Calendar.getInstance();
             int nowMins= cn.get(Calendar.HOUR_OF_DAY) * 60 + cn.get(Calendar.MINUTE);
@@ -59,15 +88,69 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
             } else {
                 setStateIconAndChangeText(R.drawable.moon, ld.getStringDs());
             }
+        }
 
-            root.setOnClickListener(v -> {
+        private void setConfigsUI(LightDevice ld, RoomsListAdapter.DataChangeListener dataChangeListener){
+            root.findViewById(R.id.ld_sre_box).setOnClickListener(
+                    view -> openTimePicker(LightDevice.FIELD_SRE_ID, ld, dataChangeListener));
+            root.findViewById(R.id.ld_ds_box).setOnClickListener(
+                    view -> openTimePicker(LightDevice.FIELD_DS_ID, ld, dataChangeListener));
+            root.findViewById(R.id.ld_sss_box).setOnClickListener(
+                    view -> openTimePicker(LightDevice.FIELD_SSS_ID, ld, dataChangeListener));
+            root.findViewById(R.id.ld_de_box).setOnClickListener(
+                    view -> openTimePicker(LightDevice.FIELD_DE_ID, ld, dataChangeListener));
 
+            root.findViewById(R.id.ld_dli_text).setOnClickListener(
+                    view -> openChangeDLIDialog(ld, dataChangeListener));
+
+            nameText.setOnClickListener(view -> {
+                openNameChangeDialog(ld, dataChangeListener);
             });
+
+            root.setOnLongClickListener(v -> {
+                openUnbindDeviceDialog(ld, dataChangeListener);
+                return false;
+            });
+
+
         }
 
         private void setStateIconAndChangeText(int iconRes, String timeText){
             stateIcon.setImageResource(iconRes);
             changeTimeText.setText(root.getContext().getString(R.string.info_light_state_change, timeText));
+        }
+
+        void openTimePicker(final int field, final LightDevice d, RoomsListAdapter.DataChangeListener dataChangeListener){
+            TimePickerDialog tpd= new TimePickerDialog(root.getContext(), (timePicker, hours, mins) -> {
+                int t= hours*60+mins;
+
+                d.setTimeOf(field, t);
+                dataChangeListener.onLightDeviceDataChanged(d);
+            }, d.getTimeOf(field)/60, d.getTimeOf(field)%60, true);
+            tpd.show();
+        }
+
+        void openChangeDLIDialog(final LightDevice device, RoomsListAdapter.DataChangeListener dataChangeListener){
+            DLIPickerDialog dialog= new DLIPickerDialog(device, "plantName", (d, v) -> {
+                d.setDli(v);
+                dataChangeListener.onLightDeviceDataChanged(d);
+            });
+
+            dialog.show(root.getContext());
+        }
+
+        void openNameChangeDialog(LightDevice ld, RoomsListAdapter.DataChangeListener dataChangeListener){
+            LightDeviceNamePickerDialog ldnpd= new LightDeviceNamePickerDialog(ld, (d, nn) -> {
+                d.setName(nn);
+                dataChangeListener.onLightDeviceDataChanged(d);
+            });
+        }
+
+        void openUnbindDeviceDialog(LightDevice ld, RoomsListAdapter.DataChangeListener dataChangeListener){
+            LightDeviceUnbindDialog deviceUnbindDialog= new LightDeviceUnbindDialog(ld, d -> {
+               d.unbind();
+               dataChangeListener.onLightDeviceDataChanged(d);
+            });
         }
     }
 

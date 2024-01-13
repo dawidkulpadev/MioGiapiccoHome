@@ -14,6 +14,7 @@
     <string name="button_finish">Kończymy</string>
     <string name="button_set">Ustaw</string>
     <string name="button_cancel">Anuluj</string>
+    <string name="button_start_upgrade">Rozpocznij aktualizację</string>
     <string name="label_signin">Logowanie</string>
     <string name="label_addnewdevice_step1">1) Włącz swoje nowe urządzenie oraz bluetooth w telefonie</string>
     <string name="label_addnewdevice_step2">2) Połącz się ze swoim nowym urządzeniem</string>
@@ -22,6 +23,8 @@
     <string name="label_addnewdevice_notfound">Nie znalazłem żadnego urządzenia :(</string>
     <string name="label_addnewdevice_connected">Połączono z</string>
     <string name="label_addnewdevice_step3">3) Ustaw dane access pointa i nazwę urządzenia</string>
+    <string name="label_timezone">Strefa czasowa:</string>
+    <string name="label_placement">Przypisz do:</string>
     <string name="hint_login">Login</string>
     <string name="hint_pass">Hasło</string>
     <string name="hint_ssid">Nazwa wifi</string>
@@ -42,6 +45,19 @@
     <string name="title_create_plant_dialog">Nowa roślina</string>
     <string name="info_seen_long_ago">Daaawno temu się odzywał</string>
     <string name="label_add_new_plant">Nowa roślina…</string>
+    <string name="cont_descr_plant_state_icon">Symbol stanu rośliny</string>
     <string name="next">Następny</string>
     <string name="previous">Poprzedni</string>
+    <string name="message_change_devices_name">Ustaw nową nazwę urządzenia</string>
+    <string name="message_unbind_light_device">Czy chcesz odłączyć to urządzenie od sektora? Nadal pozostanie ono połączone z twoim kontem.</string>
+    <string name="button_unbind">Odłącz</string>
+    <string name="title_create_room_dialog">Nowy pokój</string>
+    <string name="title_create_sector_dialog">Nowy sektor</string>
+    <string name="hint_rooms_name">Nazwa pokoju</string>
+    <string name="message_set_rooms_name">Wpisz nazwę nowego pokoju</string>
+    <string name="hint_new_plant_name">Nazwa nowej rośliny</string>
+    <string name="hint_new_sector_name">Nazwa nowego sektora</string>
+    <string name="hint_new_room_name">Nazwa nowego pokoju</string>
+    <string name="label_add_new_room">Nowy pokój…</string>
+    <string name="label_add_new_sector">Nowy sektor…</string>
 </resources>

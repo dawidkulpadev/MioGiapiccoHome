@@ -9,7 +9,10 @@
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:cardBackgroundColor="#FFFFFF">
+        app:cardBackgroundColor="#fefefe"
+        app:cardUseCompatPadding="true"
+        app:cardElevation="1dp"
+        app:cardCornerRadius="8dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -29,7 +32,9 @@
                     android:layout_marginStart="8dp"
                     android:text="NAME"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="21sp"/>
                 <TextView
                     android:id="@+id/sector_temp_text"
                     android:layout_width="wrap_content"

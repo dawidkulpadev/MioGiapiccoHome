@@ -1,6 +1,5 @@
 package pl.dawidkulpa.miogiapiccohome.activities;
 
-import android.Manifest;
 import android.animation.ObjectAnimator;
 import android.app.AlarmManager;
 import android.app.NotificationChannel;
@@ -30,26 +29,28 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 
-import java.util.ArrayList;
 import java.util.Objects;
 
 import pl.dawidkulpa.miogiapiccohome.API.AirDevice;
 import pl.dawidkulpa.miogiapiccohome.API.LightDevice;
 import pl.dawidkulpa.miogiapiccohome.API.Plant;
+import pl.dawidkulpa.miogiapiccohome.API.Room;
+import pl.dawidkulpa.miogiapiccohome.API.Sector;
 import pl.dawidkulpa.miogiapiccohome.API.SoilDevice;
 import pl.dawidkulpa.miogiapiccohome.API.StateWatcher;
 import pl.dawidkulpa.miogiapiccohome.API.User;
 import pl.dawidkulpa.miogiapiccohome.API.UserData;
-import pl.dawidkulpa.miogiapiccohome.adapters.CreatePlantDialog;
 import pl.dawidkulpa.miogiapiccohome.adapters.RoomsListAdapter;
 import pl.dawidkulpa.miogiapiccohome.R;
+import pl.dawidkulpa.miogiapiccohome.dialogs.CreateRoomDialog;
 
 public class MainActivity extends AppCompatActivity implements RoomsListAdapter.DataChangeListener {
 
     public static final String CHANNEL_ID= "dev_notifs";
 
     private RoomsListAdapter adapter;
-
+    // TODO: Spacja dodawana w polach nazwy wifi
+    // TODO: Lampa nie resetuje się po konfiguracji
     private User user;
 
     private ProgressBar progressBar;
@@ -75,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements RoomsListAdapter.
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> onFABClick());
-        findViewById(R.id.fab_add_plant).setOnClickListener(view -> onAddPlantClick());
+        findViewById(R.id.fab_add_room).setOnClickListener(view -> onAddRoomClick());
         findViewById(R.id.fab_register_device).setOnClickListener(view -> onRegisterDeviceClick());
 
         final SwipeRefreshLayout srl= findViewById(R.id.swipe_refresh_layout);
@@ -149,50 +150,50 @@ public class MainActivity extends AppCompatActivity implements RoomsListAdapter.
 
     private boolean fabExpanded=false;
     public void onFABClick(){
-        FloatingActionButton plantFAB = findViewById(R.id.fab_add_plant);
+        FloatingActionButton roomFAB = findViewById(R.id.fab_add_room);
         FloatingActionButton deviceFAB = findViewById(R.id.fab_register_device);
 
         if(fabExpanded){
-            ObjectAnimator plantFABAnimation = ObjectAnimator.ofFloat(plantFAB, "translationY", 0f);
-            plantFABAnimation.setDuration(200);
-            plantFABAnimation.start();
+            ObjectAnimator roomFABAnimation = ObjectAnimator.ofFloat(roomFAB, "translationY", 0f);
+            roomFABAnimation.setDuration(200);
+            roomFABAnimation.start();
 
             ObjectAnimator deviceFABanimation = ObjectAnimator.ofFloat(deviceFAB, "translationY", 0f);
             deviceFABanimation.setDuration(200);
             deviceFABanimation.start();
 
-            plantFAB.setVisibility(View.INVISIBLE);
+            roomFAB.setVisibility(View.INVISIBLE);
             deviceFAB.setVisibility(View.INVISIBLE);
 
             fabExpanded= false;
         } else {
-            int fabSize= plantFAB.getMeasuredHeight();
+            int fabSize= roomFAB.getMeasuredHeight();
             int marginPxSize= getResources().getDimensionPixelSize(R.dimen.fab_margin);
 
-            ObjectAnimator plantFABAnimation = ObjectAnimator.ofFloat(plantFAB, "translationY", -2*(fabSize+marginPxSize));
-            plantFABAnimation.setDuration(200);
-            plantFABAnimation.start();
+            ObjectAnimator roomFABAnimation = ObjectAnimator.ofFloat(roomFAB, "translationY", -2*(fabSize+marginPxSize));
+            roomFABAnimation.setDuration(200);
+            roomFABAnimation.start();
 
             ObjectAnimator deviceFABanimation = ObjectAnimator.ofFloat(deviceFAB, "translationY", -(fabSize+marginPxSize));
             deviceFABanimation.setDuration(200);
             deviceFABanimation.start();
 
-            plantFAB.setVisibility(View.VISIBLE);
+            roomFAB.setVisibility(View.VISIBLE);
             deviceFAB.setVisibility(View.VISIBLE);
 
             fabExpanded= true;
         }
     }
 
-    private void onAddPlantClick(){
-        CreatePlantDialog createPlantDialog= new CreatePlantDialog(this::onCreatePlantDialogPositiveClick);
+    private void onAddRoomClick(){
+        CreateRoomDialog createRoomDialog= new CreateRoomDialog(this::onCreateRoomDialogPositiveClick);
 
-        createPlantDialog.show(this);
+        createRoomDialog.show(this);
     }
 
-    private void onCreatePlantDialogPositiveClick(String v){
+    private void onCreateRoomDialogPositiveClick(String v){
         progressBar.setVisibility(View.VISIBLE);
-        user.createPlant(v, this::onCreatePlantResult);
+        user.createRoom(v, this::onCreateRoomResult);
     }
 
     private void onRegisterDeviceClick(){
@@ -244,7 +245,7 @@ public class MainActivity extends AppCompatActivity implements RoomsListAdapter.
         progressBar.setVisibility(View.INVISIBLE);
     }
 
-    private void onCreatePlantResult(boolean success){
+    private void onCreateRoomResult(boolean success){
         if(success) {
             startUserDataDownload();
         } else {
@@ -274,6 +275,21 @@ public class MainActivity extends AppCompatActivity implements RoomsListAdapter.
 
     @Override
     public void onAirDeviceDataChanged(AirDevice d) {
+
+    }
+
+    @Override
+    public void onPlantDataChanged(Plant p) {
+
+    }
+
+    @Override
+    public void onRoomDataChanged(Room r) {
+
+    }
+
+    @Override
+    public void onSectorDataChanged(Sector s) {
 
     }
 }

@@ -12,4 +12,11 @@
     <color name="textPrimary">#222</color>
     <color name="textSecondary">#333</color>
     <color name="textDisabled">#aaa</color>
+
+    <color name="textPrimaryLight">#ddd</color>
+    <color name="textSecondaryLight">#aaa</color>
+    <color name="textDisabledLight">#555</color>
+
+    <color name="backgroundColor">#2C2D2D</color>
+    <color name="backgroundDarkerColor">#222323</color>
 </resources>

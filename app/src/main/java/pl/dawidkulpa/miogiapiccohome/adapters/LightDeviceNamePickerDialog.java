@@ -7,23 +7,22 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import pl.dawidkulpa.miogiapiccohome.API.Device;
 import pl.dawidkulpa.miogiapiccohome.API.LightDevice;
 import pl.dawidkulpa.miogiapiccohome.API.Plant;
-import pl.dawidkulpa.miogiapiccohome.API.User;
-import pl.dawidkulpa.miogiapiccohome.API.Device;
 import pl.dawidkulpa.miogiapiccohome.R;
 
-public class NamePickerDialog {
+public class LightDeviceNamePickerDialog {
     public interface ClosedListener{
-        void onPositiveClick(Plant p, String v);
+        void onPositiveClick(LightDevice ld, String v);
     }
 
-    private final Plant p;
+    private LightDevice ld;
     private final ClosedListener closedListener;
     private View rootView;
 
-    public NamePickerDialog(Plant p, ClosedListener closedListener){
-        this.p= p;
+    public LightDeviceNamePickerDialog(LightDevice ld, ClosedListener closedListener){
+        this.ld= ld;
         this.closedListener= closedListener;
     }
 
@@ -33,11 +32,11 @@ public class NamePickerDialog {
         rootView= LayoutInflater.from(c).inflate(R.layout.dialog_edittext, null, false);
         adb.setView(rootView);
 
-        ((TextView)rootView.findViewById(R.id.title_text)).setText(p.getName());
-        ((TextView)rootView.findViewById(R.id.message_text)).setText(R.string.message_change_plant_name);
-        ((EditText)rootView.findViewById(R.id.text_input)).setHint(p.getName());
+        ((TextView)rootView.findViewById(R.id.title_text)).setText(ld.getName());
+        ((TextView)rootView.findViewById(R.id.message_text)).setText(R.string.message_change_devices_name);
+        ((EditText)rootView.findViewById(R.id.text_input)).setHint(ld.getName());
 
-        adb.setPositiveButton(R.string.button_set, (dialogInterface, i) -> closedListener.onPositiveClick(p, ((EditText)rootView.findViewById(R.id.text_input)).getText().toString()));
+        adb.setPositiveButton(R.string.button_set, (dialogInterface, i) -> closedListener.onPositiveClick(ld, ((EditText)rootView.findViewById(R.id.text_input)).getText().toString()));
 
         adb.setNegativeButton(R.string.button_cancel, (dialogInterface, i) -> {
 

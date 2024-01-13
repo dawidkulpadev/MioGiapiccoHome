@@ -21,6 +21,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
+import android.icu.util.TimeZone;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -92,9 +93,9 @@ public class NewDeviceActivity extends AppCompatActivity {
     private String configWifiSSID;
     private String configWifiPSK;
     private String configPicklock;
-    private int configRoomIdx;
-    private int configSectorIdx;
-    private int configPlantIdx;
+    private int configRoomIdx=-1;
+    private int configSectorIdx=-1;
+    private int configPlantIdx=-1;
     private String configUID;
     private String configMAC;
     private String configTimezone;
@@ -137,6 +138,7 @@ public class NewDeviceActivity extends AppCompatActivity {
 
     EditText wifiSSIDEdit;
     EditText wifiPskEdit;
+    EditText devicesNameEdit;
     Spinner roomsSpinner;
     Spinner sectorsSpinner;
     Spinner plantSpinner;
@@ -258,6 +260,7 @@ public class NewDeviceActivity extends AppCompatActivity {
                 if(action.equals(BluetoothLeService.ACTION_DESCR_WRITE_COMPLETE)) {
                     stopTimeoutWatchdog();
                     if(userDataReceiveState!= UserDataReceiveState.Success){
+                        Log.d("NewDeviceActivity", "Failed enabling notifications!");
                         systemState= SystemState.APICommunicationFailed;
                         finishBLE();
                         prepareNextStep(UIState.Failed);
@@ -392,6 +395,7 @@ public class NewDeviceActivity extends AppCompatActivity {
 
         wifiSSIDEdit= findViewById(R.id.wifi_ssid_edit);
         wifiPskEdit= findViewById(R.id.wifi_psk_edit);
+        devicesNameEdit= findViewById(R.id.device_name_edit);
         nextButton= findViewById(R.id.next_step_button);
         progressBar= findViewById(R.id.progressbar);
         roomsSpinner= findViewById(R.id.rooms_list_spinner);
@@ -429,11 +433,11 @@ public class NewDeviceActivity extends AppCompatActivity {
         for(Room r: userRooms){
             roomNames.add(r.getName());
         }
-        roomNames.add(getString(R.string.label_add_new_plant));
+        roomNames.add(getString(R.string.label_add_new_room));
 
         ArrayAdapter<String> roomsListAdapter= new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, roomNames);
-        roomsListAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                R.layout.spinner_item, roomNames);
+        roomsListAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 
         roomsSpinner.setAdapter(roomsListAdapter);
         roomsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -450,9 +454,13 @@ public class NewDeviceActivity extends AppCompatActivity {
     }
 
     private void onRoomItemSelected(int pos){
+        Log.d("onRoomItemSelected", String.valueOf(pos));
         if(pos < user.getDataHandler().getRooms().size()) {
             configRoomIdx= pos;
             prepareSectorsListAdapter(pos);
+        } else {
+            Log.d("onRoomItemSelected", "Show new room edit");
+            ((View)findViewById(R.id.new_room_edit).getParent()).setVisibility(View.VISIBLE);
         }
     }
 
@@ -462,11 +470,11 @@ public class NewDeviceActivity extends AppCompatActivity {
         for(Sector s: userSectors){
             sectorNames.add(s.getName());
         }
-        sectorNames.add(getString(R.string.label_add_new_plant));
+        sectorNames.add(getString(R.string.label_add_new_sector));
 
         ArrayAdapter<String> sectorsListAdapter= new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, sectorNames);
-        sectorsListAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                R.layout.spinner_item, sectorNames);
+        sectorsListAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 
         sectorsSpinner.setAdapter(sectorsListAdapter);
         sectorsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -483,10 +491,14 @@ public class NewDeviceActivity extends AppCompatActivity {
     }
 
     private void onSectorItemSelected(int pos){
+        Log.d("onSectorItemSelected", String.valueOf(pos));
         if(pos < user.getDataHandler().getRooms().get(configRoomIdx).getSectors().size()){
             configSectorIdx= pos;
             if(connectedDevType== Device.Type.Soil)
                 preparePlantsListAdapter(configRoomIdx, configSectorIdx);
+        } else {
+            Log.d("onSectorItemSelected", "Show new sector edit");
+            ((View)findViewById(R.id.new_sector_edit).getParent()).setVisibility(View.VISIBLE);
         }
     }
 
@@ -499,8 +511,8 @@ public class NewDeviceActivity extends AppCompatActivity {
         plantNames.add(getString(R.string.label_add_new_plant));
 
         ArrayAdapter<String> plantsListAdapter= new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, plantNames);
-        plantsListAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                R.layout.spinner_item, plantNames);
+        plantsListAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 
         plantSpinner.setAdapter(plantsListAdapter);
         plantSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -517,16 +529,20 @@ public class NewDeviceActivity extends AppCompatActivity {
     }
 
     private void onPlantsItemSelected(int pos){
+        Log.d("onPlantsItemSelected", String.valueOf(pos));
         if(pos < user.getDataHandler().getRooms().get(configRoomIdx).getSectors()
                 .get(configSectorIdx).getPlants().size()){
             configPlantIdx= pos;
+        }else {
+            Log.d("onPlantItemSelected", "Show new plant edit");
+            ((View)findViewById(R.id.new_plant_edit).getParent()).setVisibility(View.VISIBLE);
         }
     }
 
     private void prepareTimezoneListAdapter(){
         ArrayAdapter<String> timezoneListAdapter= new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, timezones);
-        timezoneListAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                R.layout.spinner_item, timezones);
+        timezoneListAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 
         timezonesSpinner.setAdapter(timezoneListAdapter);
         timezonesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -540,6 +556,14 @@ public class NewDeviceActivity extends AppCompatActivity {
                 configTimezone= "";
             }
         });
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            String tzName= TimeZone.getDefault().getID();
+            int tzIdx= timezones.indexOf(tzName);
+            if(tzIdx>=0){
+                timezonesSpinner.setSelection(tzIdx);
+            }
+        }
     }
 
     public void startTimeoutWatchdog(long ms){
@@ -756,11 +780,14 @@ public class NewDeviceActivity extends AppCompatActivity {
     }
 
     private void onWriteConfigClick(){
+        String deviceName= devicesNameEdit.getText().toString();
         configWifiSSID = wifiSSIDEdit.getText().toString();
         configWifiPSK = wifiPskEdit.getText().toString();
 
+
         if(configWifiPSK.isEmpty() || configWifiSSID.isEmpty() || configRoomIdx==-1
                 || (connectedDevType== Device.Type.Light && configSectorIdx==-1)
+                || (connectedDevType== Device.Type.Light && deviceName.isEmpty())
                 || (connectedDevType== Device.Type.Soil && configPlantIdx==-1)
                 || configTimezone.isEmpty()){
             Snackbar.make(wifiSSIDEdit, "Set your WiFi SSID, PSK and name your device", BaseTransientBottomBar.LENGTH_SHORT).show();
@@ -784,7 +811,7 @@ public class NewDeviceActivity extends AppCompatActivity {
                         .get(configSectorIdx).getPlants().get(configPlantIdx).getId();
             }
 
-            user.registerDevice(configMAC, roomId, sectorId, plantId, connectedDevType,
+            user.registerDevice(configMAC, roomId, sectorId, plantId, deviceName, connectedDevType,
                     this::onDeviceRegisterResult);
         }
     }
@@ -832,7 +859,7 @@ public class NewDeviceActivity extends AppCompatActivity {
         switch (next){
             case PrepareBluetooth:
                 step1Label.setVisibility(View.VISIBLE);
-                step1Label.setTextColor(getColor(R.color.textPrimary));
+                step1Label.setTextColor(getColor(R.color.textPrimaryLight));
                 step1Label.setTypeface(null, Typeface.BOLD);
                 step2Label.setVisibility(View.GONE);
                 step3Label.setVisibility(View.GONE);
@@ -841,7 +868,9 @@ public class NewDeviceActivity extends AppCompatActivity {
 
                 ((View)wifiSSIDEdit.getParent()).setVisibility(View.GONE);
                 ((View)wifiPskEdit.getParent()).setVisibility(View.GONE);
-                plantSpinner.setVisibility(View.GONE);
+                ((View)devicesNameEdit.getParent()).setVisibility(View.GONE);
+                ((View)plantSpinner.getParent()).setVisibility(View.GONE);
+                ((View)timezonesSpinner.getParent()).setVisibility(View.GONE);
 
                 progressBar.setVisibility(View.GONE);
 
@@ -850,10 +879,10 @@ public class NewDeviceActivity extends AppCompatActivity {
                 break;
             case SearchForDevice:
                 step1Label.setVisibility(View.VISIBLE);
-                step1Label.setTextColor(getColor(R.color.textDisabled));
+                step1Label.setTextColor(getColor(R.color.textDisabledLight));
                 step1Label.setTypeface(null, Typeface.NORMAL);
                 step2Label.setVisibility(View.VISIBLE);
-                step2Label.setTextColor(getColor(R.color.textPrimary));
+                step2Label.setTextColor(getColor(R.color.textPrimaryLight));
                 step2Label.setTypeface(null, Typeface.BOLD);
                 step3Label.setVisibility(View.GONE);
 
@@ -861,7 +890,9 @@ public class NewDeviceActivity extends AppCompatActivity {
 
                 ((View)wifiSSIDEdit.getParent()).setVisibility(View.GONE);
                 ((View)wifiPskEdit.getParent()).setVisibility(View.GONE);
-                plantSpinner.setVisibility(View.GONE);
+                ((View)devicesNameEdit.getParent()).setVisibility(View.GONE);
+                ((View)plantSpinner.getParent()).setVisibility(View.GONE);
+                ((View)timezonesSpinner.getParent()).setVisibility(View.GONE);
 
                 progressBar.setVisibility(View.VISIBLE);
 
@@ -870,20 +901,32 @@ public class NewDeviceActivity extends AppCompatActivity {
                 break;
             case SetupWiFi:
                 step1Label.setVisibility(View.VISIBLE);
-                step1Label.setTextColor(getColor(R.color.textDisabled));
+                step1Label.setTextColor(getColor(R.color.textDisabledLight));
                 step1Label.setTypeface(null, Typeface.NORMAL);
                 step2Label.setVisibility(View.VISIBLE);
-                step2Label.setTextColor(getColor(R.color.textDisabled));
+                step2Label.setTextColor(getColor(R.color.textDisabledLight));
                 step2Label.setTypeface(null, Typeface.NORMAL);
                 step3Label.setVisibility(View.VISIBLE);
-                step3Label.setTextColor(getColor(R.color.textPrimary));
+                step3Label.setTextColor(getColor(R.color.textPrimaryLight));
                 step3Label.setTypeface(null, Typeface.BOLD);
 
                 foundDeviceName.setVisibility(View.GONE);
 
                 ((View)wifiSSIDEdit.getParent()).setVisibility(View.VISIBLE);
                 ((View)wifiPskEdit.getParent()).setVisibility(View.VISIBLE);
-                plantSpinner.setVisibility(View.VISIBLE);
+
+                ((View)sectorsSpinner.getParent()).setVisibility(View.VISIBLE);
+                ((View)timezonesSpinner.getParent()).setVisibility(View.VISIBLE);
+
+                if(connectedDevType== Device.Type.Light) {
+                    ((View) devicesNameEdit.getParent()).setVisibility(View.VISIBLE);
+                }
+
+                if(connectedDevType== Device.Type.Soil){
+                    plantSpinner.setVisibility(View.VISIBLE);
+                } else {
+                    plantSpinner.setVisibility(View.GONE);
+                }
 
                 progressBar.setVisibility(View.GONE);
 
@@ -892,13 +935,13 @@ public class NewDeviceActivity extends AppCompatActivity {
                 break;
             case DeviceConfigured:
                 step1Label.setVisibility(View.VISIBLE);
-                step1Label.setTextColor(getColor(R.color.textDisabled));
+                step1Label.setTextColor(getColor(R.color.textDisabledLight));
                 step1Label.setTypeface(null, Typeface.NORMAL);
                 step2Label.setVisibility(View.VISIBLE);
-                step2Label.setTextColor(getColor(R.color.textDisabled));
+                step2Label.setTextColor(getColor(R.color.textDisabledLight));
                 step2Label.setTypeface(null, Typeface.NORMAL);
                 step3Label.setVisibility(View.VISIBLE);
-                step3Label.setTextColor(getColor(R.color.textDisabled));
+                step3Label.setTextColor(getColor(R.color.textDisabledLight));
                 step3Label.setTypeface(null, Typeface.NORMAL);
 
                 foundDeviceName.setVisibility(View.GONE);
