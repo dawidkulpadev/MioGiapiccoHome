@@ -1,237 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activities.NewDeviceActivity"
-    android:paddingStart="18dp"
-    android:paddingEnd="18dp"
-    android:orientation="vertical"
-    android:animateLayoutChanges="true"
-    android:background="@color/backgroundColor">
+    android:animateLayoutChanges="true">
 
-    <TextView
-        android:id="@+id/step1_label"
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/untitled"
+        android:alpha="0.15"/>
+
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/label_addnewdevice_step1"
-        android:layout_marginTop="48dp"
-        android:textSize="18sp"
-        android:textColor="@color/textPrimaryLight"/>
+        android:fitsSystemWindows="true">
 
-    <TextView
-        android:id="@+id/step2_label"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/label_addnewdevice_step2"
-        android:layout_marginTop="24dp"
-        android:textSize="18sp"
-        android:textColor="@color/textPrimaryLight"/>
-
-    <TextView
-        android:id="@+id/found_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@color/textPrimaryLight"
-        android:textSize="18sp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="8dp"/>
-
-    <TextView
-        android:id="@+id/step3_label"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/label_addnewdevice_step3"
-        android:layout_marginTop="24dp"
-        android:textSize="18sp"
-        android:textColor="@color/textPrimaryLight"/>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:layout_marginStart="24dp"
-        android:textColorHint="@color/textSecondaryLight">
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/wifi_ssid_edit"
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:fitsSystemWindows="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:maxLines="1"
-            android:inputType="text"
-            android:hint="@string/hint_ssid"
-            android:textColor="@color/textPrimaryLight"/>
-    </com.google.android.material.textfield.TextInputLayout>
+            android:minHeight="?attr/actionBarSize"
+            app:navigationIcon="@drawable/icon_action_back"
+            app:titleCentered="true"
+            app:title="@string/title_adding_new_device"/>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/wifi_psk_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:passwordToggleDrawable="@drawable/visibility_toggle"
-        app:passwordToggleEnabled="true"
-        app:passwordToggleTint="@color/colorPrimary"
-        android:layout_marginStart="24dp"
-        android:textColorHint="@color/textSecondaryLight">
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/wifi_psk_edit"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPassword"
-            android:hint="@string/hint_psk"
-            android:maxLines="1"
-            android:textColor="@color/textPrimaryLight"/>
-    </com.google.android.material.textfield.TextInputLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:layout_marginStart="24dp"
-        android:textColorHint="@color/textSecondaryLight">
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/device_name_edit"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:maxLines="1"
-            android:inputType="text"
-            android:hint="@string/hint_device_label"
-            android:textColor="@color/textPrimaryLight"/>
-    </com.google.android.material.textfield.TextInputLayout>
+    <include layout="@layout/content_new_device" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:layout_marginStart="24dp"
-        android:orientation="vertical">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_placement"
-            android:textColor="@color/textPrimaryLight"
-            android:textSize="18sp"/>
-        <androidx.appcompat.widget.AppCompatSpinner
-            android:id="@+id/rooms_list_spinner"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:padding="6dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="8dp"
-            android:backgroundTint="@color/textPrimaryLight"/>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:textColorHint="@color/textSecondaryLight"
-            android:visibility="gone">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/new_room_edit"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:inputType="text"
-                android:hint="@string/hint_new_room_name"
-                android:textColor="@color/textPrimaryLight"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <androidx.appcompat.widget.AppCompatSpinner
-            android:id="@+id/sectors_list_spinner"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:padding="6dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="8dp"
-            android:backgroundTint="@color/textPrimaryLight"/>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:textColorHint="@color/textSecondaryLight"
-            android:visibility="gone">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/new_sector_edit"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:inputType="text"
-                android:hint="@string/hint_new_sector_name"
-                android:textColor="@color/textPrimaryLight"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <androidx.appcompat.widget.AppCompatSpinner
-            android:id="@+id/plants_list_spinner"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:padding="6dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="8dp"
-            android:backgroundTint="@color/textPrimaryLight"/>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:textColorHint="@color/textSecondaryLight"
-            android:visibility="gone">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/new_plant_edit"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:inputType="text"
-                android:hint="@string/hint_new_plant_name"
-                android:textColor="@color/textPrimaryLight"/>
-        </com.google.android.material.textfield.TextInputLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginStart="24dp"
-        android:orientation="vertical">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_timezone"
-            android:textSize="18sp"
-            android:textColor="@color/textPrimaryLight"/>
-        <androidx.appcompat.widget.AppCompatSpinner
-            android:id="@+id/timezone_list_spinner"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:padding="6dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="8dp"
-            android:backgroundTint="@color/textPrimaryLight"/>
-
-    </LinearLayout>
-
-
-
-
-    <ProgressBar
-        android:id="@+id/progressbar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:indeterminate="true"
-        android:visibility="gone"
-        android:layout_marginTop="24dp"/>
-
-    <Button
-        android:id="@+id/next_step_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/progressbar"
-        android:layout_centerHorizontal="true"
-        android:background="@drawable/button_dark"
-        android:layout_marginTop="24dp"
-        android:textAllCaps="false"
-        android:text="@string/button_start"
-        android:textColor="@android:color/white"
-        android:onClick="onNextClick"/>
-
-
-</LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

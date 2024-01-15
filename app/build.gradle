@@ -43,4 +43,6 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
     implementation 'com.github.1dawidk:scm:v2.4'
+
+
 }

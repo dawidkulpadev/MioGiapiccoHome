@@ -1,7 +1,9 @@
 package pl.dawidkulpa.miogiapiccohome.activities;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -42,6 +44,7 @@ import com.google.android.material.snackbar.Snackbar;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -283,7 +286,7 @@ public class NewDeviceActivity extends AppCompatActivity {
                 if(action.equals(BluetoothLeService.ACTION_DATA_WRITE_COMPLETE)){
                     String uuid= intent.getStringExtra("uuid");
 
-                    switch (uuid) {
+                    switch (Objects.requireNonNull(uuid)) {
                         case CHARACTERISTIC_UUID_PICKLOCK:
                             configPicklockWritten= true;
                             Log.e("NewDeviceActivity", "Picklock characteristic written!");
@@ -384,6 +387,17 @@ public class NewDeviceActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_device);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                exitActivity();
+            }
+        });
+
+        toolbar.setNavigationOnClickListener(v -> exitActivity());
 
         user= getIntent().getParcelableExtra("UserAPI");
 
@@ -765,7 +779,7 @@ public class NewDeviceActivity extends AppCompatActivity {
                 onWriteConfigClick();
                 break;
             case DeviceConfigured:
-                onFinishClick();
+                exitActivity();
                 break;
         }
     }
@@ -784,6 +798,10 @@ public class NewDeviceActivity extends AppCompatActivity {
         configWifiSSID = wifiSSIDEdit.getText().toString();
         configWifiPSK = wifiPskEdit.getText().toString();
 
+        // Remove trailing and leading spaces
+        deviceName= deviceName.trim();
+        configWifiSSID= configWifiSSID.trim();
+        configWifiPSK= configWifiPSK.trim();
 
         if(configWifiPSK.isEmpty() || configWifiSSID.isEmpty() || configRoomIdx==-1
                 || (connectedDevType== Device.Type.Light && configSectorIdx==-1)
@@ -847,12 +865,9 @@ public class NewDeviceActivity extends AppCompatActivity {
         }
     }
 
-    private void onFinishClick(){
+    private void exitActivity(){
         finishBLE();
-        Intent intent= new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-        intent.putExtra("UserAPI", user);
-        startActivity(intent);
+        finish();
     }
 
     private void prepareNextStep(@NonNull UIState next){

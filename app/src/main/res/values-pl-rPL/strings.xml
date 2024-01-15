@@ -15,6 +15,12 @@
     <string name="button_set">Ustaw</string>
     <string name="button_cancel">Anuluj</string>
     <string name="button_start_upgrade">Rozpocznij aktualizację</string>
+    <string name="button_add_new_device">Dodaj nowe urządzenie MioGiapicco</string>
+    <string name="button_add_new_room">Dodaj nowy pokój</string>
+    <string name="button_add_new_sector">Dodaj nowy sektor</string>
+    <string name="button_accept">Akceptuj</string>
+    <string name="button_dismiss">Odrzuć</string>
+    <string name="button_create">Utwórz</string>
     <string name="label_signin">Logowanie</string>
     <string name="label_addnewdevice_step1">1) Włącz swoje nowe urządzenie oraz bluetooth w telefonie</string>
     <string name="label_addnewdevice_step2">2) Połącz się ze swoim nowym urządzeniem</string>
@@ -45,10 +51,12 @@
     <string name="title_create_plant_dialog">Nowa roślina</string>
     <string name="info_seen_long_ago">Daaawno temu się odzywał</string>
     <string name="label_add_new_plant">Nowa roślina…</string>
+    <string name="error_empty_name">To pole nie może byc puste</string>
     <string name="cont_descr_plant_state_icon">Symbol stanu rośliny</string>
     <string name="next">Następny</string>
     <string name="previous">Poprzedni</string>
     <string name="message_change_devices_name">Ustaw nową nazwę urządzenia</string>
+    <string name="message_set_sector_name">Wpisz nazwę nowego sektora</string>
     <string name="message_unbind_light_device">Czy chcesz odłączyć to urządzenie od sektora? Nadal pozostanie ono połączone z twoim kontem.</string>
     <string name="button_unbind">Odłącz</string>
     <string name="title_create_room_dialog">Nowy pokój</string>
@@ -60,4 +68,6 @@
     <string name="hint_new_room_name">Nazwa nowego pokoju</string>
     <string name="label_add_new_room">Nowy pokój…</string>
     <string name="label_add_new_sector">Nowy sektor…</string>
+    <string name="title_adding_new_device">Nowe urządzenie</string>
+    <string name="action_logout">Wyloguj</string>
 </resources>

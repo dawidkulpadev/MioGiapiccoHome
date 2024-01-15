@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -20,6 +21,7 @@ import pl.dawidkulpa.miogiapiccohome.API.SoilDevice;
 import pl.dawidkulpa.miogiapiccohome.R;
 
 import pl.dawidkulpa.miogiapiccohome.API.Room;
+import pl.dawidkulpa.miogiapiccohome.dialogs.NewSectorDialog;
 
 public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public interface DataChangeListener {
@@ -43,6 +45,9 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         RecyclerView sectorsRecyclerView;
         SectorsListAdapter sectorsListAdapter;
 
+        NewSectorDialog newSectorDialog;
+        Button newSectorButton;
+
         RoomViewHolder(View v){
             super(v);
             root= v;
@@ -56,6 +61,8 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             RecyclerView.LayoutManager layoutManager;
             layoutManager = new LinearLayoutManager(v.getContext());
             sectorsRecyclerView.setLayoutManager(layoutManager);
+
+            newSectorButton= v.findViewById(R.id.new_sector_button);
         }
 
         void createSectorsListAdapter(ArrayList<Sector> sectors, DataChangeListener dataChangeListener){
@@ -67,11 +74,13 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private final Context context;
     private ArrayList<Room> rooms;
     private DataChangeListener dataChangeListener;
+    private NewSectorDialog.APICreateSectorRequest apiCreateSectorRequest;
 
-    public RoomsListAdapter(Context context, ArrayList<Room> rooms, DataChangeListener dataChangeListener){
+    public RoomsListAdapter(Context context, ArrayList<Room> rooms, DataChangeListener dataChangeListener, NewSectorDialog.APICreateSectorRequest apiCreateSectorRequest){
         this.rooms= rooms;
         this.context= context;
         this.dataChangeListener= dataChangeListener;
+        this.apiCreateSectorRequest= apiCreateSectorRequest;
     }
 
     @NonNull
@@ -116,6 +125,11 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             h.tempText.setVisibility(View.GONE);
             h.co2Text.setVisibility(View.GONE);
         }
+
+        h.newSectorDialog= new NewSectorDialog(rooms.get(position).getId(), context, apiCreateSectorRequest);
+        h.newSectorButton.setOnClickListener(v -> {
+            h.newSectorDialog.show();
+        });
     }
 
     @Override

@@ -7,9 +7,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import pl.dawidkulpa.miogiapiccohome.API.Device;
 import pl.dawidkulpa.miogiapiccohome.API.LightDevice;
-import pl.dawidkulpa.miogiapiccohome.API.Plant;
 import pl.dawidkulpa.miogiapiccohome.R;
 
 public class LightDeviceNamePickerDialog {
@@ -29,7 +27,7 @@ public class LightDeviceNamePickerDialog {
     public void show(Context c){
         AlertDialog.Builder adb= new AlertDialog.Builder(c);
 
-        rootView= LayoutInflater.from(c).inflate(R.layout.dialog_edittext, null, false);
+        rootView= LayoutInflater.from(c).inflate(R.layout.dialog_new_room, null, false);
         adb.setView(rootView);
 
         ((TextView)rootView.findViewById(R.id.title_text)).setText(ld.getName());

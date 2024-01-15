@@ -103,8 +103,9 @@ public class User implements Parcelable {
         sr.addRequestDataPair("pass", pass);
         sr.addRequestDataPair("name", name);
 
-        sr.start("https://dawidkulpa.pl/apis/miogiapicco/user/createroom.php");
+        sr.start("https://dawidkulpa.pl/apis/miogiapicco-dev/user/createroom.php");
     }
+
     public void createSector(String name, int roomId, ActionListener actionListener){
         ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
                 ServerRequest.METHOD_POST,
@@ -122,7 +123,7 @@ public class User implements Parcelable {
         sr.addRequestDataPair("name", name);
         sr.addRequestDataPair("roomid", roomId);
 
-        sr.start("https://dawidkulpa.pl/apis/miogiapicco/user/createsector.php");
+        sr.start("https://dawidkulpa.pl/apis/miogiapicco-dev/user/createsector.php");
     }
 
     public void createPlant(String name, int secId, ActionListener actionListener){

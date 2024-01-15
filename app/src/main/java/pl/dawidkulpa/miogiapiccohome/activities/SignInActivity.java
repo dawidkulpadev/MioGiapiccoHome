@@ -2,10 +2,10 @@ package pl.dawidkulpa.miogiapiccohome.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.TextView;
 
@@ -16,18 +16,25 @@ import pl.dawidkulpa.miogiapiccohome.API.User;
 import pl.dawidkulpa.miogiapiccohome.R;
 
 public class SignInActivity extends AppCompatActivity {
-
     private User user;
+
+    private static final String SHARED_PREFS_NAME = "def-prefs";
+    private static final String USERNAME_KEY = "username_key";
+    private static final String PASSWORD_KEY = "password_key";
+
+    SharedPreferences prefs;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signin);
 
-        SharedPreferences prefs= PreferenceManager.getDefaultSharedPreferences(this);
-        String login= prefs.getString("login", "");
-        String pass= prefs.getString("pass", "");
-        if(login!=null && pass!=null && !login.isEmpty() && !pass.isEmpty()) {
-            performSignIn(login, pass);
+        prefs= getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
+        String lastUsername= prefs.getString(USERNAME_KEY, "");
+        String lastPassword= prefs.getString(PASSWORD_KEY, "");
+
+        if(!lastUsername.isEmpty() && !lastPassword.isEmpty()){
+            performSignIn(lastUsername, lastPassword);
         } else {
             showSignInForm();
         }
@@ -48,7 +55,6 @@ public class SignInActivity extends AppCompatActivity {
 
         performSignIn(login, pass);
     }
-
 
 
     public void onSignUpClick(View v){
@@ -80,15 +86,8 @@ public class SignInActivity extends AppCompatActivity {
 
     public void onSignInResult(User user, boolean success){
         if(success){
-            SharedPreferences prefs= PreferenceManager.getDefaultSharedPreferences(this);
-            prefs.edit().putString("login", user.getLogin())
-                        .putString("pass", user.getPassword()).apply();
-
-            Intent intent= new Intent(this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-            intent.putExtra("UserAPI", this.user);
-            startActivity(intent);
-            this.finish();
+            registerPassword(user.getLogin(), user.getPassword());
+            startMainActivity();
         } else {
             Snackbar.make(findViewById(R.id.signin_button), R.string.info_signin_failed, BaseTransientBottomBar.LENGTH_SHORT).show();
             findViewById(R.id.signin_button).setVisibility(View.VISIBLE);
@@ -96,4 +95,18 @@ public class SignInActivity extends AppCompatActivity {
         }
     }
 
+    void registerPassword(String username, String password) {
+        prefs.edit().putString(USERNAME_KEY, username).putString(PASSWORD_KEY, password).apply();
+    }
+
+    void startMainActivity(){
+        Intent intent= new Intent(this, MainActivity.class);
+        intent.putExtra("UserAPI", this.user);
+        startActivity(intent);
+    }
+
+    public static void removeLastLoginData(Context context){
+        SharedPreferences prefs= context.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().remove(USERNAME_KEY).remove(PASSWORD_KEY).apply();
+    }
 }

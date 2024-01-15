@@ -1,6 +1,5 @@
 package pl.dawidkulpa.miogiapiccohome.activities;
 
-import android.animation.ObjectAnimator;
 import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -11,10 +10,14 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -27,6 +30,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 
 import java.util.Objects;
@@ -40,17 +44,16 @@ import pl.dawidkulpa.miogiapiccohome.API.SoilDevice;
 import pl.dawidkulpa.miogiapiccohome.API.StateWatcher;
 import pl.dawidkulpa.miogiapiccohome.API.User;
 import pl.dawidkulpa.miogiapiccohome.API.UserData;
+import pl.dawidkulpa.miogiapiccohome.EditTextWatcher;
 import pl.dawidkulpa.miogiapiccohome.adapters.RoomsListAdapter;
 import pl.dawidkulpa.miogiapiccohome.R;
-import pl.dawidkulpa.miogiapiccohome.dialogs.CreateRoomDialog;
+import pl.dawidkulpa.miogiapiccohome.dialogs.NewSectorDialog;
 
-public class MainActivity extends AppCompatActivity implements RoomsListAdapter.DataChangeListener {
+public class MainActivity extends AppCompatActivity implements RoomsListAdapter.DataChangeListener, NewSectorDialog.APICreateSectorRequest {
 
     public static final String CHANNEL_ID= "dev_notifs";
 
     private RoomsListAdapter adapter;
-    // TODO: Spacja dodawana w polach nazwy wifi
-    // TODO: Lampa nie resetuje się po konfiguracji
     private User user;
 
     private ProgressBar progressBar;
@@ -64,6 +67,13 @@ public class MainActivity extends AppCompatActivity implements RoomsListAdapter.
 
         checkAndRequestPermissions();
 
+        getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                finishAffinity();
+            }
+        });
+
         user= getIntent().getParcelableExtra("UserAPI");
         if(user==null){
             Log.e("MainActivity", "User is null!");
@@ -74,9 +84,6 @@ public class MainActivity extends AppCompatActivity implements RoomsListAdapter.
 
         Objects.requireNonNull(getSupportActionBar()).setTitle(user.getLogin());
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(view -> onFABClick());
-        findViewById(R.id.fab_add_room).setOnClickListener(view -> onAddRoomClick());
         findViewById(R.id.fab_register_device).setOnClickListener(view -> onRegisterDeviceClick());
 
         final SwipeRefreshLayout srl= findViewById(R.id.swipe_refresh_layout);
@@ -90,10 +97,12 @@ public class MainActivity extends AppCompatActivity implements RoomsListAdapter.
         RecyclerView rv= findViewById(R.id.dev_list);
         rv.setLayoutManager(layoutManager);
         rv.setHasFixedSize(true);
-        adapter= new RoomsListAdapter(this, user.getDataHandler().getRooms(), this);
+        adapter= new RoomsListAdapter(this, user.getDataHandler().getRooms(), this, this);
         rv.setAdapter(adapter);
 
         progressBar = findViewById(R.id.progressbar);
+
+        findViewById(R.id.new_room_button).setOnClickListener(v -> onAddRoomClick());
 
         startUserDataDownload();
     }
@@ -141,67 +150,59 @@ public class MainActivity extends AppCompatActivity implements RoomsListAdapter.
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            startBackground();
+            // startBackground();
+            return true;
+        } else if(id == R.id.action_logout){
+            SignInActivity.removeLastLoginData(this);
+            finish();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    private boolean fabExpanded=false;
-    public void onFABClick(){
-        FloatingActionButton roomFAB = findViewById(R.id.fab_add_room);
-        FloatingActionButton deviceFAB = findViewById(R.id.fab_register_device);
-
-        if(fabExpanded){
-            ObjectAnimator roomFABAnimation = ObjectAnimator.ofFloat(roomFAB, "translationY", 0f);
-            roomFABAnimation.setDuration(200);
-            roomFABAnimation.start();
-
-            ObjectAnimator deviceFABanimation = ObjectAnimator.ofFloat(deviceFAB, "translationY", 0f);
-            deviceFABanimation.setDuration(200);
-            deviceFABanimation.start();
-
-            roomFAB.setVisibility(View.INVISIBLE);
-            deviceFAB.setVisibility(View.INVISIBLE);
-
-            fabExpanded= false;
-        } else {
-            int fabSize= roomFAB.getMeasuredHeight();
-            int marginPxSize= getResources().getDimensionPixelSize(R.dimen.fab_margin);
-
-            ObjectAnimator roomFABAnimation = ObjectAnimator.ofFloat(roomFAB, "translationY", -2*(fabSize+marginPxSize));
-            roomFABAnimation.setDuration(200);
-            roomFABAnimation.start();
-
-            ObjectAnimator deviceFABanimation = ObjectAnimator.ofFloat(deviceFAB, "translationY", -(fabSize+marginPxSize));
-            deviceFABanimation.setDuration(200);
-            deviceFABanimation.start();
-
-            roomFAB.setVisibility(View.VISIBLE);
-            deviceFAB.setVisibility(View.VISIBLE);
-
-            fabExpanded= true;
-        }
-    }
-
     private void onAddRoomClick(){
-        CreateRoomDialog createRoomDialog= new CreateRoomDialog(this::onCreateRoomDialogPositiveClick);
+        MaterialAlertDialogBuilder madb= new MaterialAlertDialogBuilder(this);
+        madb.setTitle(R.string.title_create_room_dialog).setIcon(R.drawable.icon_add)
+                .setMessage(R.string.message_set_rooms_name)
+                .setView(R.layout.dialog_new_room)
+                .setNegativeButton(R.string.button_dismiss, (dialog, which) -> {
 
-        createRoomDialog.show(this);
+                })
+                .setPositiveButton(R.string.button_create, null);
+
+        AlertDialog dialog= madb.create();
+        dialog.setOnShowListener(d -> {
+            Button b= ((AlertDialog)d).getButton(AlertDialog.BUTTON_POSITIVE);
+            b.setOnClickListener(v -> onCreateRoomDialogPositiveClick(((AlertDialog) d)));
+            b.setEnabled(false);
+
+            TextInputLayout til= ((AlertDialog)d).findViewById(R.id.text_input_layout);
+            TextInputEditText tiet= ((AlertDialog)d).findViewById(R.id.text_input);
+            if(til!=null && tiet!=null)
+                tiet.addTextChangedListener(new EditTextWatcher(til, b, ((AlertDialog) d).getContext().getString(R.string.error_empty_name)));
+        });
+
+        dialog.show();
     }
 
-    private void onCreateRoomDialogPositiveClick(String v){
-        progressBar.setVisibility(View.VISIBLE);
-        user.createRoom(v, this::onCreateRoomResult);
+
+    private void onCreateRoomDialogPositiveClick(AlertDialog d){
+        TextInputEditText input= d.findViewById(R.id.text_input);
+
+        if(input!=null){
+            progressBar.setVisibility(View.VISIBLE);
+            user.createRoom(Objects.requireNonNull(input.getText()).toString(), this::onCreateRoomResult);
+            d.dismiss();
+        }
     }
 
     private void onRegisterDeviceClick(){
         Intent intent= new Intent(this, NewDeviceActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         intent.putExtra("UserAPI", user);
         startActivity(intent);
     }
-
 
     @Override
     protected void onStop() {
@@ -291,5 +292,20 @@ public class MainActivity extends AppCompatActivity implements RoomsListAdapter.
     @Override
     public void onSectorDataChanged(Sector s) {
 
+    }
+
+    @Override
+    public void createSector(int roomId, String name) {
+        progressBar.setVisibility(View.VISIBLE);
+        user.createSector(name, roomId, this::onCreateSectorResult);
+    }
+
+    private void onCreateSectorResult(boolean success){
+        if(success) {
+            startUserDataDownload();
+        } else {
+            Snackbar.make(findViewById(R.id.dev_list), "Server error :(", BaseTransientBottomBar.LENGTH_SHORT).show();
+            progressBar.setVisibility(View.INVISIBLE);
+        }
     }
 }
