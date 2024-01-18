@@ -12,6 +12,8 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.divider.MaterialDivider;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -37,6 +39,7 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
         TextView configsDeText;
         TextView configsSreText;
         TextView configsSssText;
+        MaterialDivider divider;
 
         LightDeviceViewHolder(View v){
             super(v);
@@ -52,6 +55,8 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
             configsSssText= v.findViewById(R.id.ld_sss_text);
             configsDeText= v.findViewById(R.id.ld_de_text);
             configsDliText= v.findViewById(R.id.ld_dli_text);
+
+            divider= v.findViewById(R.id.divider);
         }
 
         void setLightDeviceDetails(LightDevice ld, RoomsListAdapter.DataChangeListener dataChangeListener){
@@ -103,9 +108,6 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
             root.findViewById(R.id.ld_dli_text).setOnClickListener(
                     view -> openChangeDLIDialog(ld, dataChangeListener));
 
-            nameText.setOnClickListener(view -> {
-                openNameChangeDialog(ld, dataChangeListener);
-            });
 
             root.setOnLongClickListener(v -> {
                 openUnbindDeviceDialog(ld, dataChangeListener);
@@ -176,6 +178,9 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         LightDeviceViewHolder h= ((LightDeviceViewHolder) holder);
         h.setLightDeviceDetails(lightDevices.get(position), dataChangeListener);
+        if(position==lightDevices.size()-1){
+            h.divider.setVisibility(View.GONE);
+        }
     }
 
     @Override

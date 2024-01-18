@@ -36,7 +36,8 @@
     <string name="hint_ssid">Nazwa wifi</string>
     <string name="hint_psk">Hasło</string>
     <string name="hint_device_label">Nazwa urządzenia</string>
-    <string name="message_change_dli">Ustaw nową wartość jasności światła (0 – 100%)</string>
+    <string name="message_change_dli">Ustaw nową wartość jasności światła</string>
+    <string name="message_update_in_progress">Aktualizowanie</string>
     <string name="info_login_pass_empty">Wypełnij pola login i hasło</string>
     <string name="info_signin_failed">Błędny login lub hasło</string>
     <string name="info_seconds_ago">Sekundę temu</string>
@@ -68,6 +69,7 @@
     <string name="hint_new_room_name">Nazwa nowego pokoju</string>
     <string name="label_add_new_room">Nowy pokój…</string>
     <string name="label_add_new_sector">Nowy sektor…</string>
+    <string name="title_set_dli">Maksymalna jasność</string>
     <string name="title_adding_new_device">Nowe urządzenie</string>
     <string name="action_logout">Wyloguj</string>
 </resources>

@@ -22,7 +22,8 @@ public class Device {
     public static SimpleDateFormat sqlSDF= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
 
     private final String id;
-    private Calendar lastSeen;
+    private final Calendar lastSeen;
+    private final boolean updateAllowed;
 
     public Device(JSONObject jobj) throws JSONException, ParseException {
         Log.d("Device", "Parsing "+jobj.toString());
@@ -31,6 +32,7 @@ public class Device {
         String strLS= jobj.getString(JSON_TAG_LAST_SEEN);
         lastSeen= Calendar.getInstance();
         lastSeen.setTime(Objects.requireNonNull(sqlSDF.parse(strLS)));
+        updateAllowed= false;
     }
 
 

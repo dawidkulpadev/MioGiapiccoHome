@@ -49,7 +49,7 @@ import pl.dawidkulpa.miogiapiccohome.adapters.RoomsListAdapter;
 import pl.dawidkulpa.miogiapiccohome.R;
 import pl.dawidkulpa.miogiapiccohome.dialogs.NewSectorDialog;
 
-public class MainActivity extends AppCompatActivity implements RoomsListAdapter.DataChangeListener, NewSectorDialog.APICreateSectorRequest {
+public class MainActivity extends AppCompatActivity implements RoomsListAdapter.DataChangeListener, NewSectorDialog.ClosedListener {
 
     public static final String CHANNEL_ID= "dev_notifs";
 
@@ -295,7 +295,7 @@ public class MainActivity extends AppCompatActivity implements RoomsListAdapter.
     }
 
     @Override
-    public void createSector(int roomId, String name) {
+    public void onPositiveClick(int roomId, String name) {
         progressBar.setVisibility(View.VISIBLE);
         user.createSector(name, roomId, this::onCreateSectorResult);
     }

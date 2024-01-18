@@ -19,10 +19,9 @@
         android:layout_height="wrap_content"
         android:text="@string/label_signin"
         android:textSize="26sp"
-        android:visibility="gone"
         android:textAlignment="center"
         android:layout_marginTop="48dp"
-        android:textColor="@color/textPrimaryLight"/>
+        android:visibility="gone"/>
 
     <EditText
         android:id="@+id/login_edit"
@@ -31,10 +30,8 @@
         android:textAlignment="center"
         android:layout_below="@id/login_label"
         android:hint="@string/hint_login"
-        android:visibility="gone"
         android:layout_marginTop="12dp"
-        android:textColorHint="@color/textSecondaryLight"
-        android:textColor="@color/textPrimaryLight"/>
+        android:visibility="gone"/>
     <EditText
         android:id="@+id/pass_edit"
         android:layout_width="match_parent"
@@ -42,11 +39,9 @@
         android:inputType="textPassword"
         android:layout_below="@id/login_edit"
         android:hint="@string/hint_pass"
-        android:visibility="gone"
         android:textAlignment="center"
         android:layout_marginTop="8dp"
-        android:textColorHint="@color/textSecondaryLight"
-        android:textColor="@color/textPrimaryLight"/>
+        android:visibility="gone"/>
 
     <Button
         android:id="@+id/signin_button"
@@ -56,11 +51,11 @@
         android:layout_below="@id/pass_edit"
         android:layout_marginTop="24dp"
         android:text="@string/button_signin"
-        android:visibility="gone"
-        android:background="@drawable/button_default"
-        android:onClick="onSignInClick"/>
+        android:onClick="onSignInClick"
+        android:visibility="gone"/>
 
     <Button
+        style="@style/Widget.Material3.Button.TextButton"
         android:id="@+id/signup_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -69,10 +64,8 @@
         android:background="@drawable/button_default"
         android:text="@string/button_signup"
         android:textAllCaps="false"
-        android:textSize="13sp"
-        android:visibility="gone"
-        android:textColor="@color/textPrimaryLight"
-        android:onClick="onSignUpClick"/>
+        android:onClick="onSignUpClick"
+        android:visibility="gone"/>
 
     <ProgressBar
         android:id="@+id/progressbar"

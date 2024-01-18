@@ -1,7 +1,6 @@
 package pl.dawidkulpa.miogiapiccohome.dialogs;
 
 import android.content.Context;
-import android.view.View;
 import android.widget.Button;
 
 import androidx.appcompat.app.AlertDialog;
@@ -16,15 +15,15 @@ import pl.dawidkulpa.miogiapiccohome.EditTextWatcher;
 import pl.dawidkulpa.miogiapiccohome.R;
 
 public class NewSectorDialog {
-    public interface APICreateSectorRequest{
-        public void createSector(int roomId, String name);
+    public interface ClosedListener {
+        void onPositiveClick(int roomId, String name);
     }
 
     private final int roomId;
     private final Context context;
-    private final APICreateSectorRequest apiCreateSectorRequest;
+    private final ClosedListener apiCreateSectorRequest;
 
-    public NewSectorDialog(int roomId, Context context, APICreateSectorRequest apiCreateSectorRequest){
+    public NewSectorDialog(int roomId, Context context, ClosedListener apiCreateSectorRequest){
         this.roomId= roomId;
         this.context= context;
         this.apiCreateSectorRequest= apiCreateSectorRequest;
@@ -59,7 +58,7 @@ public class NewSectorDialog {
         TextInputEditText input= d.findViewById(R.id.text_input);
 
         if(input!=null){
-            apiCreateSectorRequest.createSector(roomId, Objects.requireNonNull(input.getText()).toString());
+            apiCreateSectorRequest.onPositiveClick(roomId, Objects.requireNonNull(input.getText()).toString());
             d.dismiss();
         }
     }

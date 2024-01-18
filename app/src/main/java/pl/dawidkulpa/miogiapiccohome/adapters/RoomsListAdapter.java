@@ -74,9 +74,9 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private final Context context;
     private ArrayList<Room> rooms;
     private DataChangeListener dataChangeListener;
-    private NewSectorDialog.APICreateSectorRequest apiCreateSectorRequest;
+    private NewSectorDialog.ClosedListener apiCreateSectorRequest;
 
-    public RoomsListAdapter(Context context, ArrayList<Room> rooms, DataChangeListener dataChangeListener, NewSectorDialog.APICreateSectorRequest apiCreateSectorRequest){
+    public RoomsListAdapter(Context context, ArrayList<Room> rooms, DataChangeListener dataChangeListener, NewSectorDialog.ClosedListener apiCreateSectorRequest){
         this.rooms= rooms;
         this.context= context;
         this.dataChangeListener= dataChangeListener;

@@ -59,12 +59,13 @@
     <string name="hint_new_sector_name">New sector\'s name</string>
     <string name="hint_new_plant_name">New plant\'s name</string>
 
-    <string name="message_change_dli">Set new daylight intensity (0 – 100%)</string>
+    <string name="message_change_dli">Set new light intensity</string>
     <string name="message_change_plant_name">Set new plants name</string>
     <string name="message_change_devices_name">Set new devices name</string>
     <string name="message_set_rooms_name">Set new room\'s name</string>
     <string name="message_set_sector_name">Set new sector\'s name</string>
     <string name="message_unbind_light_device">Do you really want to unbind this Light Device? It will be still assigned to your account.</string>
+    <string name="message_update_in_progress">Updating</string>
 
     <string name="info_login_pass_empty">Fill up login and password fields</string>
     <string name="info_signin_failed">Wrong login or password</string>
@@ -80,6 +81,7 @@
     <string name="title_create_plant_dialog">New plant</string>
     <string name="title_create_room_dialog">New room</string>
     <string name="title_create_sector_dialog">New sector</string>
+    <string name="title_set_dli">Maximum intensity</string>
     <string name="title_adding_new_device">New device</string>
 
     <string name="value_temperature" translatable="false">%.1f&#xb0;C</string>
@@ -993,4 +995,5 @@
         libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
+
 </resources>
