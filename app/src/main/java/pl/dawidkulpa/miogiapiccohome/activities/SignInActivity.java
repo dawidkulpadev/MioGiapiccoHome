@@ -58,7 +58,7 @@ public class SignInActivity extends AppCompatActivity {
 
 
     public void onSignUpClick(View v){
-        String login= ((TextView)findViewById(R.id.login_edit)).getText().toString();
+        /*String login= ((TextView)findViewById(R.id.login_edit)).getText().toString();
         String pass= ((TextView)findViewById(R.id.pass_edit)).getText().toString();
 
         if(login.isEmpty() || pass.isEmpty()){
@@ -69,7 +69,11 @@ public class SignInActivity extends AppCompatActivity {
 
             user = new User(login, pass);
             user.signUp(this::onSignInResult);
-        }
+        }*/
+
+        Intent i= new Intent(this, SignUpActivity.class);
+
+        startActivity(i);
     }
 
     public void performSignIn(String login, String pass){

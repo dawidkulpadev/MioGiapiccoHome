@@ -6,7 +6,7 @@
     <string name="channel_description">Powiadom gdy wykryte zostanie uszkodzonie urządzenia</string>
     <string name="malfunction_detected">Znaleziono uszkodzone urządzenie</string>
     <string name="button_signin">Zaloguj</string>
-    <string name="button_signup">Stwórz nowe konto!</string>
+    <string name="button_create_account">Stwórz nowe konto!</string>
     <string name="button_start">Rozpocznij</string>
     <string name="button_connect">Połącz</string>
     <string name="button_retry">Ponów</string>
@@ -35,7 +35,7 @@
     <string name="hint_pass">Hasło</string>
     <string name="hint_ssid">Nazwa wifi</string>
     <string name="hint_psk">Hasło</string>
-    <string name="hint_device_label">Nazwa urządzenia</string>
+    <string name="hint_activation_pin">Kod aktywacji</string>
     <string name="message_change_dli">Ustaw nową wartość jasności światła</string>
     <string name="message_update_in_progress">Aktualizowanie</string>
     <string name="info_login_pass_empty">Wypełnij pola login i hasło</string>
@@ -52,7 +52,10 @@
     <string name="title_create_plant_dialog">Nowa roślina</string>
     <string name="info_seen_long_ago">Daaawno temu się odzywał</string>
     <string name="label_add_new_plant">Nowa roślina…</string>
+    <string name="title_light_device_settings">Ustawienia</string>
+    <string name="value_unknown">nieznane</string>
     <string name="error_empty_name">To pole nie może byc puste</string>
+    <string name="error_email_invalid">To chyba nie jest adres email</string>
     <string name="cont_descr_plant_state_icon">Symbol stanu rośliny</string>
     <string name="next">Następny</string>
     <string name="previous">Poprzedni</string>
@@ -72,4 +75,17 @@
     <string name="title_set_dli">Maksymalna jasność</string>
     <string name="title_adding_new_device">Nowe urządzenie</string>
     <string name="action_logout">Wyloguj</string>
+    <string name="hint_light_device_name">Nazwa urządzenia</string>
+    <string name="button_update">Aktualizuj</string>
+    <string name="button_delete">Usuń</string>
+    <string name="info_software_version">Oprogramowanie: %s</string>
+    <string name="info_hardware_version">Wersja sprzętu: %s</string>
+    <string name="hint_password">Hasło</string>
+    <string name="hint_repassword">Powtórz hasło</string>
+    <string name="button_signup">Dołączam</string>
+    <string name="message_signup_details">Wypełnij poniższe pola i zaczynamy!</string>
+    <string name="title_create_account">Tworzenie konta</string>
+    <string name="error_field_empty">To pole nie może być puste</string>
+    <string name="error_password_short">Minimum 8 znaków</string>
+    <string name="error_password_weak">Hasło musi zawierać conajmniej jednen znak specjalny, jedną dużą literę i jedną cyfrę</string>
 </resources>

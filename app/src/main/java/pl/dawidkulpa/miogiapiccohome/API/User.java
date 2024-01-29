@@ -2,21 +2,27 @@ package pl.dawidkulpa.miogiapiccohome.API;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.text.ParseException;
-import java.util.ArrayList;
 
 import pl.dawidkulpa.scm.Query;
 import pl.dawidkulpa.scm.ServerRequest;
 
 public class User implements Parcelable {
+    public static final int ACTIVATION_SUCCESS=0;
+    public static final int ACTIVATION_CODE_EXPIRED =1;
+    public static final int ACTIVATION_CODE_INCORRECT=2;
+    public static final int ACTIVATION_USER_AUTH_ERROR=3;
+    public static final int ACTIVATION_SERVER_ERROR=4;
+    public static final int ACTIVATION_NO_CODE=5;
+
     public interface SignInUpListener {
         void onFinished(User user, boolean success);
+    }
+
+    public interface ActivationListener {
+        void onFinished(int result);
     }
 
     public interface ActionListener {
@@ -27,6 +33,7 @@ public class User implements Parcelable {
         void onResult(boolean success, UserData userData);
     }
 
+    private final String serverAddress= "https://dawidkulpa.pl/apis/miogiapicco-dev/";
     private int uid;
     final private String login;
     final private String pass;
@@ -54,7 +61,7 @@ public class User implements Parcelable {
         sr.addRequestDataPair("login", login);
         sr.addRequestDataPair("pass", pass);
 
-        sr.start("https://dawidkulpa.pl/apis/miogiapicco/user/signin.php");
+        sr.start(serverAddress+"/user/signin.php");
     }
 
     public void signUp(SignInUpListener signInUpListener){
@@ -67,7 +74,40 @@ public class User implements Parcelable {
         sr.addRequestDataPair("login", login);
         sr.addRequestDataPair("pass", pass);
 
-        sr.start("https://dawidkulpa.pl/apis/miogiapicco/user/signup.php");
+        sr.start(serverAddress+"/user/create/account.php");
+    }
+
+    public void activateAccount(String activationCode, ActivationListener activationListener){
+        ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
+                ServerRequest.METHOD_POST,
+                ServerRequest.RESPONSE_TYPE_JSON,
+                ServerRequest.TIMEOUT_DEFAULT,
+                ((respCode, jObject) -> {
+                    int res;
+
+                    switch (respCode){
+                        case 200:
+                            res= ACTIVATION_SUCCESS;
+                            break;
+                        case 400:
+                            res= ACTIVATION_CODE_EXPIRED;
+                            break;
+                        case 401:
+                            res= ACTIVATION_USER_AUTH_ERROR;
+                            break;
+                        case 403:
+                            res= ACTIVATION_CODE_INCORRECT;
+                            break;
+                        case 404:
+                            res= ACTIVATION_NO_CODE;
+                            break;
+                        default:
+                            res= ACTIVATION_SERVER_ERROR;
+                    }
+
+                    if(activationListener!=null)
+                        activationListener.onFinished(res);
+                }));
     }
 
     public void onSignInUpFinished(int respCode, JSONObject jObject, SignInUpListener signInUpListener){
@@ -94,7 +134,6 @@ public class User implements Parcelable {
                 ServerRequest.TIMEOUT_DEFAULT,
                 (respCode, jObject) -> {
                     if(actionListener !=null){
-                        Log.e("CODE", String.valueOf(respCode));
                         actionListener.onFinished(respCode == 200);
                     }
                 });
@@ -103,7 +142,7 @@ public class User implements Parcelable {
         sr.addRequestDataPair("pass", pass);
         sr.addRequestDataPair("name", name);
 
-        sr.start("https://dawidkulpa.pl/apis/miogiapicco-dev/user/createroom.php");
+        sr.start(serverAddress+"/user/create/room.php");
     }
 
     public void createSector(String name, int roomId, ActionListener actionListener){
@@ -113,7 +152,6 @@ public class User implements Parcelable {
                 ServerRequest.TIMEOUT_DEFAULT,
                 (respCode, jObject) -> {
                     if(actionListener !=null){
-                        Log.e("CODE", String.valueOf(respCode));
                         actionListener.onFinished(respCode == 200);
                     }
                 });
@@ -123,7 +161,7 @@ public class User implements Parcelable {
         sr.addRequestDataPair("name", name);
         sr.addRequestDataPair("roomid", roomId);
 
-        sr.start("https://dawidkulpa.pl/apis/miogiapicco-dev/user/createsector.php");
+        sr.start(serverAddress+"/user/create/sector.php");
     }
 
     public void createPlant(String name, int secId, ActionListener actionListener){
@@ -133,7 +171,6 @@ public class User implements Parcelable {
                 ServerRequest.TIMEOUT_DEFAULT,
                 (respCode, jObject) -> {
                     if(actionListener !=null){
-                        Log.e("CODE", String.valueOf(respCode));
                         actionListener.onFinished(respCode == 200);
                     }
                 });
@@ -143,7 +180,7 @@ public class User implements Parcelable {
         sr.addRequestDataPair("name", name);
         sr.addRequestDataPair("secid", secId);
 
-        sr.start("https://dawidkulpa.pl/apis/miogiapicco/user/createplant.php");
+        sr.start(serverAddress+"/user/create/plant.php");
     }
 
     public void registerDevice(String id, int roomId, int sectorId, int plantId, String name,
@@ -175,7 +212,7 @@ public class User implements Parcelable {
         sr.addRequestDataPair("plantId", plantId);
         sr.addRequestDataPair("name", name);
 
-        sr.start("https://dawidkulpa.pl/apis/miogiapicco/user/registerdevice.php");
+        sr.start(serverAddress+"/user/create/registerdevice.php");
     }
 
     public void downloadData(final DownloadDataListener ddl){
@@ -186,14 +223,12 @@ public class User implements Parcelable {
                         if (data.parse(jObject)){
                             ddl.onResult(true, data);
                         } else {
-                            Log.d("ASD", "ASD2");
                             if(ddl!=null){
                                 ddl.onResult(false, null);
                             }
                         }
                     } else {
                         if(ddl!=null){
-                            Log.d("User", "downloadData: http response code= "+ respCode);
                             ddl.onResult(false, null);
                         }
                     }
@@ -202,7 +237,7 @@ public class User implements Parcelable {
         sr.addRequestDataPair("login", login);
         sr.addRequestDataPair("pass", pass);
 
-        sr.start("https://dawidkulpa.pl/apis/miogiapicco/user/getdata.php");
+        sr.start(serverAddress+"/user/getdata.php");
     }
 
     public void updateLightDevice(LightDevice d, ActionListener actionListener){
@@ -228,10 +263,10 @@ public class User implements Parcelable {
         sr.addRequestDataPair("ssd", d.getSsd());
         sr.addRequestDataPair("srd", d.getSrd());
 
-        sr.start("https://dawidkulpa.pl/apis/miogiapicco/user/updatelightdevice.php");
+        sr.start(serverAddress+"/user/changedata/lightdevice.php");
     }
 
-    public void updatePlantName(Plant p, ActionListener actionListener){
+    public void markLightDeviceUpgradeAllowed(LightDevice d, ActionListener actionListener){
         ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
                 ServerRequest.METHOD_POST,
                 ServerRequest.RESPONSE_TYPE_JSON,
@@ -242,15 +277,12 @@ public class User implements Parcelable {
                     }
                 });
 
-        sr.addRequestDataPair("id", p.getId());
+        sr.addRequestDataPair("id", d.getId());
         sr.addRequestDataPair("login", login);
         sr.addRequestDataPair("pass", pass);
 
-        sr.addRequestDataPair("Name", p.getName());
-
-        sr.start("https://dawidkulpa.pl/apis/miogiapicco/user/updateplant.php");
+        sr.start(serverAddress+"/user/changedata/allowupdate.php");
     }
-
 
 
     public int getUid() {

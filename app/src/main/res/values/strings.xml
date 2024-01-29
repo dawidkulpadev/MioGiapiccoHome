@@ -17,7 +17,8 @@
     <string name="example_message" translatable="false">Example message</string>
 
     <string name="button_signin">Sign in</string>
-    <string name="button_signup">Create new account!</string>
+    <string name="button_create_account">Create new account!</string>
+    <string name="button_signup">Sign up</string>
     <string name="button_start">Start</string>
     <string name="button_connect">Connect</string>
     <string name="button_retry">Retry</string>
@@ -33,6 +34,8 @@
     <string name="button_accept">Accept</string>
     <string name="button_dismiss">Dismiss</string>
     <string name="button_create">Create</string>
+    <string name="button_update">Update</string>
+    <string name="button_delete">Delete</string>
 
     <string name="label_signin">Sign in</string>
     <string name="label_addnewdevice_step1">1) Power on your device and enable bluetooth then tap Start</string>
@@ -52,12 +55,16 @@
     <string name="hint_pass">Password</string>
     <string name="hint_ssid">Wifi name</string>
     <string name="hint_psk">Password</string>
-    <string name="hint_device_label">Device label</string>
     <string name="hint_plants_name">Plants name</string>
     <string name="hint_rooms_name">Rooms name</string>
     <string name="hint_new_room_name">New room\'s name</string>
     <string name="hint_new_sector_name">New sector\'s name</string>
     <string name="hint_new_plant_name">New plant\'s name</string>
+    <string name="hint_light_device_name">Device name</string>
+    <string name="hint_activation_pin">Activation pin</string>
+    <string name="hint_email" translatable="false">Email</string>
+    <string name="hint_password">Password</string>
+    <string name="hint_repassword">Repeat password</string>
 
     <string name="message_change_dli">Set new light intensity</string>
     <string name="message_change_plant_name">Set new plants name</string>
@@ -66,6 +73,7 @@
     <string name="message_set_sector_name">Set new sector\'s name</string>
     <string name="message_unbind_light_device">Do you really want to unbind this Light Device? It will be still assigned to your account.</string>
     <string name="message_update_in_progress">Updating</string>
+    <string name="message_signup_details">Fill in the fields below and we\'ll get started!</string>
 
     <string name="info_login_pass_empty">Fill up login and password fields</string>
     <string name="info_signin_failed">Wrong login or password</string>
@@ -77,12 +85,16 @@
     <string name="info_seen_long_ago">Seen looong time ago</string>
     <string name="info_no_soil_device_assigned">No soil device</string>
     <string name="info_light_state_change">-> %s</string>
+    <string name="info_software_version">Software: %s</string>
+    <string name="info_hardware_version">Hardware: %s</string>
 
     <string name="title_create_plant_dialog">New plant</string>
     <string name="title_create_room_dialog">New room</string>
     <string name="title_create_sector_dialog">New sector</string>
     <string name="title_set_dli">Maximum intensity</string>
     <string name="title_adding_new_device">New device</string>
+    <string name="title_light_device_settings">Settings</string>
+    <string name="title_create_account">Create account</string>
 
     <string name="value_temperature" translatable="false">%.1f&#xb0;C</string>
     <string name="value_humidity" translatable="false">%.1f%%</string>
@@ -90,8 +102,13 @@
     <string name="value_no_temperature" translatable="false">-&#xb0;C</string>
     <string name="value_co2_ppm" translatable="false">%dppm</string>
     <string name="value_dli" translatable="false">%d%%</string>
+    <string name="value_unknown">unknown</string>
 
     <string name="error_empty_name">Name cannot be empty</string>
+    <string name="error_field_empty">This field cannot be empty</string>
+    <string name="error_email_invalid">Invalid email format</string>
+    <string name="error_password_short">Min 8 characters</string>
+    <string name="error_password_weak">Must contain at least one special character, one uppercase letter and one digit</string>
 
     <string name="cont_descr_plant_state_icon">Plant state icon</string>
 
@@ -995,5 +1012,6 @@
         libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
+
 
 </resources>

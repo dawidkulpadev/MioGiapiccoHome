@@ -14,7 +14,6 @@ import java.util.ArrayList;
 
 import pl.dawidkulpa.miogiapiccohome.API.Plant;
 import pl.dawidkulpa.miogiapiccohome.R;
-import pl.dawidkulpa.miogiapiccohome.dialogs.PlantNamePickerDialog;
 
 public class PlantsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -35,18 +34,8 @@ public class PlantsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         }
 
         void createUI(Plant p, RoomsListAdapter.DataChangeListener dataChangeListener){
-            nameText.setOnLongClickListener(v -> {
-                openNameChangeDialog(p, dataChangeListener);
-                return false;
-            });
 
-        }
 
-        void openNameChangeDialog(Plant p, RoomsListAdapter.DataChangeListener dataChangeListener){
-            PlantNamePickerDialog pnpd= new PlantNamePickerDialog(p, (plant, nn) -> {
-                p.setName(nn);
-                dataChangeListener.onPlantDataChanged(p);
-            });
         }
     }
 

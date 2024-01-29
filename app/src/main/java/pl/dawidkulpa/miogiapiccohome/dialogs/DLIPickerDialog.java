@@ -25,13 +25,11 @@ public class DLIPickerDialog {
     }
 
     private final LightDevice device;
-    private final String plantName;
     private final ClosedListener closedListener;
 
-    public DLIPickerDialog(LightDevice d, String plantName, ClosedListener closedListener){
+    public DLIPickerDialog(LightDevice d, ClosedListener closedListener){
         this.closedListener= closedListener;
         this.device= d;
-        this.plantName= plantName;
     }
 
     public void show(Context c){

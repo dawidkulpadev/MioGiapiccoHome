@@ -20,7 +20,7 @@ import java.util.Calendar;
 import pl.dawidkulpa.miogiapiccohome.API.LightDevice;
 import pl.dawidkulpa.miogiapiccohome.R;
 import pl.dawidkulpa.miogiapiccohome.dialogs.DLIPickerDialog;
-import pl.dawidkulpa.miogiapiccohome.dialogs.LightDeviceUnbindDialog;
+import pl.dawidkulpa.miogiapiccohome.dialogs.LightDeviceSettingsDialog;
 
 public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -110,7 +110,7 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
 
 
             root.setOnLongClickListener(v -> {
-                openUnbindDeviceDialog(ld, dataChangeListener);
+                openLightDeviceSettingsDialog(ld, null);
                 return false;
             });
 
@@ -133,7 +133,7 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
         }
 
         void openChangeDLIDialog(final LightDevice device, RoomsListAdapter.DataChangeListener dataChangeListener){
-            DLIPickerDialog dialog= new DLIPickerDialog(device, "plantName", (d, v) -> {
+            DLIPickerDialog dialog= new DLIPickerDialog(device, (d, v) -> {
                 d.setDli(v);
                 dataChangeListener.onLightDeviceDataChanged(d);
             });
@@ -141,18 +141,26 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
             dialog.show(root.getContext());
         }
 
-        void openNameChangeDialog(LightDevice ld, RoomsListAdapter.DataChangeListener dataChangeListener){
-            LightDeviceNamePickerDialog ldnpd= new LightDeviceNamePickerDialog(ld, (d, nn) -> {
-                d.setName(nn);
-                dataChangeListener.onLightDeviceDataChanged(d);
-            });
-        }
+        void openLightDeviceSettingsDialog(LightDevice ld, RoomsListAdapter.DataChangeListener dataChangeListener){
+            LightDeviceSettingsDialog lightDeviceSettingsDialog= new LightDeviceSettingsDialog(ld, new LightDeviceSettingsDialog.InteractionListener() {
+                @Override
+                public void onPositiveButtonClick(LightDevice d, String newName) {
+                    if (!newName.isEmpty())
+                        d.setName(newName);
+                    dataChangeListener.onLightDeviceDataChanged(d);
+                }
 
-        void openUnbindDeviceDialog(LightDevice ld, RoomsListAdapter.DataChangeListener dataChangeListener){
-            LightDeviceUnbindDialog deviceUnbindDialog= new LightDeviceUnbindDialog(ld, d -> {
-               d.unbind();
-               dataChangeListener.onLightDeviceDataChanged(d);
+                @Override
+                public void onUpdateButtonClick(LightDevice d) {
+                    dataChangeListener.onLightDeviceUpdateClick(d);
+                }
+
+                @Override
+                public void onDeleteButtonClick(LightDevice d) {
+                    dataChangeListener.onLightDeviceDeleteClick(d);
+                }
             });
+            lightDeviceSettingsDialog.show(root.getContext());
         }
     }
 
@@ -178,6 +186,7 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         LightDeviceViewHolder h= ((LightDeviceViewHolder) holder);
         h.setLightDeviceDetails(lightDevices.get(position), dataChangeListener);
+
         if(position==lightDevices.size()-1){
             h.divider.setVisibility(View.GONE);
         }

@@ -67,7 +67,6 @@
         android:layout_height="wrap_content"
         app:passwordToggleDrawable="@drawable/visibility_toggle"
         app:passwordToggleEnabled="true"
-        app:passwordToggleTint="@color/colorPrimary"
         android:layout_marginStart="24dp"
         android:textColorHint="@color/textSecondaryLight">
         <com.google.android.material.textfield.TextInputEditText
@@ -92,7 +91,7 @@
             android:layout_height="wrap_content"
             android:maxLines="1"
             android:inputType="text"
-            android:hint="@string/hint_device_label"
+            android:hint="@string/hint_light_device_name"
             android:textColor="@color/textPrimaryLight"/>
     </com.google.android.material.textfield.TextInputLayout>
 

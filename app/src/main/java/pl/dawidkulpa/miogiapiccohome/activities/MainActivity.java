@@ -270,6 +270,16 @@ public class MainActivity extends AppCompatActivity implements RoomsListAdapter.
     }
 
     @Override
+    public void onLightDeviceUpdateClick(LightDevice d) {
+        user.markLightDeviceUpgradeAllowed(d, success -> startUserDataDownload());
+    }
+
+    @Override
+    public void onLightDeviceDeleteClick(LightDevice d) {
+
+    }
+
+    @Override
     public void onSoilDeviceDataChanged(SoilDevice d) {
 
     }

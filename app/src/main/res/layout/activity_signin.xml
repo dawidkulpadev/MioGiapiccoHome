@@ -62,7 +62,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:background="@drawable/button_default"
-        android:text="@string/button_signup"
+        android:text="@string/button_create_account"
         android:textAllCaps="false"
         android:onClick="onSignUpClick"
         android:visibility="gone"/>
