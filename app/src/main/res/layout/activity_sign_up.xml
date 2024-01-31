@@ -28,6 +28,8 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -61,7 +63,8 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 android:hint="@string/hint_email"
-                android:minWidth="280dp">
+                android:minWidth="280dp"
+                app:startIconDrawable="@drawable/icon_email">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/email_input"
                     android:layout_width="wrap_content"
@@ -78,8 +81,9 @@
                 app:layout_constraintTop_toBottomOf="@id/email_input_box"
                 app:layout_constraintStart_toStartOf="parent"
                 android:hint="@string/hint_password"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="32dp"
                 android:minWidth="280dp"
+                app:startIconDrawable="@drawable/icon_lock"
                 app:passwordToggleDrawable="@drawable/visibility_toggle"
                 app:passwordToggleEnabled="true">
                 <com.google.android.material.textfield.TextInputEditText
@@ -118,7 +122,10 @@
                 app:layout_constraintTop_toBottomOf="@id/repassword_input_box"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginTop="48dp"/>
+                android:layout_marginTop="48dp"
+                android:textSize="18sp"
+                app:icon="@drawable/icon_click"
+                app:iconSize="24sp"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -56,6 +56,7 @@
     <string name="value_unknown">nieznane</string>
     <string name="error_empty_name">To pole nie może byc puste</string>
     <string name="error_email_invalid">To chyba nie jest adres email</string>
+    <string name="error_password_mismatch">Hasła nie są identyczne</string>
     <string name="cont_descr_plant_state_icon">Symbol stanu rośliny</string>
     <string name="next">Następny</string>
     <string name="previous">Poprzedni</string>
@@ -88,4 +89,5 @@
     <string name="error_field_empty">To pole nie może być puste</string>
     <string name="error_password_short">Minimum 8 znaków</string>
     <string name="error_password_weak">Hasło musi zawierać conajmniej jednen znak specjalny, jedną dużą literę i jedną cyfrę</string>
+    <string name="helper_password_rules">Minimum 8 znaków, conajmniej jednen znak specjalny, jedną dużą literę i jedną cyfrę</string>
 </resources>

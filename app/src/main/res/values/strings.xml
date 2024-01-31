@@ -66,6 +66,8 @@
     <string name="hint_password">Password</string>
     <string name="hint_repassword">Repeat password</string>
 
+    <string name="helper_password_rules">Minimum 8 characters long, at least one special character, one uppercase letter and one digit</string>
+
     <string name="message_change_dli">Set new light intensity</string>
     <string name="message_change_plant_name">Set new plants name</string>
     <string name="message_change_devices_name">Set new devices name</string>
@@ -109,6 +111,7 @@
     <string name="error_email_invalid">Invalid email format</string>
     <string name="error_password_short">Min 8 characters</string>
     <string name="error_password_weak">Must contain at least one special character, one uppercase letter and one digit</string>
+    <string name="error_password_mismatch">Password and confirmation password do not match</string>
 
     <string name="cont_descr_plant_state_icon">Plant state icon</string>
 
