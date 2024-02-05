@@ -24,18 +24,27 @@
         android:usesCleartextTraffic="true">
         <activity
             android:name=".activities.SignUpActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.MyApplication"
+            android:windowSoftInputMode="adjustResize"/>
         <activity
             android:name=".activities.AccountActivationActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.MyApplication"
+            android:windowSoftInputMode="adjustResize"/>
         <activity
             android:name=".activities.NewDeviceActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.MyApplication" />
+            android:theme="@style/Theme.MyApplication"
+            android:windowSoftInputMode="adjustResize"/>
         <activity
             android:name=".activities.SignInActivity"
             android:exported="true"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.MyApplication"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

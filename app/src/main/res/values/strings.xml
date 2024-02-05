@@ -36,12 +36,14 @@
     <string name="button_create">Create</string>
     <string name="button_update">Update</string>
     <string name="button_delete">Delete</string>
+    <string name="button_activate">Activate account</string>
+    <string name="button_send_new_code">Send new code</string>
 
     <string name="label_signin">Sign in</string>
     <string name="label_addnewdevice_step1">1) Power on your device and enable bluetooth then tap Start</string>
     <string name="label_addnewdevice_step2">2) Connect your new device</string>
     <string name="label_addnewdevice_found">Found</string>
-    <string name="label_addnewdevice_notfound">Cannot see any device :(</string>
+    <string name="label_addnewdevice_notfound">Cannot see any device &#128542;</string>
     <string name="label_addnewdevice_connected">Connected with</string>
     <string name="label_addnewdevice_step3">3) Config access point settings and label your device</string>
     <string name="label_addnewdevice_searching">Looking for your device…</string>
@@ -52,7 +54,6 @@
     <string name="label_placement">Placement:</string>
 
     <string name="hint_login">Login</string>
-    <string name="hint_pass">Password</string>
     <string name="hint_ssid">Wifi name</string>
     <string name="hint_psk">Password</string>
     <string name="hint_plants_name">Plants name</string>
@@ -76,6 +77,9 @@
     <string name="message_unbind_light_device">Do you really want to unbind this Light Device? It will be still assigned to your account.</string>
     <string name="message_update_in_progress">Updating</string>
     <string name="message_signup_details">Fill in the fields below and we\'ll get started!</string>
+    <string name="message_activation_pin_sent">I sent an email to the provided address with the activation code (I won\'t send anything else)</string>
+    <string name="message_activation_pin_input">Enter this code in the field below</string>
+    <string name="message_activation_code_regenerated">I have sent a new activation code</string>
 
     <string name="info_login_pass_empty">Fill up login and password fields</string>
     <string name="info_signin_failed">Wrong login or password</string>
@@ -112,6 +116,14 @@
     <string name="error_password_short">Min 8 characters</string>
     <string name="error_password_weak">Must contain at least one special character, one uppercase letter and one digit</string>
     <string name="error_password_mismatch">Password and confirmation password do not match</string>
+    <string name="error_server_error">Unknown server error &#128542;</string>
+    <string name="error_signup_form_error">Unknown signup form error &#128542; Restart app…</string>
+    <string name="error_signup_email_exists">The account with the provided email address already exists</string>
+    <string name="error_activation_code_expired">This activation code has expired &#128542; I have sent you a new one</string>
+    <string name="error_incorrect_activation_code">This is not the correct activation code</string>
+    <string name="error_connection_error">Error talking with API &#128542;</string>
+
+    <string name="content_description_background">Background</string>
 
     <string name="cont_descr_plant_state_icon">Plant state icon</string>
 
@@ -1015,6 +1027,7 @@
         libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
+    <string name="message_no_activation_code">Did you not receive an email with the activation code?</string>
 
 
 </resources>

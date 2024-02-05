@@ -2,6 +2,7 @@ package pl.dawidkulpa.miogiapiccohome.API;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,9 +17,21 @@ public class User implements Parcelable {
     public static final int ACTIVATION_USER_AUTH_ERROR=3;
     public static final int ACTIVATION_SERVER_ERROR=4;
     public static final int ACTIVATION_NO_CODE=5;
+    public static final int ACTIVATION_CONN_ERROR= 6;
+
+    public static final int SIGN_IN_RESULT_SUCCESS=0;
+    public static final int SIGN_IN_RESULT_NOT_ACTIVATED=1;
+    public static final int SIGN_IN_RESULT_AUTH_ERROR=2;
+    public static final int SIGN_IN_RESULT_SERVER_ERROR=3;
+    public static final int SIGN_IN_RESULT_CONN_ERROR= 4;
+
+    public static final int SIGN_UP_RESULT_SUCCESS=0;
+    public static final int SIGN_UP_RESULT_SERVER_ERROR=1;
+    public static final int SIGN_UP_RESULT_ACCOUNT_EXISTS =2;
+    public static final int SIGN_UP_RESULT_CONN_ERROR= 3;
 
     public interface SignInUpListener {
-        void onFinished(User user, boolean success);
+        void onFinished(User user, int result);
     }
 
     public interface ActivationListener {
@@ -56,7 +69,7 @@ public class User implements Parcelable {
                 ServerRequest.METHOD_POST,
                 ServerRequest.RESPONSE_TYPE_JSON,
                 ServerRequest.TIMEOUT_DEFAULT,
-                (respCode, jObject) -> onSignInUpFinished(respCode, jObject, signInUpListener));
+                (respCode, jObject) -> onSignInFinished(respCode, jObject, signInUpListener));
 
         sr.addRequestDataPair("login", login);
         sr.addRequestDataPair("pass", pass);
@@ -69,7 +82,7 @@ public class User implements Parcelable {
                 ServerRequest.METHOD_POST,
                 ServerRequest.RESPONSE_TYPE_JSON,
                 ServerRequest.TIMEOUT_DEFAULT,
-                (respCode, jObject) -> onSignInUpFinished(respCode, jObject, signInUpListener));
+                (respCode, jObject) -> onSignUpFinished(respCode, jObject, signInUpListener));
 
         sr.addRequestDataPair("login", login);
         sr.addRequestDataPair("pass", pass);
@@ -84,6 +97,8 @@ public class User implements Parcelable {
                 ServerRequest.TIMEOUT_DEFAULT,
                 ((respCode, jObject) -> {
                     int res;
+
+                    Log.e("User", "Signup response code: "+respCode);
 
                     switch (respCode){
                         case 200:
@@ -101,29 +116,85 @@ public class User implements Parcelable {
                         case 404:
                             res= ACTIVATION_NO_CODE;
                             break;
-                        default:
+                        case 500:
                             res= ACTIVATION_SERVER_ERROR;
+                            break;
+                        default:
+                            res= ACTIVATION_CONN_ERROR;
                     }
 
                     if(activationListener!=null)
                         activationListener.onFinished(res);
                 }));
+
+        sr.addRequestDataPair("login", login);
+        sr.addRequestDataPair("pass", pass);
+        sr.addRequestDataPair("pin", activationCode);
+
+        sr.start(serverAddress+"/user/activate.php");
     }
 
-    public void onSignInUpFinished(int respCode, JSONObject jObject, SignInUpListener signInUpListener){
+    public void onSignInFinished(int respCode, JSONObject jObject, SignInUpListener signInUpListener){
         if(signInUpListener !=null){
+            Log.e("User", "Signup response code: "+respCode);
             if(respCode==200) {
                 try {
                     uid = jObject.getInt("uid");
                     picklock= jObject.getString("picklock");
-                    signInUpListener.onFinished(this,true);
+                    signInUpListener.onFinished(this,SIGN_IN_RESULT_SUCCESS);
                 } catch (JSONException e){
-                    signInUpListener.onFinished(this,false);
+                    signInUpListener.onFinished(this,SIGN_IN_RESULT_SERVER_ERROR);
                 }
-            } else
-                signInUpListener.onFinished(this,false);
+            } else if(respCode==401) {
+                signInUpListener.onFinished(this, SIGN_IN_RESULT_AUTH_ERROR);
+            } else if(respCode==423){
+                signInUpListener.onFinished(this, SIGN_IN_RESULT_NOT_ACTIVATED);
+            } else if(respCode==500) {
+                signInUpListener.onFinished(this, SIGN_IN_RESULT_CONN_ERROR);
+            }else {
+                signInUpListener.onFinished(this, SIGN_IN_RESULT_SERVER_ERROR);
+            }
         }
+    }
 
+    public void onSignUpFinished(int respCode, JSONObject jObject, SignInUpListener signInUpListener){
+        if(signInUpListener!=null){
+            Log.d("User", "Resp code: "+respCode);
+            int result= SIGN_UP_RESULT_CONN_ERROR;
+
+            if(respCode==200){
+                try {
+                    uid = jObject.getInt("uid");
+                    picklock= jObject.getString("picklock");
+                    result =SIGN_UP_RESULT_SUCCESS;
+                } catch (JSONException ignored){}
+
+            } else if(respCode==409){
+                result= SIGN_UP_RESULT_ACCOUNT_EXISTS;
+            } else if(respCode==500){
+                result= SIGN_UP_RESULT_SERVER_ERROR;
+            }
+
+            signInUpListener.onFinished(this, result);
+        }
+    }
+
+    public void regenerateActivationCode(ActionListener actionListener){
+        ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
+                ServerRequest.METHOD_POST,
+                ServerRequest.RESPONSE_TYPE_JSON,
+                ServerRequest.TIMEOUT_DEFAULT,
+                (respCode, jObject) -> {
+                    Log.d("User", "resp: "+respCode);
+                    if(actionListener !=null){
+                        actionListener.onFinished(respCode == 200);
+                    }
+                });
+
+        sr.addRequestDataPair("login", login);
+        sr.addRequestDataPair("pass", pass);
+
+        sr.start(serverAddress+"/user/changedata/regenerateactivationcode.php");
     }
 
 

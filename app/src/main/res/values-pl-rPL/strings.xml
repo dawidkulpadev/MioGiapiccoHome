@@ -24,15 +24,14 @@
     <string name="label_signin">Logowanie</string>
     <string name="label_addnewdevice_step1">1) Włącz swoje nowe urządzenie oraz bluetooth w telefonie</string>
     <string name="label_addnewdevice_step2">2) Połącz się ze swoim nowym urządzeniem</string>
-    <string name="label_addnewdevice_searching">Szukam twojego urządzenia...</string>
+    <string name="label_addnewdevice_searching">Szukam twojego urządzenia…</string>
     <string name="label_addnewdevice_found">Znaleziono</string>
-    <string name="label_addnewdevice_notfound">Nie znalazłem żadnego urządzenia :(</string>
+    <string name="label_addnewdevice_notfound">Nie znalazłem żadnego urządzenia &#128542;</string>
     <string name="label_addnewdevice_connected">Połączono z</string>
     <string name="label_addnewdevice_step3">3) Ustaw dane access pointa i nazwę urządzenia</string>
     <string name="label_timezone">Strefa czasowa:</string>
     <string name="label_placement">Przypisz do:</string>
     <string name="hint_login">Login</string>
-    <string name="hint_pass">Hasło</string>
     <string name="hint_ssid">Nazwa wifi</string>
     <string name="hint_psk">Hasło</string>
     <string name="hint_activation_pin">Kod aktywacji</string>
@@ -57,6 +56,10 @@
     <string name="error_empty_name">To pole nie może byc puste</string>
     <string name="error_email_invalid">To chyba nie jest adres email</string>
     <string name="error_password_mismatch">Hasła nie są identyczne</string>
+    <string name="error_server_error">Nieznany błąd serwera &#128542;</string>
+    <string name="error_signup_form_error">Nieznany błąd formularza &#128542; Zrestartuj aplikację…</string>
+    <string name="error_signup_email_exists">Konto z podanym adresem email już istnieje</string>
+    <string name="content_description_background">Tło</string>
     <string name="cont_descr_plant_state_icon">Symbol stanu rośliny</string>
     <string name="next">Następny</string>
     <string name="previous">Poprzedni</string>
@@ -90,4 +93,14 @@
     <string name="error_password_short">Minimum 8 znaków</string>
     <string name="error_password_weak">Hasło musi zawierać conajmniej jednen znak specjalny, jedną dużą literę i jedną cyfrę</string>
     <string name="helper_password_rules">Minimum 8 znaków, conajmniej jednen znak specjalny, jedną dużą literę i jedną cyfrę</string>
+    <string name="message_activation_pin_sent">Na podany adres email wysłałem wiadomość z kodem aktywacyjnym (nic więcej nie będę wysyłał)</string>
+    <string name="message_activation_pin_input">Wpisz ten kod w polu poniżej</string>
+    <string name="button_activate">Aktywuj konto</string>
+    <string name="button_send_new_code">Wyślij nowy kod</string>
+    <string name="message_no_activation_code">Nie otrzymałeś emaila z kodem aktywacyjnym?</string>
+    <string name="message_activation_code_regenerated">Wysłałem nowy kod aktywacyjny</string>
+    <string name="error_activation_code_expired">Ten kod aktywacyjny stracił ważność &#128542; Wysłałem Ci nowy</string>
+    <string name="error_incorrect_activation_code">To nie jest poprawny kod aktywacyjny</string>
+    <string name="error_connection_error">Błąd komunikacji z API &#128542;</string>
+
 </resources>

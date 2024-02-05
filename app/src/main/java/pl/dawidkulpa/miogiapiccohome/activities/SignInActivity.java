@@ -42,8 +42,8 @@ public class SignInActivity extends AppCompatActivity {
 
     public void showSignInForm(){
         findViewById(R.id.login_label).setVisibility(View.VISIBLE);
-        findViewById(R.id.login_edit).setVisibility(View.VISIBLE);
-        findViewById(R.id.pass_edit).setVisibility(View.VISIBLE);
+        findViewById(R.id.login_edit_layout).setVisibility(View.VISIBLE);
+        findViewById(R.id.pass_edit_layout).setVisibility(View.VISIBLE);
         findViewById(R.id.signin_button).setVisibility(View.VISIBLE);
         findViewById(R.id.signup_button).setVisibility(View.VISIBLE);
         findViewById(R.id.progressbar).setVisibility(View.GONE);
@@ -58,21 +58,8 @@ public class SignInActivity extends AppCompatActivity {
 
 
     public void onSignUpClick(View v){
-        /*String login= ((TextView)findViewById(R.id.login_edit)).getText().toString();
-        String pass= ((TextView)findViewById(R.id.pass_edit)).getText().toString();
-
-        if(login.isEmpty() || pass.isEmpty()){
-            Snackbar.make(findViewById(R.id.signin_button), R.string.info_login_pass_empty, BaseTransientBottomBar.LENGTH_SHORT).show();
-        } else {
-            findViewById(R.id.signin_button).setVisibility(View.GONE);
-            findViewById(R.id.progressbar).setVisibility(View.VISIBLE);
-
-            user = new User(login, pass);
-            user.signUp(this::onSignInResult);
-        }*/
-
         Intent i= new Intent(this, SignUpActivity.class);
-
+        i.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         startActivity(i);
     }
 
@@ -88,14 +75,21 @@ public class SignInActivity extends AppCompatActivity {
         }
     }
 
-    public void onSignInResult(User user, boolean success){
-        if(success){
+    public void onSignInResult(User user, int r){
+        findViewById(R.id.signin_button).setVisibility(View.VISIBLE);
+        findViewById(R.id.progressbar).setVisibility(View.GONE);
+
+        if(r==User.SIGN_IN_RESULT_SUCCESS){
             registerPassword(user.getLogin(), user.getPassword());
             startMainActivity();
-        } else {
+        } else if(r==User.SIGN_IN_RESULT_NOT_ACTIVATED) {
+            startActivateActivity();
+        } else if(r==User.SIGN_IN_RESULT_AUTH_ERROR) {
             Snackbar.make(findViewById(R.id.signin_button), R.string.info_signin_failed, BaseTransientBottomBar.LENGTH_SHORT).show();
-            findViewById(R.id.signin_button).setVisibility(View.VISIBLE);
-            findViewById(R.id.progressbar).setVisibility(View.GONE);
+        } else if(r==User.SIGN_IN_RESULT_SERVER_ERROR){
+            Snackbar.make(findViewById(R.id.signin_button), R.string.error_server_error, BaseTransientBottomBar.LENGTH_SHORT).show();
+        } else {
+            Snackbar.make(findViewById(R.id.signin_button), R.string.error_connection_error, BaseTransientBottomBar.LENGTH_SHORT).show();
         }
     }
 
@@ -105,6 +99,13 @@ public class SignInActivity extends AppCompatActivity {
 
     void startMainActivity(){
         Intent intent= new Intent(this, MainActivity.class);
+        intent.putExtra("UserAPI", this.user);
+        startActivity(intent);
+    }
+
+    void startActivateActivity(){
+        Intent intent= new Intent(this, AccountActivationActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         intent.putExtra("UserAPI", this.user);
         startActivity(intent);
     }

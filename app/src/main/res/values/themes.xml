@@ -33,4 +33,8 @@
 
     <style name="Theme.MyApplication" parent="Base.Theme.MyApplication" />
 
+    <style name="Theme.MyApplication.Background" parent="Theme.MyApplication">
+        <item name="android:alpha">0.15</item>
+    </style>
+
 </resources>

@@ -10,7 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:src="@drawable/untitled"
-        android:alpha="0.25"/>
+        style="@style/Theme.MyApplication.Background"
+        android:contentDescription="@string/content_description_background"/>
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -28,108 +29,125 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toTopOf="@id/inputs_box"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginBottom="36dp"
-            android:paddingEnd="24dp"
-            android:paddingStart="24dp"
-            android:textSize="18sp"
-            android:textAlignment="center"
-            android:text="@string/message_signup_details" />
+        android:layout_height="wrap_content"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/inputs_box"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
+            android:id="@+id/contextView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/email_input_box"
+            <TextView
+                android:id="@+id/message_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                android:hint="@string/hint_email"
-                android:minWidth="280dp"
-                app:startIconDrawable="@drawable/icon_email">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/email_input"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="center"
-                    android:inputType="textEmailAddress"
-                    android:maxLength="256"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/password_input_box"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/email_input_box"
-                app:layout_constraintStart_toStartOf="parent"
-                android:hint="@string/hint_password"
-                android:layout_marginTop="32dp"
-                android:minWidth="280dp"
-                app:startIconDrawable="@drawable/icon_lock"
-                app:passwordToggleDrawable="@drawable/visibility_toggle"
-                app:passwordToggleEnabled="true">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/password_input"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="center"
-                    android:inputType="textPassword"
-                    android:maxLength="36"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/repassword_input_box"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/password_input_box"
-                app:layout_constraintStart_toStartOf="parent"
-                android:hint="@string/hint_repassword"
-                android:layout_marginTop="8dp"
-                android:minWidth="280dp"
-                app:passwordToggleDrawable="@drawable/visibility_toggle"
-                app:passwordToggleEnabled="true">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/repassword_input"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="center"
-                    android:inputType="textPassword"
-                    android:maxLength="36"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/button_signup"
-                app:layout_constraintTop_toBottomOf="@id/repassword_input_box"
+                android:layout_marginTop="40dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginTop="48dp"
+                android:paddingEnd="24dp"
+                android:paddingStart="24dp"
                 android:textSize="18sp"
-                app:icon="@drawable/icon_click"
-                app:iconSize="24sp"/>
+                android:textAlignment="center"
+                android:text="@string/message_signup_details" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/email_input_box"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/message_text"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginTop="36dp"
+                    android:hint="@string/hint_email"
+                    android:minWidth="280dp"
+                    app:startIconDrawable="@drawable/icon_email">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/email_input"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:inputType="textEmailAddress"
+                        android:maxLength="256"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/password_input_box"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/email_input_box"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:hint="@string/hint_password"
+                    android:layout_marginTop="32dp"
+                    android:minWidth="280dp"
+                    app:startIconDrawable="@drawable/icon_lock"
+                    app:passwordToggleDrawable="@drawable/visibility_toggle"
+                    app:passwordToggleEnabled="true">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/password_input"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:inputType="textPassword"
+                        android:maxLength="36"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/repassword_input_box"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/password_input_box"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:hint="@string/hint_repassword"
+                    android:layout_marginTop="8dp"
+                    android:minWidth="280dp"
+                    app:passwordToggleDrawable="@drawable/visibility_toggle"
+                    app:passwordToggleEnabled="true">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/repassword_input"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:inputType="textPassword"
+                        android:maxLength="36"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <Button
+                    android:id="@+id/signup_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/button_signup"
+                    app:layout_constraintTop_toBottomOf="@id/repassword_input_box"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginTop="40dp"
+                    android:textSize="18sp"
+                    app:icon="@drawable/icon_click"
+                    app:iconSize="24sp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
+                    android:paddingStart="30dp"
+                    android:paddingEnd="30dp"/>
+
+                <ProgressBar
+                    android:id="@+id/progressbar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/signup_button"
+                    app:layout_constraintBottom_toBottomOf="@id/signup_button"
+                    android:visibility="gone"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 
 
 
