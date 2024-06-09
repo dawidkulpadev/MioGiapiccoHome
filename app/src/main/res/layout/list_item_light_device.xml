@@ -6,7 +6,7 @@
     android:paddingTop="8dp"
     android:paddingStart="4dp"
     android:paddingEnd="4dp"
-    style="@style/Widget.Material3.Button">
+    android:background="@drawable/simple_ripple">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/ld_main_box"

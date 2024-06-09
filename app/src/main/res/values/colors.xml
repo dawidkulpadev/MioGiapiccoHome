@@ -4,6 +4,7 @@
     <color name="colorPrimaryDark">#2D9FA6</color>
     <color name="colorDisabled">#E4E4E4</color>
     <color name="colorAccent">#10F1FF</color>
+    <color name="colorRipple">#0C4BCFB2</color>
 
     <color name="buttonDefault">#00000000</color>
     <color name="colorButtonDarkMask">#B2032D5A</color>
