@@ -4,8 +4,15 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 import pl.dawidkulpa.scm.Query;
 import pl.dawidkulpa.scm.ServerRequest;
@@ -30,6 +37,8 @@ public class User implements Parcelable {
     public static final int SIGN_UP_RESULT_ACCOUNT_EXISTS =2;
     public static final int SIGN_UP_RESULT_CONN_ERROR= 3;
 
+    public static SimpleDateFormat sqlSDF= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+
     public interface SignInUpListener {
         void onFinished(User user, int result);
     }
@@ -44,6 +53,10 @@ public class User implements Parcelable {
 
     public interface DownloadDataListener {
         void onResult(boolean success, UserData userData);
+    }
+
+    public interface DownloadAirDataHistoryListener {
+        void onResult(boolean success, AirDataHistory airDataHistory);
     }
 
     private final String serverAddress= "https://dawidkulpa.pl/apis/miogiapicco-dev/";
@@ -309,6 +322,33 @@ public class User implements Parcelable {
         sr.addRequestDataPair("pass", pass);
 
         sr.start(serverAddress+"/user/getdata.php");
+    }
+
+    public void getAirDataHistory(AirDevice airDevice, @NonNull DownloadAirDataHistoryListener dadhl, Calendar start, Calendar end){
+        ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
+                ServerRequest.METHOD_POST, ServerRequest.RESPONSE_TYPE_JSON,
+                ServerRequest.TIMEOUT_DEFAULT, (respCode, jObject) -> {
+                    if(respCode==200) {
+                        try {
+                            AirDataHistory airDataHistory= new AirDataHistory(jObject);
+                            dadhl.onResult(true, airDataHistory);
+                        } catch (JSONException | ParseException e){
+                            dadhl.onResult(false, null);
+                        }
+                    } else {
+                        dadhl.onResult(false, null);
+                    }
+                });
+
+        sr.addRequestDataPair("login", login);
+        sr.addRequestDataPair("pass", pass);
+        sr.addRequestDataPair("aid", airDevice.getId());
+        if(start!=null)
+            sr.addRequestDataPair("hs", sqlSDF.format(start.getTime()));
+        if(end!=null)
+            sr.addRequestDataPair("he", sqlSDF.format(end.getTime()));
+
+        sr.start(serverAddress+"/user/getairdata.php");
     }
 
     public void updateLightDevice(LightDevice d, ActionListener actionListener){

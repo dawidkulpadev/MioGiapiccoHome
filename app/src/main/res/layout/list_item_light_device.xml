@@ -4,9 +4,9 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:paddingTop="8dp"
-
     android:paddingStart="4dp"
-    android:paddingEnd="4dp">
+    android:paddingEnd="4dp"
+    style="@style/Widget.Material3.Button">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/ld_main_box"
@@ -37,17 +37,6 @@
             android:layout_marginStart="6dp"
             />
 
-        <TextView
-            android:id="@+id/ld_change_time_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="@dimen/device_info_font_size"
-            android:text="12:00"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/ld_state_icon"/>
-
         <ImageView
             android:id="@+id/ld_state_icon"
             android:layout_centerHorizontal="true"
@@ -55,8 +44,20 @@
             android:layout_height="@dimen/details_light_icon_size"
             android:src="@drawable/sunrise"
             android:layout_marginEnd="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintEnd_toStartOf="@id/ld_change_time_text"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <TextView
+            android:id="@+id/ld_change_time_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/device_info_font_size"
+            android:text="12:00"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

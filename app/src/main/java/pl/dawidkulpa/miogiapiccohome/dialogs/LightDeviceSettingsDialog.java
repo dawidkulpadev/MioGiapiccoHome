@@ -58,8 +58,6 @@ public class LightDeviceSettingsDialog {
             rootView.findViewById(R.id.software_update_button).setOnClickListener(v -> interactionListener.onUpdateButtonClick(device));
         }
 
-
-
         nameInputText.setHint(device.getName());
         nameInputText.addTextChangedListener(new TextWatcher() {
             @Override

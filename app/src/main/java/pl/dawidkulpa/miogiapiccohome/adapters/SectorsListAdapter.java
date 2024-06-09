@@ -1,6 +1,5 @@
 package pl.dawidkulpa.miogiapiccohome.adapters;
 
-import android.app.TimePickerDialog;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,7 +26,6 @@ public class SectorsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         TextView nameText;
         TextView humText;
         TextView tempText;
-        TextView co2Text;
 
         RecyclerView plantsRecyclerView;
         PlantsListAdapter plantsListAdapter;
@@ -42,7 +40,6 @@ public class SectorsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             nameText= v.findViewById(R.id.sector_name_text);
             humText= v.findViewById(R.id.sector_hum_text);
             tempText= v.findViewById(R.id.sector_temp_text);
-            co2Text= v.findViewById(R.id.air_co2ppm_text);
 
             plantsRecyclerView= v.findViewById(R.id.sector_plants_list);
             RecyclerView.LayoutManager plantsLayoutManager = new LinearLayoutManager(v.getContext());
@@ -89,30 +86,20 @@ public class SectorsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         if(sectors.get(position).getAirDevices().isEmpty()){
             h.humText.setVisibility(View.GONE);
             h.tempText.setVisibility(View.GONE);
-            h.co2Text.setVisibility(View.GONE);
         } else {
             float hum = 0;
             float temp = 0;
-            int co2= 0;
             for (AirDevice a : sectors.get(position).getAirDevices()) {
                 hum += a.getAirHumidity();
                 temp += a.getAitTemperature();
-                co2 += a.getCo2ppm();
             }
 
-            co2 = co2 / sectors.get(position).getAirDevices().size();
             hum = hum / sectors.get(position).getAirDevices().size();
             temp = temp / sectors.get(position).getAirDevices().size();
 
-            // Check if co2 level is valid
-            if(co2!=0)
-                h.co2Text.setVisibility(View.VISIBLE);
-            else
-                h.co2Text.setVisibility(View.GONE);
             h.humText.setVisibility(View.VISIBLE);
             h.tempText.setVisibility(View.VISIBLE);
 
-            h.co2Text.setText(context.getString(R.string.value_co2_ppm, co2));
             h.humText.setText(context.getString(R.string.value_humidity, hum));
             h.tempText.setText(context.getString(R.string.value_temperature, temp));
         }

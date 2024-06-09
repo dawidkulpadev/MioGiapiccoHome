@@ -37,36 +37,64 @@
                     android:textStyle="bold"
                     android:text="NAME"/>
 
-                <TextView
-                    android:id="@+id/air_temp_text"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/air_params_box"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:layout_constraintEnd_toStartOf="@id/air_hum_text"
                     app:layout_constraintTop_toTopOf="parent"
-                    android:layout_marginEnd="16dp"
-                    android:text="TEMP"/>
-
-                <TextView
-                    android:id="@+id/air_hum_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:layout_marginEnd="8dp"
-                    android:text="HUM"/>
+                    android:padding="8dp">
+                    <TextView
+                        android:id="@+id/air_temp_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintEnd_toStartOf="@id/air_hum_text"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:layout_marginEnd="16dp"
+                        android:text="TEMP"/>
 
-                <TextView
-                    android:id="@+id/air_co2ppm_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/air_hum_text"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginTop="3dp"
-                    android:text="CO2"/>
+                    <TextView
+                        android:id="@+id/air_hum_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+
+                        android:text="HUM"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/humidifiers_data_box"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/room_top_bar"
+                android:visibility="gone">
+                <TextView
+                    android:id="@+id/humidity_hold_value_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Humidity hold:"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"/>
+                <TextView
+                    android:id="@+id/humidity_hold_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toTopOf="@id/humidity_hold_value_label"
+                    app:layout_constraintStart_toEndOf="@id/humidity_hold_value_label"
+                    android:text="75%"
+                    android:layout_marginStart="8dp"/>
 
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/humidifiers_water_level"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/humidity_hold_value_label"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginTop="4dp"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/room_sectors_list"
@@ -74,8 +102,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
                 android:layout_marginEnd="4dp"
+                android:layout_marginTop="8dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/room_top_bar"/>
+                app:layout_constraintTop_toBottomOf="@id/humidifiers_data_box"/>
 
             <Button
                 style="@style/Widget.Material3.Button.TextButton"

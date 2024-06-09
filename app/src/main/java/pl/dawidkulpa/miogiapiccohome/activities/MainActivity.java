@@ -47,9 +47,11 @@ import pl.dawidkulpa.miogiapiccohome.API.UserData;
 import pl.dawidkulpa.miogiapiccohome.EditTextWatcher;
 import pl.dawidkulpa.miogiapiccohome.adapters.RoomsListAdapter;
 import pl.dawidkulpa.miogiapiccohome.R;
+import pl.dawidkulpa.miogiapiccohome.dialogs.AirDataHistoryDialog;
 import pl.dawidkulpa.miogiapiccohome.dialogs.NewSectorDialog;
 
-public class MainActivity extends AppCompatActivity implements RoomsListAdapter.DataChangeListener, NewSectorDialog.ClosedListener {
+public class MainActivity extends AppCompatActivity
+        implements RoomsListAdapter.DataChangeListener, NewSectorDialog.ClosedListener, RoomsListAdapter.DataRequestListener {
 
     public static final String CHANNEL_ID= "dev_notifs";
 
@@ -97,12 +99,14 @@ public class MainActivity extends AppCompatActivity implements RoomsListAdapter.
         RecyclerView rv= findViewById(R.id.dev_list);
         rv.setLayoutManager(layoutManager);
         rv.setHasFixedSize(true);
-        adapter= new RoomsListAdapter(this, user.getDataHandler().getRooms(), this, this);
+        adapter= new RoomsListAdapter(this, user.getDataHandler().getRooms(), this, this, this);
         rv.setAdapter(adapter);
 
         progressBar = findViewById(R.id.progressbar);
 
         findViewById(R.id.new_room_button).setOnClickListener(v -> onAddRoomClick());
+
+
 
         startUserDataDownload();
     }
@@ -317,5 +321,12 @@ public class MainActivity extends AppCompatActivity implements RoomsListAdapter.
             Snackbar.make(findViewById(R.id.dev_list), "Server error :(", BaseTransientBottomBar.LENGTH_SHORT).show();
             progressBar.setVisibility(View.INVISIBLE);
         }
+    }
+
+    @Override
+    public void onShowAirDataHistoryClick(Room r) {
+        AirDataHistoryDialog adhd= new AirDataHistoryDialog(user, r.getAirDevices().get(0));
+        adhd.show(this);
+
     }
 }

@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -36,19 +37,24 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         void onSectorDataChanged(Sector s);
     }
 
+    public interface DataRequestListener {
+        void onShowAirDataHistoryClick(Room r);
+    }
+
     static class RoomViewHolder extends RecyclerView.ViewHolder{
         View root;
 
         TextView nameText;
         TextView humText;
         TextView tempText;
-        TextView co2Text;
 
         RecyclerView sectorsRecyclerView;
         SectorsListAdapter sectorsListAdapter;
 
         NewSectorDialog newSectorDialog;
         Button newSectorButton;
+
+        ConstraintLayout airParamsBox;
 
         RoomViewHolder(View v){
             super(v);
@@ -57,7 +63,8 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             nameText= v.findViewById(R.id.room_name_text);
             humText= v.findViewById(R.id.air_hum_text);
             tempText= v.findViewById(R.id.air_temp_text);
-            co2Text= v.findViewById(R.id.air_co2ppm_text);
+
+            airParamsBox= v.findViewById(R.id.air_params_box);
 
             sectorsRecyclerView= v.findViewById(R.id.room_sectors_list);
             RecyclerView.LayoutManager layoutManager;
@@ -76,12 +83,14 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private final Context context;
     private ArrayList<Room> rooms;
     private DataChangeListener dataChangeListener;
+    private DataRequestListener dataRequestListener;
     private NewSectorDialog.ClosedListener apiCreateSectorRequest;
 
-    public RoomsListAdapter(Context context, ArrayList<Room> rooms, DataChangeListener dataChangeListener, NewSectorDialog.ClosedListener apiCreateSectorRequest){
+    public RoomsListAdapter(Context context, ArrayList<Room> rooms, DataChangeListener dataChangeListener, DataRequestListener dataRequestListener, NewSectorDialog.ClosedListener apiCreateSectorRequest){
         this.rooms= rooms;
         this.context= context;
         this.dataChangeListener= dataChangeListener;
+        this.dataRequestListener= dataRequestListener;
         this.apiCreateSectorRequest= apiCreateSectorRequest;
     }
 
@@ -101,31 +110,28 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         if(!rooms.get(position).getAirDevices().isEmpty()) {
             float hum = 0;
             float temp = 0;
-            int co2= 0;
             for (AirDevice a : rooms.get(position).getAirDevices()) {
-                hum += a.getAirHumidity();
-                temp += a.getAitTemperature();
-                co2 += a.getCo2ppm();
+                hum += (float) a.getAirHumidity();
+                temp += (float) a.getAitTemperature();
             }
 
-            co2 = co2 / rooms.get(position).getAirDevices().size();
             hum = hum / rooms.get(position).getAirDevices().size();
             temp = temp / rooms.get(position).getAirDevices().size();
 
             h.humText.setVisibility(View.VISIBLE);
             h.tempText.setVisibility(View.VISIBLE);
-            // Check if co2 level is valid
-            if(co2!=0)
-                h.co2Text.setVisibility(View.VISIBLE);
-            else
-                h.co2Text.setVisibility(View.GONE);
-            h.co2Text.setText(context.getString(R.string.value_co2_ppm, co2));
+
             h.humText.setText(context.getString(R.string.value_humidity, hum));
             h.tempText.setText(context.getString(R.string.value_temperature, temp));
+
+            h.airParamsBox.setOnClickListener(v -> {
+                if(!rooms.get(position).getAirDevices().isEmpty())
+                    dataRequestListener.onShowAirDataHistoryClick(rooms.get(position));
+            });
+
         } else {
             h.humText.setVisibility(View.GONE);
             h.tempText.setVisibility(View.GONE);
-            h.co2Text.setVisibility(View.GONE);
         }
 
         h.newSectorDialog= new NewSectorDialog(rooms.get(position).getId(), context, apiCreateSectorRequest);

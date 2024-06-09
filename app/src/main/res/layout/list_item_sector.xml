@@ -12,7 +12,8 @@
         app:layout_constraintTop_toTopOf="parent"
         app:cardUseCompatPadding="true"
         app:cardElevation="1dp"
-        app:cardCornerRadius="8dp">
+        app:cardCornerRadius="8dp"
+        android:animateLayoutChanges="true">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -41,7 +42,8 @@
                     android:layout_marginEnd="16dp"
                     android:text="TEMP"
                     app:layout_constraintEnd_toStartOf="@id/sector_hum_text"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
                 <TextView
                     android:id="@+id/sector_hum_text"
                     android:layout_width="wrap_content"
@@ -49,16 +51,8 @@
                     android:layout_marginEnd="8dp"
                     android:text="HUM"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-                <TextView
-                    android:id="@+id/air_co2ppm_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/sector_hum_text"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginTop="3dp"
-                    android:text="CO2"/>
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.recyclerview.widget.RecyclerView

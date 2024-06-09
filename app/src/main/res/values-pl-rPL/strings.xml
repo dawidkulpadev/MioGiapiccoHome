@@ -21,6 +21,8 @@
     <string name="button_accept">Akceptuj</string>
     <string name="button_dismiss">Odrzuć</string>
     <string name="button_create">Utwórz</string>
+    <string name="button_close">Zamknij</string>
+    <string name="button_settings">Ustawienia</string>
     <string name="label_signin">Logowanie</string>
     <string name="label_addnewdevice_step1">1) Włącz swoje nowe urządzenie oraz bluetooth w telefonie</string>
     <string name="label_addnewdevice_step2">2) Połącz się ze swoim nowym urządzeniem</string>
@@ -102,5 +104,6 @@
     <string name="error_activation_code_expired">Ten kod aktywacyjny stracił ważność &#128542; Wysłałem Ci nowy</string>
     <string name="error_incorrect_activation_code">To nie jest poprawny kod aktywacyjny</string>
     <string name="error_connection_error">Błąd komunikacji z API &#128542;</string>
+    <string name="title_air_data_history">Historia parametrów powietrza</string>
 
 </resources>

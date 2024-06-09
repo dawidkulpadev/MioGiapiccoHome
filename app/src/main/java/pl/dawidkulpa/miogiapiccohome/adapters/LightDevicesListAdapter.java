@@ -5,6 +5,8 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -40,6 +42,7 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
         TextView configsSreText;
         TextView configsSssText;
         MaterialDivider divider;
+        Button settingsButton;
 
         LightDeviceViewHolder(View v){
             super(v);
@@ -56,6 +59,8 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
             configsDeText= v.findViewById(R.id.ld_de_text);
             configsDliText= v.findViewById(R.id.ld_dli_text);
 
+            settingsButton= v.findViewById(R.id.ld_settings_button);
+
             divider= v.findViewById(R.id.divider);
         }
 
@@ -70,11 +75,14 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
             setConfigsUI(ld, dataChangeListener);
 
             root.setOnClickListener(v -> {
-                if(configsBox.getVisibility()==View.GONE)
+                if(configsBox.getVisibility()==View.GONE) {
                     configsBox.setVisibility(View.VISIBLE);
-                else
+                } else {
                     configsBox.setVisibility(View.GONE);
+                }
             });
+
+
         }
 
         private void setStateData(LightDevice ld){
@@ -108,13 +116,9 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
             root.findViewById(R.id.ld_dli_text).setOnClickListener(
                     view -> openChangeDLIDialog(ld, dataChangeListener));
 
-
-            root.setOnLongClickListener(v -> {
+            settingsButton.setOnClickListener(v -> {
                 openLightDeviceSettingsDialog(ld, null);
-                return false;
             });
-
-
         }
 
         private void setStateIconAndChangeText(int iconRes, String timeText){
