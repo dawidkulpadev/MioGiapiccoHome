@@ -13,7 +13,7 @@ public class SoilDevice extends Device {
     int batteryLevel;
 
     public SoilDevice(Plant parent, JSONObject jobj) throws JSONException, ParseException {
-        super(jobj);
+        super(jobj, Type.Soil);
         this.parent= parent;
         airHumidity= jobj.getInt("AH");
         airTemperature= jobj.getInt("AT");

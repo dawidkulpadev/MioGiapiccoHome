@@ -9,10 +9,11 @@
         android:id="@+id/ld_ds_box"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/button_default"
+        android:background="@drawable/simple_ripple"
         android:layout_marginStart="16dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        android:padding="6dp">
         <ImageView
             android:id="@+id/ld_ds_icon"
             android:layout_width="@dimen/details_light_icon_size"
@@ -34,10 +35,11 @@
         android:id="@+id/ld_sre_box"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/button_default"
+        android:background="@drawable/simple_ripple"
         android:layout_marginStart="16dp"
         app:layout_constraintStart_toEndOf="@id/ld_ds_box"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        android:padding="6dp">
         <ImageView
             android:id="@+id/ld_sre_icon"
             android:layout_width="@dimen/details_light_icon_size"
@@ -64,17 +66,19 @@
         app:layout_constraintBottom_toBottomOf="@id/ld_de_box"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:background="@drawable/button_default"
+        android:background="@drawable/simple_ripple"
+        android:padding="16dp"
         android:text="100%"/>
 
     <RelativeLayout
         android:id="@+id/ld_sss_box"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/button_default"
+        android:background="@drawable/simple_ripple"
         android:layout_marginEnd="16dp"
         app:layout_constraintEnd_toStartOf="@id/ld_de_box"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        android:padding="6dp">
         <ImageView
             android:id="@+id/ld_sss_icon"
             android:layout_width="@dimen/details_light_icon_size"
@@ -95,10 +99,11 @@
         android:id="@+id/ld_de_box"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/button_default"
+        android:background="@drawable/simple_ripple"
         android:layout_marginEnd="16dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        android:padding="6dp">
         <ImageView
             android:id="@+id/ld_de_icon"
             android:layout_width="@dimen/details_light_icon_size"

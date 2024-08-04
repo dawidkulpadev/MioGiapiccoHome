@@ -179,6 +179,7 @@ public class User implements Parcelable {
                 try {
                     uid = jObject.getInt("uid");
                     picklock= jObject.getString("picklock");
+                    Log.d("User", picklock);
                     result =SIGN_UP_RESULT_SUCCESS;
                 } catch (JSONException ignored){}
 
@@ -297,6 +298,30 @@ public class User implements Parcelable {
         sr.addRequestDataPair("name", name);
 
         sr.start(serverAddress+"/user/create/registerdevice.php");
+    }
+
+    public void unregisterDevice(Device device, ActionListener actionListener){
+        ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
+                ServerRequest.METHOD_POST,
+                ServerRequest.RESPONSE_TYPE_JSON,
+                ServerRequest.TIMEOUT_DEFAULT,
+                (respCode, jObject) -> {
+                    if(actionListener !=null){
+                        actionListener.onFinished(respCode == 200);
+                    }
+                });
+
+        if(device.getType()== Device.Type.Soil)
+            sr.addRequestDataPair("t", "soil");
+        else if(device.getType()==Device.Type.Light)
+            sr.addRequestDataPair("t", "light");
+        else if(device.getType()==Device.Type.Air)
+            sr.addRequestDataPair("t", "air");
+        sr.addRequestDataPair("login", login);
+        sr.addRequestDataPair("pass", pass);
+        sr.addRequestDataPair("id", device.getId());
+
+        sr.start(serverAddress+"/user/delete/unregisterdevice.php");
     }
 
     public void downloadData(final DownloadDataListener ddl){

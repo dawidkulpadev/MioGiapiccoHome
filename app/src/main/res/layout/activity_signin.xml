@@ -95,7 +95,6 @@
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:background="@drawable/button_default"
         android:text="@string/button_create_account"
         android:textAllCaps="false"
         android:onClick="onSignUpClick"

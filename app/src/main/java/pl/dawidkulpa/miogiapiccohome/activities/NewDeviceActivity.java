@@ -66,8 +66,8 @@ public class NewDeviceActivity extends AppCompatActivity {
     public static final int ACTION_TIMEOUT_READ_CHARACTERISTICS         = 5000;
     public static final int ACTION_TIMEOUT_ENABLE_NOTIFICATIONS         = 4000;
     public static final int ACTION_TIMEOUT_REGISTER_DEVICE              = 10000;
-    public static final int ACTION_TIMEOUT_WRITE_CHARACTERISTICS        = 6000;
-    public static final int ACTION_TIMEOUT_DEVICE_CONFIGURED_RESPONSE   = 4000;
+    public static final int ACTION_TIMEOUT_WRITE_CHARACTERISTICS        = 15000;
+    public static final int ACTION_TIMEOUT_DEVICE_CONFIGURED_RESPONSE   = 15000;
     public static final int ACTION_TIMEOUT_DEVICE_SEARCH                = 120000;
 
     public static final String SERVICE_UUID                  = "952cb13b-57fa-4885-a445-57d1f17328fd";
@@ -852,8 +852,10 @@ public class NewDeviceActivity extends AppCompatActivity {
         if(success){
             stopTimeoutWatchdog();
             systemState=SystemState.WritingCharacteristics;
+            Log.d("NewDeviceActivity", "New version");
             Log.d("NewDeviceActivity", "System state: WritingCharacteristics");
             Log.d("NewDeviceActivity", "Populate device in database success");
+            Log.d("NewDeviceActivity", "Sending picklock: "+user.getPicklock());
             writeCharacteristics();
             startTimeoutWatchdog(ACTION_TIMEOUT_WRITE_CHARACTERISTICS);
         } else {

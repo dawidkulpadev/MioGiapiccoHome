@@ -58,6 +58,9 @@ public class LightDeviceSettingsDialog {
             rootView.findViewById(R.id.software_update_button).setOnClickListener(v -> interactionListener.onUpdateButtonClick(device));
         }
 
+        // TODO: Make delete confirmation and close dialog on success
+        //rootView.findViewById(R.id.delete_button).setOnClickListener(v->interactionListener.onDeleteButtonClick(device));
+
         nameInputText.setHint(device.getName());
         nameInputText.addTextChangedListener(new TextWatcher() {
             @Override

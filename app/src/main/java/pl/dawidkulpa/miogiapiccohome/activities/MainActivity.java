@@ -280,7 +280,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onLightDeviceDeleteClick(LightDevice d) {
-
+        user.unregisterDevice(d, this::onUpdateLightDeviceResult);
     }
 
     @Override

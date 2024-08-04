@@ -21,7 +21,7 @@ public class AirDevice extends Device{
     private final int humidWaterLvl;
 
     public AirDevice(JSONObject jobj, int roomId, int sectorId) throws JSONException, ParseException {
-        super(jobj);
+        super(jobj, Type.Air);
 
         roomParentId= roomId;
         sectorParentId= sectorId;

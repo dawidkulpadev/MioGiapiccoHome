@@ -42,7 +42,7 @@ public class LightDevice extends Device{
     public int getSsd() {return dayEndAt-sunsetStartAt;}
 
     public LightDevice(JSONObject jobj, int plantId) throws JSONException, ParseException {
-        super(jobj);
+        super(jobj, Type.Light);
 
         sectorParentId= plantId;
         name= jobj.getString(JSON_TAG_NAME);

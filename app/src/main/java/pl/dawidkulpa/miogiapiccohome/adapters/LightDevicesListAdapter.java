@@ -117,7 +117,7 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
                     view -> openChangeDLIDialog(ld, dataChangeListener));
 
             settingsButton.setOnClickListener(v -> {
-                openLightDeviceSettingsDialog(ld, null);
+                openLightDeviceSettingsDialog(ld, dataChangeListener);
             });
         }
 

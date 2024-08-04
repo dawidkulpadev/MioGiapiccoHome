@@ -27,7 +27,6 @@
             android:id="@+id/sh_box"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/button_default"
             android:layout_marginStart="16dp"
             android:layout_alignParentStart="true">
             <ImageView
@@ -51,7 +50,6 @@
             android:id="@+id/ah_box"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/button_default"
             android:layout_marginStart="16dp"
             android:layout_toEndOf="@id/sh_box">
             <ImageView
@@ -75,7 +73,6 @@
             android:id="@+id/at_box"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/button_default"
             android:layout_marginStart="16dp"
             android:layout_toEndOf="@id/ah_box">
             <ImageView
@@ -99,7 +96,6 @@
             android:id="@+id/btry_box"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/button_default"
             android:layout_marginEnd="16dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true">

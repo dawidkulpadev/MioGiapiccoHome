@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#82d0d5</color>
-    <color name="colorPrimaryDark">#2D9FA6</color>
-    <color name="colorDisabled">#E4E4E4</color>
-    <color name="colorAccent">#10F1FF</color>
-    <color name="colorRipple">#0C4BCFB2</color>
-
-    <color name="buttonDefault">#00000000</color>
-    <color name="colorButtonDarkMask">#B2032D5A</color>
-    <color name="colorSimpleMask">#4B032D5A</color>
+    <color name="colorRipple">#174BCFB2</color>
 
     <color name="textPrimary">#222</color>
     <color name="textSecondary">#333</color>
@@ -18,6 +10,5 @@
     <color name="textSecondaryLight">#aaa</color>
     <color name="textDisabledLight">#555</color>
 
-    <color name="backgroundColor">#2C2D2D</color>
     <color name="backgroundDarkerColor">#222323</color>
 </resources>
