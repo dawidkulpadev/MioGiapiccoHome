@@ -27,8 +27,8 @@ import pl.dawidkulpa.miogiapiccohome.dialogs.NewSectorDialog;
 public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public interface DataChangeListener {
         void onLightDeviceDataChanged(LightDevice d);
-        void onLightDeviceUpdateClick(LightDevice d);
-        void onLightDeviceDeleteClick(LightDevice d);
+        void onDeviceUpdateClick(LightDevice d);
+        void onDeviceDeleteClick(LightDevice d);
         void onSoilDeviceDataChanged(SoilDevice d);
         void onAirDeviceDataChanged(AirDevice d);
 

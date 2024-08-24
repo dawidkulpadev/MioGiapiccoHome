@@ -25,6 +25,18 @@
             android:text="Light"
             android:layout_marginStart="8dp"/>
 
+        <ImageView
+            android:id="@+id/ld_update_available_icon"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/icon_new_release"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ld_name_text"
+            android:layout_marginStart="8dp"
+            app:tint="@color/colorAccent"
+            android:visibility="gone"/>
+
         <TextView
             android:id="@+id/ld_state_text"
             android:layout_width="wrap_content"
@@ -71,9 +83,10 @@
 
         <include
             android:id="@+id/ld_configbox_layout"
-            layout="@layout/configbox_lightdevice"/>
+            layout="@layout/pane_config_lightdevice"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <com.google.android.material.divider.MaterialDivider
         android:id="@+id/divider"

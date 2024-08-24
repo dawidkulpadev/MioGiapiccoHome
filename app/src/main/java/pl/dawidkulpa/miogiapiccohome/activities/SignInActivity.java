@@ -2,12 +2,20 @@ package pl.dawidkulpa.miogiapiccohome.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.usage.NetworkStatsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityDiagnosticsManager;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
@@ -34,10 +42,15 @@ public class SignInActivity extends AppCompatActivity {
         String lastPassword= prefs.getString(PASSWORD_KEY, "");
 
         if(!lastUsername.isEmpty() && !lastPassword.isEmpty()){
+            ((TextView)findViewById(R.id.login_edit)).setText(lastUsername);
+            ((TextView)findViewById(R.id.pass_edit)).setText(lastPassword);
             performSignIn(lastUsername, lastPassword);
         } else {
             showSignInForm();
         }
+
+
+        // TODO: Check internet with custom web service
     }
 
     public void showSignInForm(){
@@ -76,19 +89,19 @@ public class SignInActivity extends AppCompatActivity {
     }
 
     public void onSignInResult(User user, int r){
-        findViewById(R.id.signin_button).setVisibility(View.VISIBLE);
-        findViewById(R.id.progressbar).setVisibility(View.GONE);
-
         if(r==User.SIGN_IN_RESULT_SUCCESS){
             registerPassword(user.getLogin(), user.getPassword());
             startMainActivity();
         } else if(r==User.SIGN_IN_RESULT_NOT_ACTIVATED) {
             startActivateActivity();
         } else if(r==User.SIGN_IN_RESULT_AUTH_ERROR) {
+            showSignInForm();
             Snackbar.make(findViewById(R.id.signin_button), R.string.info_signin_failed, BaseTransientBottomBar.LENGTH_SHORT).show();
         } else if(r==User.SIGN_IN_RESULT_SERVER_ERROR){
+            showSignInForm();
             Snackbar.make(findViewById(R.id.signin_button), R.string.error_server_error, BaseTransientBottomBar.LENGTH_SHORT).show();
         } else {
+            showSignInForm();
             Snackbar.make(findViewById(R.id.signin_button), R.string.error_connection_error, BaseTransientBottomBar.LENGTH_SHORT).show();
         }
     }

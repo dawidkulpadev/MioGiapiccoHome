@@ -38,7 +38,7 @@
             android:scaleType="fitXY"/>
 
 
-        <include layout="@layout/configbox_lightdevice"
+        <include layout="@layout/pane_config_lightdevice"
             android:id="@+id/detailsbox_lightdevice"
             android:layout_marginTop="10dp"
             android:layout_height="wrap_content"

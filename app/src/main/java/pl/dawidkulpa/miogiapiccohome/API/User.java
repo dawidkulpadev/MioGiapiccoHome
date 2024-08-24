@@ -59,7 +59,7 @@ public class User implements Parcelable {
         void onResult(boolean success, AirDataHistory airDataHistory);
     }
 
-    private final String serverAddress= "https://dawidkulpa.pl/apis/miogiapicco-dev/";
+    private final String serverAddress= "https://dawidkulpa.pl/apis/miogiapicco/";
     private int uid;
     final private String login;
     final private String pass;

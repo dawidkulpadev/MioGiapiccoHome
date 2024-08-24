@@ -56,7 +56,7 @@ public class SectorsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
 
         void createLightsListAdapter(ArrayList<LightDevice> lights, RoomsListAdapter.DataChangeListener dataChangeListener){
-            lightsListAdapter= new LightDevicesListAdapter(root.getContext(), lights, dataChangeListener);
+            lightsListAdapter= new LightDevicesListAdapter(lights, dataChangeListener);
             lightsRecyclerView.setAdapter(lightsListAdapter);
         }
     }

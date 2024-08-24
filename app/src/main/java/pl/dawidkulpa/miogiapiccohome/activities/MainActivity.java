@@ -274,12 +274,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onLightDeviceUpdateClick(LightDevice d) {
+    public void onDeviceUpdateClick(LightDevice d) {
         user.markLightDeviceUpgradeAllowed(d, success -> startUserDataDownload());
     }
 
     @Override
-    public void onLightDeviceDeleteClick(LightDevice d) {
+    public void onDeviceDeleteClick(LightDevice d) {
         user.unregisterDevice(d, this::onUpdateLightDeviceResult);
     }
 
