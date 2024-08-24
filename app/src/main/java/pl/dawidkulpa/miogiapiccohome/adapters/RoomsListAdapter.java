@@ -56,6 +56,8 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         ConstraintLayout airParamsBox;
 
+        RecyclerView.LayoutManager layoutManager;
+
         RoomViewHolder(View v){
             super(v);
             root= v;
@@ -67,7 +69,7 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             airParamsBox= v.findViewById(R.id.air_params_box);
 
             sectorsRecyclerView= v.findViewById(R.id.room_sectors_list);
-            RecyclerView.LayoutManager layoutManager;
+
             layoutManager = new LinearLayoutManager(v.getContext());
             sectorsRecyclerView.setLayoutManager(layoutManager);
 
