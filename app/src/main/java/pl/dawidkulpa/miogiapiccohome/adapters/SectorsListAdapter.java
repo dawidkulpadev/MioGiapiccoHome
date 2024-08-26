@@ -63,7 +63,7 @@ public class SectorsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     private final Context context;
     final private ArrayList<Sector> sectors;
-    private RoomsListAdapter.DataChangeListener dataChangeListener;
+    private final RoomsListAdapter.DataChangeListener dataChangeListener;
 
     public SectorsListAdapter(Context context, ArrayList<Sector> sectors, RoomsListAdapter.DataChangeListener dataChangeListener){
         this.sectors= sectors;
@@ -90,8 +90,8 @@ public class SectorsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             float hum = 0;
             float temp = 0;
             for (AirDevice a : sectors.get(position).getAirDevices()) {
-                hum += a.getAirHumidity();
-                temp += a.getAitTemperature();
+                hum += (float) a.getAirHumidity();
+                temp += (float) a.getAitTemperature();
             }
 
             hum = hum / sectors.get(position).getAirDevices().size();
@@ -110,7 +110,6 @@ public class SectorsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     @Override
     public int getItemCount() {
-        Log.e("Sectors cnt", String.valueOf(sectors.size()));
         return sectors.size();
     }
 }

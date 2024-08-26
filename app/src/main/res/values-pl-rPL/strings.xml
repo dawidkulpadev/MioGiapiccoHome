@@ -56,6 +56,7 @@
     <string name="label_add_new_plant">Nowa roślina…</string>
     <string name="title_light_device_settings">Ustawienia</string>
     <string name="title_remove_device">Usuń urządzenie %s</string>
+    <string name="title_today">Dzisiaj</string>
     <string name="value_unknown">nieznane</string>
     <string name="error_empty_name">To pole nie może byc puste</string>
     <string name="error_email_invalid">To chyba nie jest adres email</string>
@@ -107,7 +108,11 @@
     <string name="error_incorrect_activation_code">To nie jest poprawny kod aktywacyjny</string>
     <string name="error_connection_error">Błąd komunikacji z API &#128542;</string>
     <string name="title_air_data_history">Historia parametrów powietrza</string>
-    <string name="message_remove_device">Urządzenie zniknie z Twojego konta natychmiast ale konfigurację urządzenia musisz wyczyścić ręcznie przytrzymując odpowiedni przycisk na urządzeni. Czy na pewno chcesz odłączyć urządzenie od swojego konta?</string>
+    <string name="message_remove_device">Urządzenie zniknie z Twojego konta natychmiast ale konfigurację urządzenia musisz wyczyścić ręcznie przytrzymując odpowiedni przycisk na urządzeni.\n\nCzy na pewno chcesz odłączyć urządzenie od swojego konta?</string>
     <string name="button_remove">Usuń</string>
+    <string name="button_next">Następny</string>
+    <string name="button_previous">Poprzedni</string>
+    <string name="label_humidity">Wilgotność</string>
+    <string name="label_temperature">Temperatura</string>
 
 </resources>

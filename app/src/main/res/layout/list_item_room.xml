@@ -96,6 +96,17 @@
                     android:layout_marginTop="4dp"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/room_details_box_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/humidifiers_data_box"
+                android:visibility="gone">
+                <include
+                    layout="@layout/pane_details_room"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/room_sectors_list"
                 android:layout_width="match_parent"
@@ -104,7 +115,8 @@
                 android:layout_marginEnd="4dp"
                 android:layout_marginTop="8dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/humidifiers_data_box"/>
+                app:layout_constraintTop_toBottomOf="@id/room_details_box_layout"
+                />
 
             <Button
                 style="@style/Widget.Material3.Button.TextButton"

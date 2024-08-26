@@ -42,6 +42,8 @@
     <string name="button_settings">Settings</string>
     <string name="button_rename">Rename</string>
     <string name="button_remove">Remove</string>
+    <string name="button_next">Next</string>
+    <string name="button_previous">Previous</string>
 
     <string name="label_signin">Sign in</string>
     <string name="label_addnewdevice_step1">1) Power on your device and enable bluetooth then tap Start</string>
@@ -56,6 +58,8 @@
     <string name="label_add_new_plant">New plant…</string>
     <string name="label_timezone">Timezone:</string>
     <string name="label_placement">Placement:</string>
+    <string name="label_humidity">Humidity</string>
+    <string name="label_temperature">Temperature</string>
 
     <string name="hint_login">Login</string>
     <string name="hint_ssid">Wifi name</string>
@@ -84,7 +88,7 @@
     <string name="message_activation_pin_sent">I sent an email to the provided address with the activation code (I won\'t send anything else)</string>
     <string name="message_activation_pin_input">Enter this code in the field below</string>
     <string name="message_activation_code_regenerated">I have sent a new activation code</string>
-    <string name="message_remove_device">Device will be unbind from your account immediately but you may need to reset your device configuration manually pressing reset button for at least 5 seconds. Do you really want to unbind device from your account?</string>
+    <string name="message_remove_device">Device will be unbind from your account immediately but you may need to reset your device configuration manually pressing reset button for at least 5 seconds.\n\nDo you really want to unbind device from your account?</string>
 
     <string name="info_login_pass_empty">Fill up login and password fields</string>
     <string name="info_signin_failed">Wrong login or password</string>
@@ -108,6 +112,7 @@
     <string name="title_create_account">Create account</string>
     <string name="title_air_data_history">Air data history</string>
     <string name="title_remove_device">Remove %s device</string>
+    <string name="title_today">Today</string>
 
     <string name="value_temperature" translatable="false">%.1f&#xb0;C</string>
     <string name="value_humidity" translatable="false">%.1f%%</string>

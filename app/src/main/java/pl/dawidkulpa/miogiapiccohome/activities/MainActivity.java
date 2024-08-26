@@ -33,6 +33,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 
+import java.util.Calendar;
 import java.util.Objects;
 
 import pl.dawidkulpa.miogiapiccohome.API.AirDevice;
@@ -327,6 +328,10 @@ public class MainActivity extends AppCompatActivity
     public void onShowAirDataHistoryClick(Room r) {
         AirDataHistoryDialog adhd= new AirDataHistoryDialog(user, r.getAirDevices().get(0));
         adhd.show(this);
+    }
 
+    @Override
+    public void requestAirData(AirDevice ad, User.DownloadAirDataHistoryListener dadh, Calendar start, Calendar end) {
+        user.getAirDataHistory(ad, dadh, start, end);
     }
 }
