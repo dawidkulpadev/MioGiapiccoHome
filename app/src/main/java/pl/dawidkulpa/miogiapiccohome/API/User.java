@@ -64,7 +64,7 @@ public class User implements Parcelable {
     final private String login;
     final private String pass;
     private String picklock;
-    private UserData data;
+    private final UserData data;
 
     public User(String login, String pass){
         this.login= login;

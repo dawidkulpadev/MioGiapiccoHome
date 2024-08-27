@@ -18,9 +18,9 @@ public class AirData {
     public static SimpleDateFormat sqlSDF= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
     public static SimpleDateFormat hmTimeSDF= new SimpleDateFormat("HH:mm", Locale.getDefault());
 
-    private float temp;
-    private float hum;
-    private Calendar timestamp;
+    private final float temp;
+    private final float hum;
+    private final Calendar timestamp;
 
     public AirData(JSONObject jobj) throws JSONException, ParseException {
         temp= (float) jobj.getDouble(JSON_TAG_AIR_TEMPERATURE);

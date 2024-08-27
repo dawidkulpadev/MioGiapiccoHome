@@ -48,7 +48,6 @@ import pl.dawidkulpa.miogiapiccohome.API.UserData;
 import pl.dawidkulpa.miogiapiccohome.EditTextWatcher;
 import pl.dawidkulpa.miogiapiccohome.adapters.RoomsListAdapter;
 import pl.dawidkulpa.miogiapiccohome.R;
-import pl.dawidkulpa.miogiapiccohome.dialogs.AirDataHistoryDialog;
 import pl.dawidkulpa.miogiapiccohome.dialogs.NewSectorDialog;
 
 public class MainActivity extends AppCompatActivity
@@ -322,12 +321,6 @@ public class MainActivity extends AppCompatActivity
             Snackbar.make(findViewById(R.id.dev_list), "Server error :(", BaseTransientBottomBar.LENGTH_SHORT).show();
             progressBar.setVisibility(View.INVISIBLE);
         }
-    }
-
-    @Override
-    public void onShowAirDataHistoryClick(Room r) {
-        AirDataHistoryDialog adhd= new AirDataHistoryDialog(user, r.getAirDevices().get(0));
-        adhd.show(this);
     }
 
     @Override

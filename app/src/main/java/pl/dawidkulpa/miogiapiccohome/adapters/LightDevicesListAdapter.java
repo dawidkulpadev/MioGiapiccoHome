@@ -134,7 +134,7 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
 
             adb.setTitle(root.getContext().getString(R.string.title_remove_device, ld.getName()));
             adb.setMessage(R.string.message_remove_device);
-            adb.setPositiveButton(R.string.button_remove, (dialog, which) -> dataChangeListener.onDeviceUpdateClick(ld));
+            adb.setPositiveButton(R.string.button_remove, (dialog, which) -> dataChangeListener.onDeviceDeleteClick(ld));
             adb.setNegativeButton(R.string.button_cancel, null);
 
             adb.create().show();

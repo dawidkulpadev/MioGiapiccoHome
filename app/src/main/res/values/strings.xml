@@ -45,6 +45,12 @@
     <string name="button_next">Next</string>
     <string name="button_previous">Previous</string>
 
+    <string name="chip_period_day">day</string>
+    <string name="chip_period_month">month</string>
+    <string name="chip_period_3months">3 months</string>
+    <string name="chip_period_year">year</string>
+    <string name="chip_period_all_data">all data</string>
+
     <string name="label_signin">Sign in</string>
     <string name="label_addnewdevice_step1">1) Power on your device and enable bluetooth then tap Start</string>
     <string name="label_addnewdevice_step2">2) Connect your new device</string>
@@ -113,6 +119,7 @@
     <string name="title_air_data_history">Air data history</string>
     <string name="title_remove_device">Remove %s device</string>
     <string name="title_today">Today</string>
+    <string name="title_period_all_data">All data</string>
 
     <string name="value_temperature" translatable="false">%.1f&#xb0;C</string>
     <string name="value_humidity" translatable="false">%.1f%%</string>

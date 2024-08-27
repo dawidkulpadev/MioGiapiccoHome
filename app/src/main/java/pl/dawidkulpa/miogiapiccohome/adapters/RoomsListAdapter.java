@@ -58,7 +58,6 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     public interface DataRequestListener {
-        void onShowAirDataHistoryClick(Room r);
 
         void requestAirData(AirDevice ad, User.DownloadAirDataHistoryListener dadh, Calendar start, Calendar end);
     }
@@ -118,7 +117,6 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
                 long xvalue= (long)(times.get(0)+duration*i);
 
-                // Konwertowanie wartości float na czas
                 Date date = new Date(xvalue);
 
                 // Formatowanie daty tylko do pełnej godziny
@@ -148,7 +146,6 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 return new SimpleDateFormat("dd MMM", Locale.getDefault()).format(date);
             }
         }
-
 
 
         RoomViewHolder(View v){
@@ -207,17 +204,12 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                     airDataHistoryStart.set(Calendar.MONTH, 1);
                     root.findViewById(R.id.prev_btn).setEnabled(true);
                     root.findViewById(R.id.next_btn).setEnabled(true);
-                } else if(group.getCheckedChipId()==R.id.adh_period_whole_chip){
-                    adhPeriodLen= ADH_PERIOD_LENGTH_ALL_DATA;
-                    airDataHistoryStart.set(Calendar.YEAR, 2020);
-                    airDataHistoryStart.set(Calendar.MONTH, 1);
-                    airDataHistoryStart.set(Calendar.DAY_OF_MONTH, 1);
-                    root.findViewById(R.id.prev_btn).setEnabled(false);
-                    root.findViewById(R.id.next_btn).setEnabled(false);
                 }
 
                 downloadAirData();
             });
+
+
 
             root.findViewById(R.id.prev_btn).setOnClickListener(view->{
                 airDataHistoryStart.add(getCalendarFieldForADHPeriod(adhPeriodLen), -getCalendarShiftsForADHPeriod(adhPeriodLen));
@@ -305,7 +297,7 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
 
         static void setDateOnChartTitleForAllData(TextView titleView){
-            titleView.setText("Whole data");
+            titleView.setText(R.string.title_period_all_data);
         }
 
 
@@ -321,6 +313,11 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             root.setOnClickListener(v-> toggleDetails());
 
             initChartView();
+            if(!room.getAirDevices().isEmpty()){
+                downloadAirData();
+            } else {
+                airDataChart.setVisibility(View.GONE);
+            }
         }
 
         void initChartView(){
@@ -339,9 +336,9 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
             // enable scaling and dragging
             airDataChart.setDragEnabled(true);
-            airDataChart.setScaleEnabled(true);
-            // chart.setScaleXEnabled(true);
-            // chart.setScaleYEnabled(true);
+            //airDataChart.setScaleEnabled(true);
+            airDataChart.setScaleXEnabled(true);
+            airDataChart.setScaleYEnabled(false);
 
             // force pinch zoom along both axis
             airDataChart.setPinchZoom(true);
@@ -410,11 +407,6 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         void toggleDetails(){
             if(detailsBoxLayout.getVisibility()==View.GONE){
                 detailsBoxLayout.setVisibility(View.VISIBLE);
-                if(!room.getAirDevices().isEmpty()){
-                    downloadAirData();
-                } else {
-                    airDataChart.setVisibility(View.GONE);
-                }
             } else {
                 detailsBoxLayout.setVisibility(View.GONE);
             }
@@ -469,7 +461,6 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 airDataChart.getXAxis().setValueFormatter(new HourValueFormatter(xTimes));
             else
                 airDataChart.getXAxis().setValueFormatter(new DayMonValueFormatter(xTimes));
-            // TODO: Add proper values formatter
 
             ArrayList<Entry> values = new ArrayList<>();
 
@@ -591,11 +582,6 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
             h.humText.setText(context.getString(R.string.value_humidity, hum));
             h.tempText.setText(context.getString(R.string.value_temperature, temp));
-
-            /*h.airParamsBox.setOnClickListener(v -> {
-                if(!rooms.get(position).getAirDevices().isEmpty())
-                    dataRequestListener.onShowAirDataHistoryClick(rooms.get(position));
-            });*/
 
         } else {
             h.humText.setVisibility(View.GONE);

@@ -24,6 +24,11 @@
     <string name="button_close">Zamknij</string>
     <string name="button_settings">Ustawienia</string>
     <string name="button_rename">Zmień nazwę</string>
+    <string name="chip_period_day">dzień</string>
+    <string name="chip_period_month">miesiąc</string>
+    <string name="chip_period_3months">3 miesiące</string>
+    <string name="chip_period_year">rok</string>
+    <string name="chip_period_all_data">wszystko</string>
     <string name="label_signin">Logowanie</string>
     <string name="label_addnewdevice_step1">1) Włącz swoje nowe urządzenie oraz bluetooth w telefonie</string>
     <string name="label_addnewdevice_step2">2) Połącz się ze swoim nowym urządzeniem</string>
@@ -114,5 +119,6 @@
     <string name="button_previous">Poprzedni</string>
     <string name="label_humidity">Wilgotność</string>
     <string name="label_temperature">Temperatura</string>
+    <string name="title_period_all_data">Wszystko</string>
 
 </resources>
