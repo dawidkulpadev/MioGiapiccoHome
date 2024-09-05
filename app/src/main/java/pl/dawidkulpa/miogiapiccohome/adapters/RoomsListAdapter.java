@@ -42,31 +42,32 @@ import pl.dawidkulpa.miogiapiccohome.API.User;
 import pl.dawidkulpa.miogiapiccohome.R;
 
 import pl.dawidkulpa.miogiapiccohome.API.Room;
+import pl.dawidkulpa.miogiapiccohome.dialogs.HumidityTargetPickerDialog;
 import pl.dawidkulpa.miogiapiccohome.dialogs.NewSectorDialog;
 
 public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public interface DataChangeListener {
-        void onLightDeviceDataChanged(LightDevice d);
         void onDeviceUpdateClick(LightDevice d);
         void onDeviceDeleteClick(LightDevice d);
+
+        void onLightDeviceDataChanged(LightDevice d);
         void onSoilDeviceDataChanged(SoilDevice d);
         void onAirDeviceDataChanged(AirDevice d);
-
         void onPlantDataChanged(Plant p);
         void onRoomDataChanged(Room r);
         void onSectorDataChanged(Sector s);
     }
 
     public interface DataRequestListener {
-
         void requestAirData(AirDevice ad, User.DownloadAirDataHistoryListener dadh, Calendar start, Calendar end);
     }
 
     static class RoomViewHolder extends RecyclerView.ViewHolder{
         static final int ADH_PERIOD_LENGTH_DAY= 1;
-        static final int ADH_PERIOD_LENGTH_MONTH= 2;
-        static final int ADH_PERIOD_LENGTH_3MONTHS= 3;
-        static final int ADH_PERIOD_LENGTH_YEAR= 4;
+        static final int ADH_PERIOD_LENGTH_3DAYS=2;
+        static final int ADH_PERIOD_LENGTH_MONTH= 3;
+        static final int ADH_PERIOD_LENGTH_3MONTHS= 4;
+        static final int ADH_PERIOD_LENGTH_YEAR= 5;
         static final int ADH_PERIOD_LENGTH_ALL_DATA= 10;
 
         View root;
@@ -88,64 +89,18 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         Calendar airDataHistoryStart;
 
-        LineChart airDataChart;
+        AirDataChart airDataChart;
         ChipGroup adhPeriodSelectorGroup;
 
         TextView chartTitleTextView;
 
         ProgressBar chartDataProgressBar;
 
-
         DataRequestListener dataRequestListener;
 
-        int adhPeriodLen= 1; // 1- day, 2- month, 3- 3 months, 4-year, 5- whole available data
+        int adhPeriodLen= 1;
 
         Room room;
-
-        public static class HourValueFormatter extends ValueFormatter {
-            ArrayList<Long> times;
-
-            HourValueFormatter(ArrayList<Long> ts){
-                super();
-                times= ts;
-            }
-
-            @Override
-            public String getFormattedValue(float value) {
-                double duration= times.get(times.size()-1)-times.get(0);
-                double i= value/times.size();
-
-                long xvalue= (long)(times.get(0)+duration*i);
-
-                Date date = new Date(xvalue);
-
-                // Formatowanie daty tylko do pełnej godziny
-                return new SimpleDateFormat("HH:mm", Locale.getDefault()).format(date);
-            }
-        }
-
-        public static class DayMonValueFormatter extends ValueFormatter {
-            ArrayList<Long> times;
-
-            DayMonValueFormatter(ArrayList<Long> ts){
-                super();
-                times= ts;
-            }
-
-            @Override
-            public String getFormattedValue(float value) {
-                double duration= times.get(times.size()-1)-times.get(0);
-                double i= value/times.size();
-
-                long xvalue= (long)(times.get(0)+duration*i);
-
-                // Konwertowanie wartości float na czas
-                Date date = new Date(xvalue);
-
-                // Formatowanie daty tylko do pełnej godziny
-                return new SimpleDateFormat("dd MMM", Locale.getDefault()).format(date);
-            }
-        }
 
 
         RoomViewHolder(View v){
@@ -166,7 +121,9 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             newSectorButton= v.findViewById(R.id.new_sector_button);
             detailsBoxLayout= v.findViewById(R.id.room_details_box_layout);
 
-            airDataChart= v.findViewById(R.id.chart);
+            airDataChart= new AirDataChart(v.findViewById(R.id.chart),
+                    v.getContext().getString(R.string.label_humidity),
+                    v.getContext().getString(R.string.label_temperature));
 
             chartTitleTextView= root.findViewById(R.id.date_text);
             chartDataProgressBar= v.findViewById(R.id.chart_data_progressbar);
@@ -180,6 +137,14 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                     airDataHistoryStart.set(Calendar.MONTH, now.get(Calendar.MONTH));
                     airDataHistoryStart.set(Calendar.DAY_OF_MONTH, now.get(Calendar.DAY_OF_MONTH));
                     adhPeriodLen= ADH_PERIOD_LENGTH_DAY;
+                    root.findViewById(R.id.prev_btn).setEnabled(true);
+                    root.findViewById(R.id.next_btn).setEnabled(true);
+                } else if(group.getCheckedChipId()==R.id.adh_period_3days_chip){
+                    airDataHistoryStart.set(Calendar.YEAR, now.get(Calendar.YEAR));
+                    airDataHistoryStart.set(Calendar.MONTH, now.get(Calendar.MONTH));
+                    airDataHistoryStart.set(Calendar.DAY_OF_MONTH, now.get(Calendar.DAY_OF_MONTH));
+                    airDataHistoryStart.add(Calendar.DAY_OF_MONTH, -2);
+                    adhPeriodLen= ADH_PERIOD_LENGTH_3DAYS;
                     root.findViewById(R.id.prev_btn).setEnabled(true);
                     root.findViewById(R.id.next_btn).setEnabled(true);
                 } else if(group.getCheckedChipId()==R.id.adh_period_month_chip){
@@ -209,8 +174,6 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 downloadAirData();
             });
 
-
-
             root.findViewById(R.id.prev_btn).setOnClickListener(view->{
                 airDataHistoryStart.add(getCalendarFieldForADHPeriod(adhPeriodLen), -getCalendarShiftsForADHPeriod(adhPeriodLen));
                 downloadAirData();
@@ -237,6 +200,7 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         int getCalendarShiftsForADHPeriod(int adhPeriod){
             switch (adhPeriod){
                 case ADH_PERIOD_LENGTH_3MONTHS:
+                case ADH_PERIOD_LENGTH_3DAYS:
                     return 3;
                 case ADH_PERIOD_LENGTH_ALL_DATA:
                     return  0;
@@ -249,6 +213,9 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             switch (adhPeriodLen){
                 case ADH_PERIOD_LENGTH_DAY:
                     setDateOnChartTitleForDay(start, chartTitleTextView);
+                    break;
+                case ADH_PERIOD_LENGTH_3DAYS:
+                    setDateOnChartTitleFor3Days(start, end, chartTitleTextView);
                     break;
                 case ADH_PERIOD_LENGTH_MONTH:
                     setDateOnChartTitleForMonth(start, chartTitleTextView);
@@ -279,6 +246,13 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             }
         }
 
+        static void setDateOnChartTitleFor3Days(Calendar start, Calendar end, TextView titleView){
+            SimpleDateFormat simpleDateEndFormat = new SimpleDateFormat("d LLLL yyyy", Locale.getDefault());
+            SimpleDateFormat simpleDateStartFormat = new SimpleDateFormat("d", Locale.getDefault());
+            String dateString = simpleDateStartFormat.format(start.getTime()) + " - " + simpleDateEndFormat.format(end.getTime());
+            titleView.setText(dateString);
+        }
+
         static void setDateOnChartTitleForMonth(Calendar start, TextView titleView){
             SimpleDateFormat simpleDateFormat= new SimpleDateFormat("LLLL yyyy", Locale.getDefault());
             titleView.setText(simpleDateFormat.format(start.getTime()));
@@ -300,8 +274,7 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             titleView.setText(R.string.title_period_all_data);
         }
 
-
-        void init(DataRequestListener drl, Room r){
+        void init(DataRequestListener drl, DataChangeListener dcl, Room r){
             dataRequestListener= drl;
             room= r;
 
@@ -312,91 +285,33 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
             root.setOnClickListener(v-> toggleDetails());
 
-            initChartView();
+            airDataChart.init();
             if(!room.getAirDevices().isEmpty()){
                 downloadAirData();
+
+                ((TextView)root.findViewById(R.id.humidity_target_text)).setText(
+                        root.getContext().getString(R.string.value_humidity_integer, room.getHumidityTarget()));
+
+                ((TextView)root.findViewById(R.id.battery_level_text)).setText(
+                        root.getContext().getString(R.string.value_battery_voltage, room.getAirDevices().get(0).getBatteryVoltage())
+                );
+                root.findViewById(R.id.humidity_target_edit_button).setOnClickListener((v)->{
+                    openHumidityTargetPickerDialog(dcl);
+                });
             } else {
-                airDataChart.setVisibility(View.GONE);
+                adhPeriodSelectorGroup.setVisibility(View.GONE);
+                root.findViewById(R.id.control_box);
+                airDataChart.hide();
             }
         }
 
-        void initChartView(){
-            // background color
-            airDataChart.setNoDataText("");
-            airDataChart.setBackgroundColor(Color.TRANSPARENT);
+        void openHumidityTargetPickerDialog(DataChangeListener dcl){
+            HumidityTargetPickerDialog htpd= new HumidityTargetPickerDialog(room, (r, v) -> {
+                r.setHumidityTarget(v);
+                dcl.onRoomDataChanged(r);
+            });
 
-            // disable description text
-            airDataChart.getDescription().setEnabled(false);
-
-            // enable touch gestures
-            airDataChart.setTouchEnabled(true);
-
-            // set listeners
-            airDataChart.setDrawGridBackground(false);
-
-            // enable scaling and dragging
-            airDataChart.setDragEnabled(true);
-            //airDataChart.setScaleEnabled(true);
-            airDataChart.setScaleXEnabled(true);
-            airDataChart.setScaleYEnabled(false);
-
-            // force pinch zoom along both axis
-            airDataChart.setPinchZoom(true);
-
-            XAxis xAxis;
-            {   // // X-Axis Style // //
-                xAxis = airDataChart.getXAxis();
-                xAxis.setTextColor(Color.WHITE);
-                xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-
-                xAxis.setYOffset(10f);
-                // vertical grid lines
-                xAxis.enableGridDashedLine(10f, 10f, 0f);
-                xAxis.setGranularity(3600f);
-                xAxis.setGranularityEnabled(true);
-                xAxis.setLabelCount(6, true);
-                xAxis.setTextSize(12);
-            }
-
-            YAxis yAxis;
-            {   // // Y-Axis Style // //
-                yAxis = airDataChart.getAxisLeft();
-                yAxis.setTextColor(Color.CYAN);
-                yAxis.setTextSize(12);
-
-                // horizontal grid lines
-                yAxis.enableGridDashedLine(10f, 10f, 0f);
-
-                // axis range
-                yAxis.setAxisMaximum(90f);
-                yAxis.setAxisMinimum(40f);
-            }
-
-            YAxis yAxis2;
-            {
-                yAxis2= airDataChart.getAxisRight();
-                yAxis2.setTextColor(Color.RED);
-                yAxis2.enableGridDashedLine(10f, 10f, 0f);
-                yAxis2.setTextSize(12);
-
-                yAxis2.setAxisMaximum(32f);
-                yAxis2.setAxisMinimum(15f);
-            }
-
-            // get the legend (only possible after setting data)
-            Legend l = airDataChart.getLegend();
-            l.setTextColor(Color.WHITE);
-            l.setTextSize(12);
-            l.setXEntrySpace(30);
-            l.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
-            l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
-
-            // draw legend entries as lines
-            l.setForm(Legend.LegendForm.LINE);
-            l.setDrawInside(false);
-
-            airDataChart.setExtraOffsets(0, 0, 0, 10f);
-            airDataChart.invalidate();
+            htpd.show(root.getContext());
         }
 
         void createSectorsListAdapter(ArrayList<Sector> sectors, DataChangeListener dataChangeListener){
@@ -422,6 +337,9 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 case ADH_PERIOD_LENGTH_DAY:
                     airDataHistoryEnd.add(Calendar.SECOND, 3600*24);
                     break;
+                case ADH_PERIOD_LENGTH_3DAYS:
+                    airDataHistoryEnd.add(Calendar.DAY_OF_MONTH, 3);
+                    break;
                 case ADH_PERIOD_LENGTH_MONTH:
                     airDataHistoryEnd.add(Calendar.MONTH, 1);
                     break;
@@ -444,97 +362,12 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         void onAirDataReceived(boolean success, AirDataHistory airDataHistory){
             chartDataProgressBar.setVisibility(View.GONE);
             if(success){
-                putDataOnPlot(airDataHistory);
+                airDataChart.setData(airDataHistory, adhPeriodLen);
             } else {
                 Toast.makeText(root.getContext(), "Failed downloading air data history", Toast.LENGTH_SHORT).show();
             }
         }
 
-        public void putDataOnPlot(@NonNull AirDataHistory adh){
-
-            ArrayList<Long> xTimes = new ArrayList<>();
-            for(int i=0; i<adh.size(); i++){
-                xTimes.add(adh.get(i).getTimestamp().getTimeInMillis());
-            }
-
-            if(adhPeriodLen==ADH_PERIOD_LENGTH_DAY)
-                airDataChart.getXAxis().setValueFormatter(new HourValueFormatter(xTimes));
-            else
-                airDataChart.getXAxis().setValueFormatter(new DayMonValueFormatter(xTimes));
-
-            ArrayList<Entry> values = new ArrayList<>();
-
-            for(int i=0; i<adh.size(); i++){
-                values.add(new Entry(i, adh.get(i).getHum()));
-            }
-
-            ArrayList<Entry> values2 = new ArrayList<>();
-
-            for(int i=0; i<adh.size(); i++){
-                values2.add(new Entry(i, adh.get(i).getTemp()));
-            }
-
-            LineDataSet set1, set2;
-            {
-                // create a dataset and give it a type
-                set1 = new LineDataSet(values, root.getContext().getString(R.string.label_humidity));
-
-                set1.setDrawIcons(false);
-
-                // black lines and points
-                set1.setColor(Color.CYAN);
-
-                // line thickness and point size
-                set1.setLineWidth(1.5f);
-
-                set1.setDrawCircles(false);
-
-                // customize legend entry
-                set1.setFormLineWidth(1f);
-                set1.setFormSize(15.f);
-                set1.setAxisDependency(YAxis.AxisDependency.LEFT);
-
-                set1.setValueTextColor(Color.TRANSPARENT);
-
-                // draw selection line as dashed
-                set1.enableDashedHighlightLine(10f, 5f, 0f);
-
-                // create a dataset and give it a type
-                set2 = new LineDataSet(values2, root.getContext().getString(R.string.label_temperature));
-
-                set2.setDrawIcons(false);
-
-                // black lines and points
-                set2.setColor(Color.RED);
-
-                // line thickness and point size
-                set2.setLineWidth(1.5f);
-
-                set2.setDrawCircles(false);
-
-                // customize legend entry
-                set2.setFormLineWidth(1f);
-                set2.setFormSize(15.f);
-
-                set2.setValueTextColor(Color.TRANSPARENT);
-
-                set2.setAxisDependency(YAxis.AxisDependency.RIGHT);
-                // draw selection line as dashed
-                set2.enableDashedHighlightLine(10f, 5f, 0f);
-
-                ArrayList<ILineDataSet> dataSets = new ArrayList<>();
-                dataSets.add(set1); // add the data sets
-                dataSets.add(set2);
-
-                // create a data object with the data sets
-                LineData data = new LineData(dataSets);
-
-                // set data
-                airDataChart.setData(data);
-            }
-
-            airDataChart.invalidate();
-        }
     }
 
     private final Context context;
@@ -564,7 +397,7 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         h.nameText.setText(rooms.get(position).getName());
         h.createSectorsListAdapter(rooms.get(position).getSectors(), dataChangeListener);
 
-        h.init(dataRequestListener, rooms.get(position));
+        h.init(dataRequestListener, dataChangeListener, rooms.get(position));
 
         if(!rooms.get(position).getAirDevices().isEmpty()) {
             float hum = 0;

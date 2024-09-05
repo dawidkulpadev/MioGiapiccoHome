@@ -25,6 +25,7 @@
     <string name="button_settings">Ustawienia</string>
     <string name="button_rename">Zmień nazwę</string>
     <string name="chip_period_day">dzień</string>
+    <string name="chip_period_3days">3 dni</string>
     <string name="chip_period_month">miesiąc</string>
     <string name="chip_period_3months">3 miesiące</string>
     <string name="chip_period_year">rok</string>
@@ -62,6 +63,7 @@
     <string name="title_light_device_settings">Ustawienia</string>
     <string name="title_remove_device">Usuń urządzenie %s</string>
     <string name="title_today">Dzisiaj</string>
+    <string name="title_air_data">Parametry powietrza</string>
     <string name="value_unknown">nieznane</string>
     <string name="error_empty_name">To pole nie może byc puste</string>
     <string name="error_email_invalid">To chyba nie jest adres email</string>
@@ -120,5 +122,9 @@
     <string name="label_humidity">Wilgotność</string>
     <string name="label_temperature">Temperatura</string>
     <string name="title_period_all_data">Wszystko</string>
+    <string name="label_battery_level">Poziom baterii:</string>
+    <string name="label_humidity_target">Utrzymywana wilgotność:</string>
+    <string name="message_change_humidity_target">Ustaw nowy poziom utrzymywanej wilgotności powietrza</string>
+    <string name="title_set_ht">Utrzymywana wilgotność powietrza</string>
 
 </resources>

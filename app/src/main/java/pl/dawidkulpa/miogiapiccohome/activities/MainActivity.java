@@ -268,6 +268,15 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void onUpdateRoomResult(boolean success){
+        if(success) {
+            startUserDataDownload();
+        } else {
+            Snackbar.make(findViewById(R.id.dev_list), "Server error :(", BaseTransientBottomBar.LENGTH_SHORT).show();
+            progressBar.setVisibility(View.INVISIBLE);
+        }
+    }
+
     @Override
     public void onLightDeviceDataChanged(LightDevice d) {
         user.updateLightDevice(d, this::onUpdateLightDeviceResult);
@@ -300,7 +309,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onRoomDataChanged(Room r) {
-
+        user.updateRoom(r, this::onUpdateRoomResult);
     }
 
     @Override

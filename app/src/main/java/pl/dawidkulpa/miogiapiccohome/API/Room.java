@@ -10,19 +10,23 @@ import java.text.ParseException;
 import java.util.ArrayList;
 
 public class Room {
-    private static final String JSON_TAG_ID="id";
-    private static final String JSON_TAG_NAME="n";
+    public static final String JSON_TAG_ID="id";
+    public static final String JSON_TAG_NAME="n";
     private static final String JSON_TAG_AIR_DEVICES="ads";
     private static final String JSON_TAG_SECTORS="ss";
+    public static final String JSON_TAG_HUMIDITY_TARGET="ht";
 
-    private int id;
-    private String name;
-    private ArrayList<Sector> sectors= new ArrayList<>();
-    private ArrayList<AirDevice> airDevices= new ArrayList<>();
+    private final int id;
+    private final String name;
+    private int humidityTarget;
+    private final ArrayList<Sector> sectors= new ArrayList<>();
+    private final ArrayList<AirDevice> airDevices= new ArrayList<>();
 
     public Room(JSONObject jObj) throws JSONException, ParseException {
         id= jObj.getInt(JSON_TAG_ID);
         name= jObj.getString(JSON_TAG_NAME);
+
+        humidityTarget= jObj.getInt(JSON_TAG_HUMIDITY_TARGET);
 
         JSONArray jAirDevs= jObj.getJSONArray(JSON_TAG_AIR_DEVICES);
         JSONArray jSectors= jObj.getJSONArray(JSON_TAG_SECTORS);
@@ -52,5 +56,13 @@ public class Room {
 
     public ArrayList<AirDevice> getAirDevices(){
         return airDevices;
+    }
+
+    public int getHumidityTarget(){
+        return humidityTarget;
+    }
+
+    public void setHumidityTarget(int ht){
+        humidityTarget= ht;
     }
 }

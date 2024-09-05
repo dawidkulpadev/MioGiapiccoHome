@@ -46,6 +46,7 @@
     <string name="button_previous">Previous</string>
 
     <string name="chip_period_day">day</string>
+    <string name="chip_period_3days">3 days</string>
     <string name="chip_period_month">month</string>
     <string name="chip_period_3months">3 months</string>
     <string name="chip_period_year">year</string>
@@ -66,6 +67,8 @@
     <string name="label_placement">Placement:</string>
     <string name="label_humidity">Humidity</string>
     <string name="label_temperature">Temperature</string>
+    <string name="label_battery_level">Battery level:</string>
+    <string name="label_humidity_target">Humidity target:</string>
 
     <string name="hint_login">Login</string>
     <string name="hint_ssid">Wifi name</string>
@@ -84,6 +87,7 @@
     <string name="helper_password_rules">Minimum 8 characters long, at least one special character, one uppercase letter and one digit</string>
 
     <string name="message_change_dli">Set new light intensity</string>
+    <string name="message_change_humidity_target">Set new air humidity target</string>
     <string name="message_change_plant_name">Set new plants name</string>
     <string name="message_change_devices_name">Set new devices name</string>
     <string name="message_set_rooms_name">Set new room\'s name</string>
@@ -113,6 +117,7 @@
     <string name="title_create_room_dialog">New room</string>
     <string name="title_create_sector_dialog">New sector</string>
     <string name="title_set_dli">Maximum intensity</string>
+    <string name="title_set_ht">Humidity target</string>
     <string name="title_adding_new_device">New device</string>
     <string name="title_light_device_settings">Settings</string>
     <string name="title_create_account">Create account</string>
@@ -120,14 +125,17 @@
     <string name="title_remove_device">Remove %s device</string>
     <string name="title_today">Today</string>
     <string name="title_period_all_data">All data</string>
+    <string name="title_air_data">Air data</string>
 
     <string name="value_temperature" translatable="false">%.1f&#xb0;C</string>
     <string name="value_humidity" translatable="false">%.1f%%</string>
+    <string name="value_humidity_integer" translatable="false">%d%%</string>
     <string name="value_no_humidity" translatable="false">-%%</string>
     <string name="value_no_temperature" translatable="false">-&#xb0;C</string>
     <string name="value_co2_ppm" translatable="false">%dppm</string>
     <string name="value_dli" translatable="false">%d%%</string>
     <string name="value_unknown">unknown</string>
+    <string name="value_battery_voltage" translatable="false">%.2fV</string>
 
     <string name="error_empty_name">Name cannot be empty</string>
     <string name="error_field_empty">This field cannot be empty</string>
