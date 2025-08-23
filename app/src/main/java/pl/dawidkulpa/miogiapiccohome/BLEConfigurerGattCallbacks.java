@@ -79,9 +79,13 @@ public class BLEConfigurerGattCallbacks extends BroadcastReceiver {
     BLEConfigurer parent;
 
 
-    public BLEConfigurerGattCallbacks(BLEConfigurer parent, BluetoothLeService bleService, ConfigurerGattListener configurerGattListener){
-        bluetoothService= bleService;
+    public BLEConfigurerGattCallbacks(BLEConfigurer parentConfigurer, ConfigurerGattListener configurerGattListener){
+        parent= parentConfigurer;
         listener= configurerGattListener;
+    }
+
+    void setBLEService(BluetoothLeService bleService){
+        bluetoothService= bleService;
     }
 
     @Override
@@ -138,32 +142,32 @@ public class BLEConfigurerGattCallbacks extends BroadcastReceiver {
 
                 switch (Objects.requireNonNull(uuid)) {
                     case BLE_CHAR_UUID_PICKLOCK:
-                        Log.e("NewDeviceActivity", "Picklock characteristic data received!");
+                        Log.e("NewDeviceActivity", "Picklock characteristic data received!: "+data);
                         configPicklock = data;
                         break;
                     case BLE_CHAR_UUID_WIFI_SSID:
-                        Log.e("NewDeviceActivity", "WiFi SSID characteristic data received!");
+                        Log.e("NewDeviceActivity", "WiFi SSID characteristic data received!: "+data);
                         configWifiSSID = data;
                         break;
                     case BLE_CHAR_UUID_WIFI_PSK:
-                        Log.e("NewDeviceActivity", "WiFi PSK characteristic data received!");
+                        Log.e("NewDeviceActivity", "WiFi PSK characteristic data received!: "+data);
                         configWifiPSK = data;
                         break;
                     case BLE_CHAR_UUID_UID:
-                        Log.e("NewDeviceActivity", "UID characteristic data received!");
+                        Log.e("NewDeviceActivity", "UID characteristic data received!: "+data);
                         configUID = data;
                         break;
                     case BLE_CHAR_UUID_MAC:
-                        Log.e("NewDeviceActivity", "MAC characteristic data received!");
+                        Log.e("NewDeviceActivity", "MAC characteristic data received!:= "+data);
                         configMAC = data;
                         break;
                     case BLE_CHAR_UUID_TIMEZONE:
-                        Log.e("NewDeviceActivity", "Timezone characteristic data received!");
+                        Log.e("NewDeviceActivity", "Timezone characteristic data received!: "+data);
                         configTimezone = data;
                         break;
                     case BLE_CHAR_UUID_WIFI_SCAN_RES:
                         wifiSSIDsCSV= data;
-                        Log.e("NewDeviceActivity", "WiFi scan result characteristic data received!");
+                        Log.e("NewDeviceActivity", "WiFi scan result characteristic data received!: "+data);
                         break;
                 }
 
@@ -187,8 +191,8 @@ public class BLEConfigurerGattCallbacks extends BroadcastReceiver {
         else if(parent.getState()== BLEConfigurer.ConfigurerState.EnablingWiFiScanNotifications){
             if(action!=null && action.equals(BluetoothLeService.ACTION_DESCR_WRITE_COMPLETE)) {
                 parent.stopTimeoutWatchdog();
+                parent.setState(BLEConfigurer.ConfigurerState.WaitingForUserInput);
                 listener.onDeviceBond();
-
 
             }
         } else if(parent.getState()== BLEConfigurer.ConfigurerState.WaitingForUserInput){
@@ -245,6 +249,8 @@ public class BLEConfigurerGattCallbacks extends BroadcastReceiver {
             if(action!=null && action.equals(BluetoothLeService.ACTION_CHARACTERISTIC_CHANGED)){
                 String uuid= intent.getStringExtra("uuid");
                 String data= intent.getStringExtra("data");
+
+                Log.d("BLEConfigurerGattCallbacks", "Notify received - "+uuid+": "+data);
 
                 if(uuid!=null && data!=null && uuid.equals(BLE_CHAR_UUID_SET_FLAG) && data.equals("0")) {
                     parent.stopTimeoutWatchdog();

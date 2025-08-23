@@ -5,29 +5,13 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattService;
-import android.bluetooth.le.BluetoothLeScanner;
-import android.bluetooth.le.ScanCallback;
-import android.bluetooth.le.ScanResult;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.icu.util.TimeZone;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
@@ -53,8 +37,6 @@ import pl.dawidkulpa.miogiapiccohome.API.Sector;
 import pl.dawidkulpa.miogiapiccohome.API.User;
 import pl.dawidkulpa.miogiapiccohome.API.UserData;
 import pl.dawidkulpa.miogiapiccohome.BLEConfigurer;
-import pl.dawidkulpa.miogiapiccohome.BLEConfigurerGattCallbacks;
-import pl.dawidkulpa.miogiapiccohome.BluetoothLeService;
 import pl.dawidkulpa.miogiapiccohome.R;
 
 public class NewDeviceActivity extends AppCompatActivity {
@@ -143,7 +125,7 @@ public class NewDeviceActivity extends AppCompatActivity {
         String[] tzs= getResources().getStringArray(R.array.timezones_names);
         timezoneCodes= getResources().getStringArray(R.array.timezones_codes);
         timezones.addAll(Arrays.asList(tzs));
-        prepareTimezoneListAdapter();
+
 
         prepareNextStep(UIState.PrepareBluetooth);
 
@@ -169,7 +151,7 @@ public class NewDeviceActivity extends AppCompatActivity {
                     prepareNextStep(NewDeviceActivity.UIState.Failed);
                 } else {
                     Log.d("NewDeviceActivity", "System state: WaitingForUserInput");
-
+                    prepareTimezoneListAdapter();
                     prepareRoomsListAdapter();
                     prepareNextStep(NewDeviceActivity.UIState.SetupWiFi);
                 }
@@ -291,9 +273,8 @@ public class NewDeviceActivity extends AppCompatActivity {
 
 
     public void onActionTimeout(BLEConfigurer.ConfigurerState onState){
-        BLEConfigurer.ConfigurerState onFailState= onState;
         onConnectionFailed();
-        Log.e("NewDeviceActivity", "Timeout at "+onFailState.toString());
+        Log.e("NewDeviceActivity", "Timeout at "+ onState.toString());
     }
 
     public void onConnectionFailed(){
@@ -370,13 +351,13 @@ public class NewDeviceActivity extends AppCompatActivity {
                 || (bleConfigurer.getConnectedDevType()== Device.Type.Soil && configPlantIdx==-1)
                 || bleConfigurer.getConfigTimezone().isEmpty()){
 
-            Log.d("IsEmpty", String.valueOf(bleConfigurer.getConfigWifiPSK().isEmpty()));
-            Log.d("IsEmpty", String.valueOf(bleConfigurer.getConfigWifiSSID().isEmpty()));
-            Log.d("IsEmpty", String.valueOf(configRoomIdx==-1));
-            Log.d("IsEmpty", String.valueOf((bleConfigurer.getConnectedDevType()== Device.Type.Light && configSectorIdx==-1)));
-            Log.d("IsEmpty", String.valueOf((bleConfigurer.getConnectedDevType()== Device.Type.Light && deviceName.isEmpty())));
-            Log.d("IsEmpty", String.valueOf((bleConfigurer.getConnectedDevType()== Device.Type.Soil && configPlantIdx==-1)));
-            Log.d("IsEmpty", String.valueOf(bleConfigurer.getConfigTimezone().isEmpty()));
+            Log.d("PSK IsEmpty", String.valueOf(bleConfigurer.getConfigWifiPSK().isEmpty()));
+            Log.d("SSID IsEmpty", String.valueOf(bleConfigurer.getConfigWifiSSID().isEmpty()));
+            Log.d("roomIdx IsEmpty", String.valueOf(configRoomIdx==-1));
+            Log.d("light and sectorIdx IsEmpty", String.valueOf((bleConfigurer.getConnectedDevType()== Device.Type.Light && configSectorIdx==-1)));
+            Log.d("light and devName IsEmpty", String.valueOf((bleConfigurer.getConnectedDevType()== Device.Type.Light && deviceName.isEmpty())));
+            Log.d("soil and plantIdx IsEmpty", String.valueOf((bleConfigurer.getConnectedDevType()== Device.Type.Soil && configPlantIdx==-1)));
+            Log.d("timezone IsEmpty", String.valueOf(bleConfigurer.getConfigTimezone().isEmpty()));
 
             Snackbar.make(wifiSSIDsMenu, "Set your WiFi SSID, PSK and name your device", BaseTransientBottomBar.LENGTH_SHORT).show();
         } else {
@@ -404,8 +385,6 @@ public class NewDeviceActivity extends AppCompatActivity {
                     this::onDeviceRegisterResult);
         }
     }
-
-
 
     private void onDeviceRegisterResult(boolean success){
         stopUITimeoutWatchdog();
@@ -548,7 +527,7 @@ public class NewDeviceActivity extends AppCompatActivity {
         timeoutWatchdogTimer.schedule(new TimerTask() {
             @Override
             public void run() {
-                // TODO: callbacks.onTimeout(state);
+                // TODO: action on timer timeout
             }
         }, ms);
     }

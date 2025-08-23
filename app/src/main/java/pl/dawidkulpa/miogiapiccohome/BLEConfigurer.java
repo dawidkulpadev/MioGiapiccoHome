@@ -92,9 +92,10 @@ public class BLEConfigurer {
             bluetoothService = ((BluetoothLeService.LocalBinder) service).getService();
             if (bluetoothService != null) {
                 if (bluetoothService.initialize()) {
-                    if(bleAddress!=null && !bleAddress.isEmpty())
+                    if(bleAddress!=null && !bleAddress.isEmpty()) {
+                        gattUpdateReceiver.setBLEService(bluetoothService);
                         bluetoothService.connect(bleAddress);
-                    else
+                    } else
                         Log.e("ASD", "Address empty");
                 } else {
                     Log.e("ASD", "BLEService init failed");
@@ -134,12 +135,10 @@ public class BLEConfigurer {
     // GATT manager callbacks
     private final BLEConfigurerGattCallbacks gattUpdateReceiver;
 
-
-
     public BLEConfigurer(Context context, BLEConfigurerCallbacks bleConfigurerCallbacks){
         c= context;
         callbacks= bleConfigurerCallbacks;
-        gattUpdateReceiver= new BLEConfigurerGattCallbacks(this, bluetoothService, new BLEConfigurerGattCallbacks.ConfigurerGattListener() {
+        gattUpdateReceiver= new BLEConfigurerGattCallbacks(this, new BLEConfigurerGattCallbacks.ConfigurerGattListener() {
             @Override
             public void onConnectionFailed() {
                 ConfigurerState onFailState= state;
@@ -149,7 +148,6 @@ public class BLEConfigurer {
 
             @Override
             public void onDeviceBond() {
-                state= ConfigurerState.WaitingForUserInput;
                 callbacks.onDeviceBond(true);
 
             }
