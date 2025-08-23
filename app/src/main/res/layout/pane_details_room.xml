@@ -130,12 +130,14 @@
             />
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/air_device_params_box"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@id/chart"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="4dp"
+            android:paddingBottom="8dp"
             android:layout_marginTop="16dp">
             <TextView
                 android:id="@+id/battery_level_label"
@@ -186,17 +188,25 @@
                 app:icon="@drawable/icon_edit"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <com.google.android.material.divider.MaterialDivider
+            android:id="@+id/ad_bottom_divider"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/ld_settingsbox_layout_box"
+        android:id="@+id/room_settingsbox_layout_box"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/air_params_box"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="16dp"
         android:visibility="gone">
         <include
             layout="@layout/pane_settings_room"
@@ -204,15 +214,15 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <Button
-        android:id="@+id/ld_settings_button"
+        android:id="@+id/room_settings_button"
         style="@style/Widget.Material3.Button.TextButton.Icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/ld_settingsbox_layout_box"
+        app:layout_constraintTop_toBottomOf="@id/room_settingsbox_layout_box"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:text="@string/button_settings"
+        android:text="@string/button_room_settings"
         android:textSize="12sp"
         android:layout_marginTop="8dp"
         app:icon="@drawable/icon_settings"/>

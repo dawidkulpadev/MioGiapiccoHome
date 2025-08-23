@@ -3,33 +3,97 @@ package pl.dawidkulpa.miogiapiccohome.adapters;
 import static pl.dawidkulpa.miogiapiccohome.adapters.RoomsListAdapter.RoomViewHolder.ADH_PERIOD_LENGTH_3DAYS;
 import static pl.dawidkulpa.miogiapiccohome.adapters.RoomsListAdapter.RoomViewHolder.ADH_PERIOD_LENGTH_DAY;
 
+import android.content.Context;
 import android.graphics.Color;
+import android.os.Build;
 import android.view.View;
+import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.MarkerView;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+import com.github.mikephil.charting.utils.MPPointF;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import pl.dawidkulpa.miogiapiccohome.API.AirDataHistory;
+import pl.dawidkulpa.miogiapiccohome.R;
 
 public class AirDataChart {
-    public static class HourValueFormatter extends ValueFormatter {
-        ArrayList<Long> times;
+    public class DataMarkerView extends MarkerView{
+        private final TextView dateTextView;
+        private final TextView humidityTextView;
+        private final TextView temperatureTextView;
+        private final ArrayList<Long> ts;
+        private final SimpleDateFormat spf;
 
-        HourValueFormatter(ArrayList<Long> ts){
+        public DataMarkerView(Context context, int layoutResource, ArrayList<Long> timestamps) {
+            super(context, layoutResource);
+            dateTextView= findViewById(R.id.date_text);
+            humidityTextView= findViewById(R.id.humidity_text);
+            temperatureTextView= findViewById(R.id.temperature_text);
+            ts= timestamps;
+            spf= new SimpleDateFormat("HH:mm   d MMM", Locale.getDefault());
+        }
+
+        @Override
+        public void refreshContent(Entry e, Highlight highlight) {
+            Locale usersLocale;
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                usersLocale= getResources().getConfiguration().getLocales().get(0);
+            } else {
+                usersLocale= getResources().getConfiguration().locale;
+            }
+
+            float xVal = e.getX();
+
+            LineData lineData = ((LineChart)getChartView()).getLineData();
+            dateTextView.setText(spf.format(ts.get((int)xVal)));
+
+            if (lineData != null) {
+                List<ILineDataSet> dataSets= lineData.getDataSets();
+                Entry humEntry = dataSets.get(0).getEntryForXValue(xVal, Float.NaN);
+                Entry tempEntry = dataSets.get(1).getEntryForXValue(xVal, Float.NaN);
+                humidityTextView.setText(String.format(usersLocale, "%.0f%%", humEntry.getY()));
+                temperatureTextView.setText(String.format(usersLocale, "%.1f℃", tempEntry.getY()));
+            }
+
+            // Wymuszenie przeliczenia rozmiaru
+            /*textView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+            measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+            layout(0, 0, getMeasuredWidth(), getMeasuredHeight());*/
+
+            super.refreshContent(e, highlight);
+        }
+
+        @Override
+        public MPPointF getOffset() {
+            return new MPPointF(-(getWidth() / 2f), -getHeight()-20);
+        }
+    }
+
+
+    public static class HourValueFormatter extends ValueFormatter {
+        private ArrayList<Long> times;
+        private final Locale ul;
+
+        HourValueFormatter(ArrayList<Long> ts, Locale usersLocale){
             super();
             times= ts;
+            ul = usersLocale;
         }
 
         @Override
@@ -42,15 +106,17 @@ public class AirDataChart {
             Date date = new Date(xvalue);
 
             // Formatowanie daty tylko do pełnej godziny
-            return new SimpleDateFormat("HH:mm", Locale.getDefault()).format(date);
+            return new SimpleDateFormat("HH:mm", ul).format(date);
         }
     }
     public static class DayMonValueFormatter extends ValueFormatter {
-        ArrayList<Long> times;
+        private ArrayList<Long> times;
+        private final Locale ul;
 
-        DayMonValueFormatter(ArrayList<Long> ts){
+        DayMonValueFormatter(ArrayList<Long> ts, Locale usersLocale){
             super();
             times= ts;
+            ul = usersLocale;
         }
 
         @Override
@@ -64,30 +130,7 @@ public class AirDataChart {
             Date date = new Date(xvalue);
 
             // Formatowanie daty tylko do pełnej godziny
-            return new SimpleDateFormat("d MMM", Locale.getDefault()).format(date);
-        }
-    }
-
-    public static class HourDayMonValueFormatter extends ValueFormatter {
-        ArrayList<Long> times;
-
-        HourDayMonValueFormatter(ArrayList<Long> ts){
-            super();
-            times= ts;
-        }
-
-        @Override
-        public String getFormattedValue(float value) {
-            double duration= times.get(times.size()-1)-times.get(0);
-            double i= value/times.size();
-
-            long xvalue= (long)(times.get(0)+duration*i);
-
-            // Konwertowanie wartości float na czas
-            Date date = new Date(xvalue);
-
-            // Formatowanie daty tylko do pełnej godziny
-            return new SimpleDateFormat("HH:mm, d MMM", Locale.getDefault()).format(date);
+            return new SimpleDateFormat("d MMM", ul).format(date);
         }
     }
 
@@ -108,11 +151,18 @@ public class AirDataChart {
     private final LineChart chartView;
     private final String humTitle;
     private final String tempTitle;
+    private final Locale usersLocale;
 
-    public AirDataChart(LineChart v, String humTitleText, String tempTitleText){
+    public AirDataChart(LineChart v, String humTitleText, String tempTitleText, Context context){
         chartView= v;
         humTitle= humTitleText;
         tempTitle= tempTitleText;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            usersLocale= context.getResources().getConfiguration().getLocales().get(0);
+        } else {
+            usersLocale= context.getResources().getConfiguration().locale;
+        }
     }
 
     public void init(){
@@ -202,11 +252,11 @@ public class AirDataChart {
         }
 
         if(adhPeriodLen==ADH_PERIOD_LENGTH_DAY)
-            chartView.getXAxis().setValueFormatter(new HourValueFormatter(xTimes));
+            chartView.getXAxis().setValueFormatter(new HourValueFormatter(xTimes, usersLocale));
         else if(adhPeriodLen==ADH_PERIOD_LENGTH_3DAYS)
-            chartView.getXAxis().setValueFormatter(new HourDayMonValueFormatter(xTimes));
+            chartView.getXAxis().setValueFormatter(new DayMonValueFormatter(xTimes, usersLocale));
         else
-            chartView.getXAxis().setValueFormatter(new DayMonValueFormatter(xTimes));
+            chartView.getXAxis().setValueFormatter(new DayMonValueFormatter(xTimes, usersLocale));
 
         ArrayList<Entry> values = new ArrayList<>();
 
@@ -268,12 +318,13 @@ public class AirDataChart {
             // draw selection line as dashed
             set2.enableDashedHighlightLine(10f, 5f, 0f);
 
-            ArrayList<ILineDataSet> dataSets = new ArrayList<>();
-            dataSets.add(set1); // add the data sets
-            dataSets.add(set2);
-
             // create a data object with the data sets
-            LineData data = new LineData(dataSets);
+            LineData data = new LineData(set1, set2);
+
+            // Initialize marker (popup) view with date at point
+            DataMarkerView marketView = new DataMarkerView(chartView.getContext(), R.layout.view_marker, xTimes);
+            marketView.setChartView(chartView);
+            chartView.setMarker(marketView);
 
             // set data
             chartView.setData(data);

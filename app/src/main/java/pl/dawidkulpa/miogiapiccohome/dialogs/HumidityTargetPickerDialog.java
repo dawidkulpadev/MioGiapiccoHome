@@ -36,7 +36,14 @@ public class HumidityTargetPickerDialog {
         slider.addOnChangeListener((slider1, value, fromUser) -> {
             sliderValueText.setText(c.getString(R.string.value_humidity_integer, Math.round(value)));
         });
-        slider.setValue(room.getHumidityTarget());
+
+        if(room.getHumidityTarget()<20){
+            slider.setValue(20);
+        } else {
+            slider.setValue(Math.min(room.getHumidityTarget(), 99));
+        }
+        sliderValueText.setText(c.getString(R.string.value_humidity_integer, Math.round(slider.getValue())));
+
 
 
         MaterialAlertDialogBuilder madb= new MaterialAlertDialogBuilder(c);

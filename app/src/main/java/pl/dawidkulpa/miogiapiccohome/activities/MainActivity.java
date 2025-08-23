@@ -293,6 +293,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void onRoomDeleteClick(Room r) {
+
+    }
+
+    @Override
     public void onSoilDeviceDataChanged(SoilDevice d) {
 
     }

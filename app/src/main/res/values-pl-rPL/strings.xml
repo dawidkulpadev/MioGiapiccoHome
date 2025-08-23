@@ -23,6 +23,7 @@
     <string name="button_create">Utwórz</string>
     <string name="button_close">Zamknij</string>
     <string name="button_settings">Ustawienia</string>
+    <string name="button_room_settings">Ustawienia pokoju</string>
     <string name="button_rename">Zmień nazwę</string>
     <string name="chip_period_day">dzień</string>
     <string name="chip_period_3days">3 dni</string>
@@ -32,14 +33,13 @@
     <string name="chip_period_all_data">wszystko</string>
     <string name="label_signin">Logowanie</string>
     <string name="label_addnewdevice_step1">1) Włącz swoje nowe urządzenie oraz bluetooth w telefonie</string>
-    <string name="label_addnewdevice_step2">2) Połącz się ze swoim nowym urządzeniem</string>
-    <string name="label_addnewdevice_searching">Szukam twojego urządzenia…</string>
+    <string name="label_addnewdevice_step2">2) Szukam twojego urządzenia…</string>
     <string name="label_addnewdevice_found">Znaleziono</string>
     <string name="label_addnewdevice_notfound">Nie znalazłem żadnego urządzenia &#128542;</string>
     <string name="label_addnewdevice_connected">Połączono z</string>
     <string name="label_addnewdevice_step3">3) Ustaw dane access pointa i nazwę urządzenia</string>
-    <string name="label_timezone">Strefa czasowa:</string>
-    <string name="label_placement">Przypisz do:</string>
+    <string name="label_timezone">Wybierz swoją strefę czasową</string>
+    <string name="label_placement">Gdzie ustawisz nowe urządzenie?</string>
     <string name="hint_login">Login</string>
     <string name="hint_ssid">Nazwa wifi</string>
     <string name="hint_psk">Hasło</string>
@@ -64,6 +64,7 @@
     <string name="title_remove_device">Usuń urządzenie %s</string>
     <string name="title_today">Dzisiaj</string>
     <string name="title_air_data">Parametry powietrza</string>
+    <string name="title_room_settings">Ustawienia pokoju</string>
     <string name="value_unknown">nieznane</string>
     <string name="error_empty_name">To pole nie może byc puste</string>
     <string name="error_email_invalid">To chyba nie jest adres email</string>
@@ -77,7 +78,6 @@
     <string name="previous">Poprzedni</string>
     <string name="message_change_devices_name">Ustaw nową nazwę urządzenia</string>
     <string name="message_set_sector_name">Wpisz nazwę nowego sektora</string>
-    <string name="message_unbind_light_device">Czy chcesz odłączyć to urządzenie od sektora? Nadal pozostanie ono połączone z twoim kontem.</string>
     <string name="button_unbind">Odłącz</string>
     <string name="title_create_room_dialog">Nowy pokój</string>
     <string name="title_create_sector_dialog">Nowy sektor</string>
@@ -85,6 +85,7 @@
     <string name="message_set_rooms_name">Wpisz nazwę nowego pokoju</string>
     <string name="hint_new_plant_name">Nazwa nowej rośliny</string>
     <string name="hint_new_sector_name">Nazwa nowego sektora</string>
+    <string name="hint_timezone">Strefa czasowa</string>
     <string name="hint_new_room_name">Nazwa nowego pokoju</string>
     <string name="label_add_new_room">Nowy pokój…</string>
     <string name="label_add_new_sector">Nowy sektor…</string>
@@ -126,5 +127,13 @@
     <string name="label_humidity_target">Utrzymywana wilgotność:</string>
     <string name="message_change_humidity_target">Ustaw nowy poziom utrzymywanej wilgotności powietrza</string>
     <string name="title_set_ht">Utrzymywana wilgotność powietrza</string>
+    <string name="title_remove_room">Usuń pokój %s</string>
+    <string name="message_remove_room">Wszystkie sektory, urządzenia i rośliny przypisane do tego pokoju zostaną usunięte!\n\nCzy na pewno chcesz usunąć ten pokój?</string>
+    <string name="title_rename_device">Zmień nazwę urządzenia %s</string>
+    <string name="title_rename_room">Zmień nazwę pokoju %s</string>
+    <string name="hint_room">Pokój</string>
+    <string name="hint_sector">Sektor</string>
+    <string name="hint_plant">Roślina</string>
+    <string name="label_config_wifi">Do której sieci podłączyć urządzenie?</string>
 
 </resources>

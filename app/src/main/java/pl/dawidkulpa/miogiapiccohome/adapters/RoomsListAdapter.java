@@ -2,6 +2,7 @@ package pl.dawidkulpa.miogiapiccohome.adapters;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -49,6 +51,7 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public interface DataChangeListener {
         void onDeviceUpdateClick(LightDevice d);
         void onDeviceDeleteClick(LightDevice d);
+        void onRoomDeleteClick(Room r);
 
         void onLightDeviceDataChanged(LightDevice d);
         void onSoilDeviceDataChanged(SoilDevice d);
@@ -97,6 +100,7 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         ProgressBar chartDataProgressBar;
 
         DataRequestListener dataRequestListener;
+        DataChangeListener dataChangeListener;
 
         int adhPeriodLen= 1;
 
@@ -123,7 +127,8 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
             airDataChart= new AirDataChart(v.findViewById(R.id.chart),
                     v.getContext().getString(R.string.label_humidity),
-                    v.getContext().getString(R.string.label_temperature));
+                    v.getContext().getString(R.string.label_temperature),
+                    v.getContext());
 
             chartTitleTextView= root.findViewById(R.id.date_text);
             chartDataProgressBar= v.findViewById(R.id.chart_data_progressbar);
@@ -182,6 +187,17 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 airDataHistoryStart.add(getCalendarFieldForADHPeriod(adhPeriodLen), getCalendarShiftsForADHPeriod(adhPeriodLen));
                 downloadAirData();
             });
+
+            root.findViewById(R.id.room_settings_button).setOnClickListener((view)-> toggleRoomsSettings());
+        }
+
+        void toggleRoomsSettings(){
+            ConstraintLayout settingsPane= root.findViewById(R.id.room_settingsbox_layout_box);
+            if(settingsPane.getVisibility()==View.VISIBLE){
+                settingsPane.setVisibility(View.GONE);
+            } else {
+                settingsPane.setVisibility(View.VISIBLE);
+            }
         }
 
         int getCalendarFieldForADHPeriod(int adhPeriod){
@@ -276,6 +292,7 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         void init(DataRequestListener drl, DataChangeListener dcl, Room r){
             dataRequestListener= drl;
+            dataChangeListener= dcl;
             room= r;
 
             airDataHistoryStart= Calendar.getInstance();
@@ -285,24 +302,49 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
             root.setOnClickListener(v-> toggleDetails());
 
-            airDataChart.init();
             if(!room.getAirDevices().isEmpty()){
+                airDataChart.init();
                 downloadAirData();
 
                 ((TextView)root.findViewById(R.id.humidity_target_text)).setText(
                         root.getContext().getString(R.string.value_humidity_integer, room.getHumidityTarget()));
 
-                ((TextView)root.findViewById(R.id.battery_level_text)).setText(
-                        root.getContext().getString(R.string.value_battery_voltage, room.getAirDevices().get(0).getBatteryVoltage())
-                );
-                root.findViewById(R.id.humidity_target_edit_button).setOnClickListener((v)->{
-                    openHumidityTargetPickerDialog(dcl);
-                });
+                if(room.getAirDevices().get(0).getBatteryVoltage()==0){
+                    ((TextView) root.findViewById(R.id.battery_level_text)).setVisibility(View.GONE);
+                    root.findViewById(R.id.battery_level_label).setVisibility(View.GONE);
+                } else {
+                    ((TextView) root.findViewById(R.id.battery_level_text)).setText(
+                            root.getContext().getString(R.string.value_battery_voltage, room.getAirDevices().get(0).getBatteryVoltage())
+                    );
+                }
+                root.findViewById(R.id.humidity_target_edit_button).setOnClickListener(
+                        (v)-> openHumidityTargetPickerDialog(dcl));
             } else {
-                adhPeriodSelectorGroup.setVisibility(View.GONE);
-                root.findViewById(R.id.control_box);
-                airDataChart.hide();
+                root.findViewById(R.id.ad_bottom_divider).setVisibility(View.GONE);
+                root.findViewById(R.id.air_params_box_title).setVisibility(View.GONE);
+                root.findViewById(R.id.control_box).setVisibility(View.GONE);
+                root.findViewById(R.id.adh_periods_group).setVisibility(View.GONE);
+                root.findViewById(R.id.chart).setVisibility(View.GONE);
+                root.findViewById(R.id.air_device_params_box).setVisibility(View.GONE);
             }
+
+            root.findViewById(R.id.room_rename_button).setOnClickListener(view-> onRoomRenameClick());
+            root.findViewById(R.id.room_delete_button).setOnClickListener(view->onRoomDeleteClick());
+        }
+
+        void onRoomDeleteClick(){
+            MaterialAlertDialogBuilder adb= new MaterialAlertDialogBuilder(root.getContext());
+
+            adb.setTitle(root.getContext().getString(R.string.title_remove_room, room.getName()));
+            adb.setMessage(R.string.message_remove_device);
+            adb.setPositiveButton(R.string.button_remove, (dialog, which) -> dataChangeListener.onRoomDeleteClick(room));
+            adb.setNegativeButton(R.string.button_cancel, null);
+
+            adb.create().show();
+        }
+
+        void onRoomRenameClick(){
+
         }
 
         void openHumidityTargetPickerDialog(DataChangeListener dcl){
@@ -356,7 +398,8 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             airDataHistoryEnd.add(Calendar.SECOND, -1);
 
             setDateOnChartTitle(airDataHistoryStart, airDataHistoryEnd);
-            dataRequestListener.requestAirData(room.getAirDevices().get(0), this::onAirDataReceived, airDataHistoryStart, airDataHistoryEnd);
+            int lastIdx = room.getAirDevices().size()-1;
+            dataRequestListener.requestAirData(room.getAirDevices().get(lastIdx), this::onAirDataReceived, airDataHistoryStart, airDataHistoryEnd);
         }
 
         void onAirDataReceived(boolean success, AirDataHistory airDataHistory){
@@ -422,9 +465,7 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
 
         h.newSectorDialog= new NewSectorDialog(rooms.get(position).getId(), context, apiCreateSectorRequest);
-        h.newSectorButton.setOnClickListener(v -> {
-            h.newSectorDialog.show();
-        });
+        h.newSectorButton.setOnClickListener(v -> h.newSectorDialog.show());
     }
 
     @Override
