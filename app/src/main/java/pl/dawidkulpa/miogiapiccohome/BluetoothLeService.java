@@ -72,6 +72,7 @@ public class BluetoothLeService extends Service {
             }
         }
 
+
         @SuppressLint("MissingPermission")
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt,
@@ -131,6 +132,12 @@ public class BluetoothLeService extends Service {
         sendBroadcast(intent);
     }
 
+    private void broadcastUpdate(final String action, final BluetoothGattDescriptor descriptor) {
+        final Intent intent = new Intent(action);
+        intent.putExtra("uuid", descriptor.getCharacteristic().getUuid().toString());
+        sendBroadcast(intent);
+    }
+
     private void broadcastUpdate(final String action,
                                  final BluetoothGattCharacteristic characteristic) {
         final Intent intent = new Intent(action);
@@ -150,6 +157,8 @@ public class BluetoothLeService extends Service {
             return BluetoothLeService.this;
         }
     }
+
+
 
     public boolean initialize() {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();

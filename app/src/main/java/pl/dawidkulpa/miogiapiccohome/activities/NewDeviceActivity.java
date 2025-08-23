@@ -58,6 +58,9 @@ public class NewDeviceActivity extends AppCompatActivity {
     private final ArrayList<String> timezones= new ArrayList<>();
     private String[] timezoneCodes;
 
+    String inputWifiSSID;
+    String inputWifiPSK;
+    String inputTimezone;
 
 
     /** UI Elements */
@@ -257,14 +260,14 @@ public class NewDeviceActivity extends AppCompatActivity {
     private void prepareTimezoneListAdapter(){
         timezonesAutoComplete.setSimpleItems(timezones.toArray(new String[0]));
         timezonesAutoComplete.setOnItemClickListener((parent, view, position, id) ->
-                bleConfigurer.setConfigTimezone(timezoneCodes[position]));
+                inputTimezone= timezoneCodes[position]);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             String tzName= TimeZone.getDefault().getID();
             int tzIdx= timezones.indexOf(tzName);
             if(tzIdx>=0){
                 timezonesAutoComplete.setText(tzName, false);
-                bleConfigurer.setConfigTimezone(timezoneCodes[tzIdx]);
+                inputTimezone= timezoneCodes[tzIdx];
                 Log.d("ASD", "tzIdx>=0");
             }
         }
@@ -337,8 +340,8 @@ public class NewDeviceActivity extends AppCompatActivity {
 
     private void onWriteConfigClick(){
         String deviceName= devicesNameEdit.getText().toString();
-        bleConfigurer.setConfigWifiSSID(wifiSSIDsAutoComplete.getText().toString());
-        bleConfigurer.setConfigWifiPSK(wifiPskEdit.getText().toString());
+        inputWifiSSID= wifiSSIDsAutoComplete.getText().toString();
+        inputWifiPSK= wifiPskEdit.getText().toString();
         timezonesMenu.getEditText().getText().toString();
 
         // Remove trailing and leading spaces
@@ -389,13 +392,12 @@ public class NewDeviceActivity extends AppCompatActivity {
     private void onDeviceRegisterResult(boolean success){
         stopUITimeoutWatchdog();
         if(success){
-
             bleConfigurer.setState(BLEConfigurer.ConfigurerState.WritingCharacteristics);
             Log.d("NewDeviceActivity", "New version");
             Log.d("NewDeviceActivity", "System state: WritingCharacteristics");
             Log.d("NewDeviceActivity", "Populate device in database success");
             Log.d("NewDeviceActivity", "Sending picklock: "+user.getPicklock());
-            bleConfigurer.writeCharacteristics(String.valueOf(user.getUid()), user.getPicklock());
+            bleConfigurer.writeCharacteristics(inputWifiSSID, inputWifiPSK, String.valueOf(user.getUid()), user.getPicklock(), inputTimezone);
 
         } else {
             bleConfigurer.setState(BLEConfigurer.ConfigurerState.ConnectionFailed);

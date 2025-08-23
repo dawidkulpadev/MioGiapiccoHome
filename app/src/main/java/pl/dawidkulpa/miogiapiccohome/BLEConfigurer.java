@@ -33,10 +33,9 @@ public class BLEConfigurer {
 
     /** State machines */
     public enum ConfigurerState {CheckingPermissions, WaitingForPermissionsUserResponse,
-        WaitingForBluetooth, SearchingDevice, ConnectingWithDevice, ReadingCharacteristics, EnablingWiFiScanNotifications,
-        EnablingSetFlagNotifications,
-        WaitingForUserInput, RegisteringDevice, WritingCharacteristics,
-        NotifyingCharacteristicsReady, DeviceConfigured, ConnectionFailed, APICommunicationFailed}
+        WaitingForBluetooth, SearchingDevice, ConnectingWithDevice, PreparingCharacteristicsManager,
+        WaitingForUserInput, RegisteringDevice, WritingCharacteristics, DeviceConfigured,
+        ConnectionFailed, APICommunicationFailed}
 
     public interface BLEConfigurerCallbacks {
         void deviceSearchStarted();
@@ -266,24 +265,12 @@ public class BLEConfigurer {
         return gattUpdateReceiver.getConfigWifiSSID();
     }
 
-    public void setConfigWifiSSID(String configWifiSSID) {
-        gattUpdateReceiver.setConfigWifiSSID(configWifiSSID.trim());
-    }
-
     public String getConfigWifiPSK() {
         return gattUpdateReceiver.getConfigWifiPSK();
     }
 
-    public void setConfigWifiPSK(String configWifiPSK) {
-        gattUpdateReceiver.setConfigWifiPSK(configWifiPSK.trim());
-    }
-
     public String getConfigPicklock() {
         return gattUpdateReceiver.getConfigPicklock();
-    }
-
-    public void setConfigPicklock(String configPicklock) {
-        gattUpdateReceiver.setConfigPicklock(configPicklock);
     }
 
     public Device.Type getConnectedDevType() {
@@ -294,10 +281,6 @@ public class BLEConfigurer {
         return gattUpdateReceiver.getConfigTimezone();
     }
 
-    public void setConfigTimezone(String configTimezone) {
-        gattUpdateReceiver.setConfigTimezone(configTimezone);
-    }
-
     public String getConfigMAC() {
         return gattUpdateReceiver.getConfigMAC();
     }
@@ -306,8 +289,8 @@ public class BLEConfigurer {
         return gattUpdateReceiver.getFoundDeviceName();
     }
 
-    public void writeCharacteristics(String uid, String picklock){
+    public void writeCharacteristics(String wifiSSID, String wifiPSK, String uid, String picklock, String timezone){
         startTimeoutWatchdog(ACTION_TIMEOUT_WRITE_CHARACTERISTICS);
-        gattUpdateReceiver.writeCharacteristics(uid, picklock);
+        gattUpdateReceiver.writeCharacteristics(wifiSSID, wifiPSK, uid, picklock, timezone);
     }
 }
