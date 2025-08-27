@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
+import androidx.emoji2.widget.EmojiTextView;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -40,7 +41,7 @@ import pl.dawidkulpa.miogiapiccohome.BLEConfigurer;
 import pl.dawidkulpa.miogiapiccohome.R;
 
 public class NewDeviceActivity extends AppCompatActivity {
-    public enum UIState {PrepareBluetooth, SearchForDevice, SetupWiFi, DeviceConfigured, Failed}
+    public enum UIState {PrepareBluetooth, SearchForDevice, SetupWiFi, DeviceConfigured, UnexpectedDisconnect, Failed}
 
     private UIState uiState;
     boolean scanning = false;
@@ -142,15 +143,25 @@ public class NewDeviceActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onTimeout(BLEConfigurer.ConfigurerState state) {
-                onActionTimeout(state);
+            public void onError(BLEConfigurer.ErrorCode errorCode) {
+                onBLEError(errorCode);
             }
 
             @Override
-            public void onDeviceBond(boolean success) {
+            public void onDeviceFound(String name) {
+
+            }
+
+            @Override
+            public void onDeviceConnected() {
+
+            }
+
+            @Override
+            public void onDeviceReady() {
                 if (userDataReceiveState != UserDataReceiveState.Success) {
                     Log.d("NewDeviceActivity", "Failed reading user data!");
-                    onConnectionFailed();
+                    onBLEError(BLEConfigurer.ErrorCode.ConnectFailed);
                     prepareNextStep(NewDeviceActivity.UIState.Failed);
                 } else {
                     Log.d("NewDeviceActivity", "System state: WaitingForUserInput");
@@ -161,7 +172,7 @@ public class NewDeviceActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onDeviceConfigured(boolean success) {
+            public void onDeviceConfigured() {
                 prepareNextStep(NewDeviceActivity.UIState.DeviceConfigured);
             }
 
@@ -170,7 +181,6 @@ public class NewDeviceActivity extends AppCompatActivity {
                 refreshAvailableWiFiSSIDs(wifis);
             }
         });
-        bleConfigurer.setState(BLEConfigurer.ConfigurerState.CheckingPermissions);
 
         Log.d("NewDeviceActivity", "System state: CheckingPermissions");
         checkAndRequestPermissions();
@@ -275,17 +285,15 @@ public class NewDeviceActivity extends AppCompatActivity {
 
 
 
-    public void onActionTimeout(BLEConfigurer.ConfigurerState onState){
-        onConnectionFailed();
-        Log.e("NewDeviceActivity", "Timeout at "+ onState.toString());
-    }
-
-    public void onConnectionFailed(){
+    public void onBLEError(BLEConfigurer.ErrorCode errorCode){
+        if(errorCode== BLEConfigurer.ErrorCode.UnexpectedDisconnect && uiState==UIState.SetupWiFi){
+            prepareNextStep(UIState.UnexpectedDisconnect);
+        } else {
+            prepareNextStep(UIState.Failed);
+        }
         bleConfigurer.finishBLE();
-        prepareNextStep(UIState.Failed);
+        Log.e("NewDeviceActivity", "BLE Error: "+ errorCode.toString());
     }
-
-
 
     public void checkAndRequestPermissions(){
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
@@ -297,7 +305,6 @@ public class NewDeviceActivity extends AppCompatActivity {
                     ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
 
             if(!bluetoothConnectPermited || !bluetoothScanPermited || !fineLocationPermited){
-                bleConfigurer.setState(BLEConfigurer.ConfigurerState.WaitingForPermissionsUserResponse);
                 Log.d("NewDeviceActivity", "System state: WaitingForPermissionsUserResponse");
                 requestPermissions(
                         new String[]{Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.ACCESS_FINE_LOCATION},
@@ -342,29 +349,26 @@ public class NewDeviceActivity extends AppCompatActivity {
         String deviceName= devicesNameEdit.getText().toString();
         inputWifiSSID= wifiSSIDsAutoComplete.getText().toString();
         inputWifiPSK= wifiPskEdit.getText().toString();
-        timezonesMenu.getEditText().getText().toString();
 
         // Remove trailing and leading spaces
         deviceName= deviceName.trim();
 
-        if(bleConfigurer.getConfigWifiPSK().isEmpty() ||
-                bleConfigurer.getConfigWifiSSID().isEmpty() || configRoomIdx==-1
+        if(inputWifiPSK.isEmpty() || inputWifiSSID.isEmpty() || configRoomIdx==-1
                 || (bleConfigurer.getConnectedDevType()== Device.Type.Light && configSectorIdx==-1)
                 || (bleConfigurer.getConnectedDevType()== Device.Type.Light && deviceName.isEmpty())
                 || (bleConfigurer.getConnectedDevType()== Device.Type.Soil && configPlantIdx==-1)
-                || bleConfigurer.getConfigTimezone().isEmpty()){
+                || inputTimezone.isEmpty()){
 
-            Log.d("PSK IsEmpty", String.valueOf(bleConfigurer.getConfigWifiPSK().isEmpty()));
-            Log.d("SSID IsEmpty", String.valueOf(bleConfigurer.getConfigWifiSSID().isEmpty()));
+            Log.d("SSID IsEmpty", String.valueOf(inputWifiSSID.isEmpty()));
+            Log.d("PSK IsEmpty", String.valueOf(inputWifiPSK.isEmpty()));
             Log.d("roomIdx IsEmpty", String.valueOf(configRoomIdx==-1));
             Log.d("light and sectorIdx IsEmpty", String.valueOf((bleConfigurer.getConnectedDevType()== Device.Type.Light && configSectorIdx==-1)));
             Log.d("light and devName IsEmpty", String.valueOf((bleConfigurer.getConnectedDevType()== Device.Type.Light && deviceName.isEmpty())));
             Log.d("soil and plantIdx IsEmpty", String.valueOf((bleConfigurer.getConnectedDevType()== Device.Type.Soil && configPlantIdx==-1)));
-            Log.d("timezone IsEmpty", String.valueOf(bleConfigurer.getConfigTimezone().isEmpty()));
+            Log.d("timezone IsEmpty", String.valueOf(inputTimezone.isEmpty()));
 
             Snackbar.make(wifiSSIDsMenu, "Set your WiFi SSID, PSK and name your device", BaseTransientBottomBar.LENGTH_SHORT).show();
         } else {
-            bleConfigurer.setState(BLEConfigurer.ConfigurerState.RegisteringDevice);
             Log.d("NewDeviceActivity", "System state: RegisteringDevice");
             progressBar.setVisibility(View.VISIBLE);
             startUITimeoutWatchdog(BLEConfigurer.ACTION_TIMEOUT_REGISTER_DEVICE);
@@ -392,18 +396,15 @@ public class NewDeviceActivity extends AppCompatActivity {
     private void onDeviceRegisterResult(boolean success){
         stopUITimeoutWatchdog();
         if(success){
-            bleConfigurer.setState(BLEConfigurer.ConfigurerState.WritingCharacteristics);
             Log.d("NewDeviceActivity", "New version");
             Log.d("NewDeviceActivity", "System state: WritingCharacteristics");
             Log.d("NewDeviceActivity", "Populate device in database success");
-            Log.d("NewDeviceActivity", "Sending picklock: "+user.getPicklock());
-            bleConfigurer.writeCharacteristics(inputWifiSSID, inputWifiPSK, String.valueOf(user.getUid()), user.getPicklock(), inputTimezone);
+            bleConfigurer.writeDeviceConfig(inputWifiSSID, inputWifiPSK, String.valueOf(user.getUid()), user.getPicklock(), inputTimezone);
 
         } else {
-            bleConfigurer.setState(BLEConfigurer.ConfigurerState.ConnectionFailed);
             Log.e("NewDeviceActivity", "System state: ConnectionFailed");
             Log.e("NewDeviceActivity", "Populate device in database failed");
-            onConnectionFailed();
+            onBLEError(BLEConfigurer.ErrorCode.ConfigWriteFailed);
         }
     }
 
@@ -446,6 +447,9 @@ public class NewDeviceActivity extends AppCompatActivity {
                 plantsMenu.setVisibility(View.GONE);
                 timezonesMenu.setVisibility(View.GONE);
 
+                findViewById(R.id.action_done_text).setVisibility(View.GONE);
+                findViewById(R.id.action_failed_text).setVisibility(View.GONE);
+
                 progressBar.setVisibility(View.GONE);
 
                 nextButton.setVisibility(View.GONE);
@@ -457,7 +461,11 @@ public class NewDeviceActivity extends AppCompatActivity {
                 step2Label.setVisibility(View.VISIBLE);
                 step2Label.setTypeface(null, Typeface.BOLD);
 
+                findViewById(R.id.action_done_text).setVisibility(View.GONE);
+                findViewById(R.id.action_failed_text).setVisibility(View.GONE);
+
                 progressBar.setVisibility(View.VISIBLE);
+
                 break;
             case SetupWiFi:
                 step2Label.setEnabled(false);
@@ -487,6 +495,8 @@ public class NewDeviceActivity extends AppCompatActivity {
                     plantsMenu.setVisibility(View.GONE);
                 }
 
+                findViewById(R.id.action_done_text).setVisibility(View.GONE);
+                findViewById(R.id.action_failed_text).setVisibility(View.GONE);
                 progressBar.setVisibility(View.GONE);
 
                 nextButton.setVisibility(View.VISIBLE);
@@ -502,17 +512,93 @@ public class NewDeviceActivity extends AppCompatActivity {
                 step3Label.setVisibility(View.VISIBLE);
                 step3Label.setTextColor(getColor(R.color.textDisabledLight));
                 step3Label.setTypeface(null, Typeface.NORMAL);
+                step3Label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
 
                 wifiSSIDsMenu.setVisibility(View.GONE);
+                ((View) devicesNameEdit.getParent()).setVisibility(View.GONE);
                 ((View)wifiPskEdit.getParent()).setVisibility(View.GONE);
+                findViewById(R.id.found_device_text).setVisibility(View.GONE);
+                findViewById(R.id.wifi_config_label).setVisibility(View.GONE);
+                findViewById(R.id.placement_config_label).setVisibility(View.GONE);
+                findViewById(R.id.timezone_config_label).setVisibility(View.GONE);
+                roomsMenu.setVisibility(View.GONE);
+                sectorsMenu.setVisibility(View.GONE);
                 plantsMenu.setVisibility(View.GONE);
+                timezonesMenu.setVisibility(View.GONE);
 
                 progressBar.setVisibility(View.GONE);
+
+                findViewById(R.id.action_done_text).setVisibility(View.VISIBLE);
+                findViewById(R.id.action_failed_text).setVisibility(View.GONE);
 
                 nextButton.setVisibility(View.VISIBLE);
                 nextButton.setText(R.string.button_finish);
                 break;
             case Failed:
+                step1Label.setVisibility(View.VISIBLE);
+                step1Label.setTextColor(getColor(R.color.textDisabledLight));
+                step1Label.setTypeface(null, Typeface.NORMAL);
+                step2Label.setVisibility(View.VISIBLE);
+                step2Label.setTextColor(getColor(R.color.textDisabledLight));
+                step2Label.setTypeface(null, Typeface.NORMAL);
+                step2Label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+                step3Label.setVisibility(View.VISIBLE);
+                step3Label.setTextColor(getColor(R.color.textDisabledLight));
+                step3Label.setTypeface(null, Typeface.NORMAL);
+                step3Label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+
+                wifiSSIDsMenu.setVisibility(View.GONE);
+                ((View) devicesNameEdit.getParent()).setVisibility(View.GONE);
+                ((View)wifiPskEdit.getParent()).setVisibility(View.GONE);
+                findViewById(R.id.found_device_text).setVisibility(View.GONE);
+                findViewById(R.id.wifi_config_label).setVisibility(View.GONE);
+                findViewById(R.id.placement_config_label).setVisibility(View.GONE);
+                findViewById(R.id.timezone_config_label).setVisibility(View.GONE);
+                roomsMenu.setVisibility(View.GONE);
+                sectorsMenu.setVisibility(View.GONE);
+                plantsMenu.setVisibility(View.GONE);
+                timezonesMenu.setVisibility(View.GONE);
+
+                findViewById(R.id.action_done_text).setVisibility(View.GONE);
+                ((EmojiTextView)findViewById(R.id.action_failed_text)).setText(R.string.message_device_connect_failed);
+                findViewById(R.id.action_failed_text).setVisibility(View.VISIBLE);
+
+                nextButton.setText(R.string.button_try_again);
+                nextButton.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.GONE);
+                break;
+            case UnexpectedDisconnect:
+                step1Label.setVisibility(View.VISIBLE);
+                step1Label.setTextColor(getColor(R.color.textDisabledLight));
+                step1Label.setTypeface(null, Typeface.NORMAL);
+                step2Label.setVisibility(View.VISIBLE);
+                step2Label.setTextColor(getColor(R.color.textDisabledLight));
+                step2Label.setTypeface(null, Typeface.NORMAL);
+                step2Label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+                step3Label.setVisibility(View.VISIBLE);
+                step3Label.setTextColor(getColor(R.color.textDisabledLight));
+                step3Label.setTypeface(null, Typeface.NORMAL);
+                step3Label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+
+                wifiSSIDsMenu.setVisibility(View.GONE);
+                ((View) devicesNameEdit.getParent()).setVisibility(View.GONE);
+                ((View)wifiPskEdit.getParent()).setVisibility(View.GONE);
+                findViewById(R.id.found_device_text).setVisibility(View.GONE);
+                findViewById(R.id.wifi_config_label).setVisibility(View.GONE);
+                findViewById(R.id.placement_config_label).setVisibility(View.GONE);
+                findViewById(R.id.timezone_config_label).setVisibility(View.GONE);
+                roomsMenu.setVisibility(View.GONE);
+                sectorsMenu.setVisibility(View.GONE);
+                plantsMenu.setVisibility(View.GONE);
+                timezonesMenu.setVisibility(View.GONE);
+
+                findViewById(R.id.action_done_text).setVisibility(View.GONE);
+                ((EmojiTextView)findViewById(R.id.action_failed_text)).setText(R.string.message_device_unexpected_disconnect);
+                findViewById(R.id.action_failed_text).setVisibility(View.VISIBLE);
+
+                nextButton.setText(R.string.button_try_again);
+                nextButton.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.GONE);
                 break;
         }
         uiState = next;

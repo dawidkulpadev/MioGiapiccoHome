@@ -3,40 +3,46 @@ package pl.dawidkulpa.miogiapiccohome;
 import android.bluetooth.BluetoothGattService;
 
 abstract public class BLEConfigurerCharacteristics {
-    protected String configWifiSSID;
-    protected String configWifiPSK;
-    protected String configPicklock;
-    protected String configUID;
-    protected String configMAC;
-    protected String configTimezone;
-    protected String wifiSSIDsCSV;
+    protected String configWifiSSID="";
+    protected String configWifiPSK="";
+    protected String configPicklock="";
+    protected String configUID="";
+    protected String configMAC="";
+    protected String configTimezone="";
+    protected String wifiSSIDsCSV="";
 
-    public interface WiFiListListener {
+    public enum ErrorCode {SyncFailed, WriteFailed}
+
+    final TimeoutWatchdog timeoutWatchdog= new TimeoutWatchdog();
+
+    public interface ActionsListener {
         void onRefresh(String wifis);
+        void onError(ErrorCode ec);
     }
 
-    BluetoothLeService bleService;
-    WiFiListListener wiFiListListener;
+    BLEGattService bleService;
+    ActionsListener actionsListener;
 
-    BLEConfigurerCharacteristics(BluetoothLeService bleService, WiFiListListener listener){
+    BLEConfigurerCharacteristics(BLEGattService bleService, ActionsListener listener){
         this.bleService= bleService;
-        wiFiListListener= listener;
+        actionsListener = listener;
     }
 
     abstract boolean discoverCharacteristics(BluetoothGattService gattService);
     abstract void startWrite();
-    abstract void startRead();
+    abstract void startSync();
     abstract boolean preparedAndReady();
 
 
-    abstract void onPreparingDataAvailable(String uuid, String data);
-    abstract void onPreparingDescriptorUpdate();
+    abstract void onPreparingDataAvailable(String uuid, byte[] data);
+    abstract void onPreparingDescriptorUpdate(String uuid);
+    abstract void onPreparingNotify(String uuid, byte[] data);
 
-    abstract void onReadyCharacteristicChanged(String uuid);
-    abstract void onReadyDataAvailable(String uuid, String data);
+    abstract void onReadyNotify(String uuid, byte[] data);
+    abstract void onReadyDataAvailable(String uuid, byte[] data);
 
     abstract void onWritingWriteComplete(String uuid);
-    abstract void onWritingCharacteristicChanged(String uuid, String data);
+    abstract void onWritingNotify(String uuid, byte[] data);
     abstract boolean writingComplete();
 
     public String getWiFiSSID(){

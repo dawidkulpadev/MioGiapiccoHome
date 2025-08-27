@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.util.Log;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 
@@ -46,7 +47,7 @@ public class BLEConfigurerRawCharacteristics extends BLEConfigurerCharacteristic
     private enum State {Init, ReadingCharacteristics, EnablingSetFlagNotifications, EnablingWiFiScanNotifications, Ready, ConfigWritten}
     private State state;
 
-    BLEConfigurerRawCharacteristics(BluetoothLeService bleService, WiFiListListener listener) {
+    BLEConfigurerRawCharacteristics(BLEGattService bleService, ActionsListener listener) {
         super(bleService, listener);
         state= State.Init;
     }
@@ -126,7 +127,7 @@ public class BLEConfigurerRawCharacteristics extends BLEConfigurerCharacteristic
     }
 
     @Override
-    void startRead() {
+    void startSync() {
         wifiSSIDCharRead = false;
         wifiPSKCharRead = false;
         uidCharRead = false;
@@ -156,42 +157,44 @@ public class BLEConfigurerRawCharacteristics extends BLEConfigurerCharacteristic
     }
 
     @Override
-    void onPreparingDataAvailable(String uuid, String data) {
+    void onPreparingDataAvailable(String uuid, byte[] data) {
+        String dataStr= new String(data, StandardCharsets.UTF_8);
+
         switch (Objects.requireNonNull(uuid)) {
             case BLE_CHAR_UUID_PICKLOCK:
-                Log.e("NewDeviceActivity", "Picklock characteristic data received!: "+data);
-                configPicklock = data;
+                Log.e("NewDeviceActivity", "Picklock characteristic data received!: "+dataStr);
+                configPicklock = dataStr;
                 picklockCharRead = true;
                 break;
             case BLE_CHAR_UUID_WIFI_SSID:
-                Log.e("NewDeviceActivity", "WiFi SSID characteristic data received!: "+data);
-                configWifiSSID = data;
+                Log.e("NewDeviceActivity", "WiFi SSID characteristic data received!: "+dataStr);
+                configWifiSSID = dataStr;
                 wifiSSIDCharRead = true;
                 break;
             case BLE_CHAR_UUID_WIFI_PSK:
-                Log.e("NewDeviceActivity", "WiFi PSK characteristic data received!: "+data);
-                configWifiPSK = data;
+                Log.e("NewDeviceActivity", "WiFi PSK characteristic data received!: "+dataStr);
+                configWifiPSK = dataStr;
                 wifiPSKCharRead = true;
                 break;
             case BLE_CHAR_UUID_UID:
-                Log.e("NewDeviceActivity", "UID characteristic data received!: "+data);
-                configUID = data;
+                Log.e("NewDeviceActivity", "UID characteristic data received!: "+dataStr);
+                configUID = dataStr;
                 uidCharRead = true;
                 break;
             case BLE_CHAR_UUID_MAC:
-                Log.e("NewDeviceActivity", "MAC characteristic data received!:= "+data);
-                configMAC = data;
+                Log.e("NewDeviceActivity", "MAC characteristic data received!:= "+dataStr);
+                configMAC = dataStr;
                 macCharRead = true;
                 break;
             case BLE_CHAR_UUID_TIMEZONE:
-                Log.e("NewDeviceActivity", "Timezone characteristic data received!: "+data);
-                configTimezone = data;
+                Log.e("NewDeviceActivity", "Timezone characteristic data received!: "+dataStr);
+                configTimezone = dataStr;
                 timezoneCharRead = true;
                 break;
             case BLE_CHAR_UUID_WIFI_SCAN_RES:
-                wifiSSIDsCSV= data;
+                wifiSSIDsCSV= dataStr;
                 wifiScanResCharRead = true;
-                Log.e("NewDeviceActivity", "WiFi scan result characteristic data received!: "+data);
+                Log.e("NewDeviceActivity", "WiFi scan result characteristic data received!: "+dataStr);
                 break;
         }
 
@@ -202,7 +205,7 @@ public class BLEConfigurerRawCharacteristics extends BLEConfigurerCharacteristic
     }
 
     @Override
-    void onPreparingDescriptorUpdate() {
+    void onPreparingDescriptorUpdate(String uuid) {
         // TODO: Check which descriptor was updated
         if(state==State.EnablingSetFlagNotifications){
             state= State.EnablingWiFiScanNotifications;
@@ -213,16 +216,23 @@ public class BLEConfigurerRawCharacteristics extends BLEConfigurerCharacteristic
     }
 
     @Override
-    void onReadyCharacteristicChanged(String uuid) {
+    void onPreparingNotify(String uuid, byte[] data) {
+
+    }
+
+    @Override
+    void onReadyNotify(String uuid, byte[] data) {
         if(Objects.equals(uuid, BLE_CHAR_UUID_WIFI_SCAN_RES)) {
             bleService.readCharacteristic(wifiScanResChar);
         }
     }
 
     @Override
-    void onReadyDataAvailable(String uuid, String data) {
+    void onReadyDataAvailable(String uuid, byte[] data) {
+        String dataStr= new String(data, StandardCharsets.UTF_8);
+
         if(Objects.equals(uuid, BLE_CHAR_UUID_WIFI_SCAN_RES) && data!=null){
-            wiFiListListener.onRefresh(data);
+            actionsListener.onRefresh(dataStr);
         }
     }
 
@@ -266,8 +276,10 @@ public class BLEConfigurerRawCharacteristics extends BLEConfigurerCharacteristic
     }
 
     @Override
-    void onWritingCharacteristicChanged(String uuid, String data) {
-        if(uuid!=null && data!=null && uuid.equals(BLE_CHAR_UUID_SET_FLAG) && data.equals("0")) {
+    void onWritingNotify(String uuid, byte[] data) {
+        String dataStr= new String(data, StandardCharsets.UTF_8);
+
+        if(uuid!=null && uuid.equals(BLE_CHAR_UUID_SET_FLAG) && dataStr.equals("0")) {
             state= State.ConfigWritten;
         }
     }

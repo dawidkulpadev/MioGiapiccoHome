@@ -25,6 +25,7 @@
     <string name="button_settings">Ustawienia</string>
     <string name="button_room_settings">Ustawienia pokoju</string>
     <string name="button_rename">Zmień nazwę</string>
+    <string name="button_try_again">Jeszcze raz!</string>
     <string name="chip_period_day">dzień</string>
     <string name="chip_period_3days">3 dni</string>
     <string name="chip_period_month">miesiąc</string>
@@ -46,6 +47,9 @@
     <string name="hint_activation_pin">Kod aktywacji</string>
     <string name="message_change_dli">Ustaw nową wartość jasności światła</string>
     <string name="message_update_in_progress">Aktualizowanie</string>
+    <string name="message_device_configured">Gotowe! 🎊</string>
+    <string name="message_device_connect_failed">Nie udało mi się połączyć z Twoim urządzeniem 😥</string>
+    <string name="message_device_unexpected_disconnect">Ojć! Straciłem połączenie z Twoim nowym urządzeniem! 🛸</string>
     <string name="info_login_pass_empty">Wypełnij pola login i hasło</string>
     <string name="info_signin_failed">Błędny login lub hasło</string>
     <string name="info_seconds_ago">Sekundę temu</string>

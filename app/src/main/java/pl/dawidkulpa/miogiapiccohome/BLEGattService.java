@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class BluetoothLeService extends Service {
+public class BLEGattService extends Service {
     public final static String ACTION_GATT_CONNECTED =
             "pl.dawidkulpa.bluetooth.le.ACTION_GATT_CONNECTED";
     public final static String ACTION_GATT_DISCONNECTED =
@@ -51,15 +51,23 @@ public class BluetoothLeService extends Service {
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             Log.e("BluetoothGattCallback", "Broadcast state change");
             if (newState == BluetoothProfile.STATE_CONNECTED) {
+                gatt.requestMtu(247);
                 pendingCharacteristicsRead.clear();
                 pendingCharacteristicsWrite.clear();
                 isReadingCharacteristic= false;
                 isWritingCharacteristic= false;
                 broadcastUpdate(ACTION_GATT_CONNECTED);
-                bluetoothGatt.discoverServices();
+                gatt.discoverServices();
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 broadcastUpdate(ACTION_GATT_DISCONNECTED);
             }
+        }
+
+
+
+        @Override
+        public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
+            Log.d("onMtuChanged", "MTU=" + mtu);
         }
 
         @Override
@@ -71,7 +79,6 @@ public class BluetoothLeService extends Service {
                 Log.e("BluetoothGattCallback", "failed onServicesDiscovered received: " + status);
             }
         }
-
 
         @SuppressLint("MissingPermission")
         @Override
@@ -94,13 +101,15 @@ public class BluetoothLeService extends Service {
             }
         }
 
+
+
         @SuppressLint("MissingPermission")
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+            Log.e("Write", "write");
             broadcastUpdate(ACTION_DATA_WRITE_COMPLETE, characteristic);
-
             if(!pendingCharacteristicsWrite.isEmpty()){
-                Log.e("BluetoothLeService", "Characteristics write queue not empty. Writing next...");
+                Log.e("BluetoothLeService", "Characteristics write queue not empty. Writing next..."+pendingCharacteristicsWrite.get(0).getUuid().toString());
                 isWritingCharacteristic= true;
                 BluetoothGattCharacteristic ch= pendingCharacteristicsWrite.get(0);
                 pendingCharacteristicsWrite.remove(0);
@@ -113,7 +122,7 @@ public class BluetoothLeService extends Service {
         @Override
         public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
             if(status==BluetoothGatt.GATT_SUCCESS)
-                broadcastUpdate(ACTION_DESCR_WRITE_COMPLETE);
+                broadcastUpdate(ACTION_DESCR_WRITE_COMPLETE, descriptor);
         }
 
         @Override
@@ -142,7 +151,7 @@ public class BluetoothLeService extends Service {
                                  final BluetoothGattCharacteristic characteristic) {
         final Intent intent = new Intent(action);
         intent.putExtra("uuid", characteristic.getUuid().toString());
-        intent.putExtra("data", characteristic.getStringValue(0));
+        intent.putExtra("data", characteristic.getValue());
         sendBroadcast(intent);
     }
 
@@ -153,12 +162,10 @@ public class BluetoothLeService extends Service {
     }
 
     public class LocalBinder extends Binder {
-        public BluetoothLeService getService() {
-            return BluetoothLeService.this;
+        public BLEGattService getService() {
+            return BLEGattService.this;
         }
     }
-
-
 
     public boolean initialize() {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -179,7 +186,10 @@ public class BluetoothLeService extends Service {
         try {
             final BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
             // connect to the GATT server on the device
+            byte[] pin= {0x01, 0x02, 0x03, 0x04, 0x05, 0x06};
+            device.setPin(pin);
             bluetoothGatt = device.connectGatt(this, false, bluetoothGattCallback);
+
             return true;
         } catch (IllegalArgumentException exception) {
             Log.e("BluetoothLeService", "Device not found with provided address.  Unable to connect.");
@@ -212,7 +222,8 @@ public class BluetoothLeService extends Service {
             pendingCharacteristicsWrite.add(characteristic);
         } else {
             isWritingCharacteristic= true;
-            bluetoothGatt.writeCharacteristic(characteristic);
+            boolean r= bluetoothGatt.writeCharacteristic(characteristic);
+            Log.d("Write init result", String.valueOf(r));
         }
     }
 

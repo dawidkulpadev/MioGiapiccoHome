@@ -16,65 +16,64 @@ import android.util.Log;
 
 import androidx.core.content.ContextCompat;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import pl.dawidkulpa.miogiapiccohome.API.Device;
-import pl.dawidkulpa.miogiapiccohome.activities.NewDeviceActivity;
 
 public class BLEConfigurer {
     /** Constants */
     public static final String MG_SSID_PREFIX = "MioGiapicco";
 
-    public static final int ACTION_TIMEOUT_GATT_CONNECTION              = 15000;
-    public static final int ACTION_TIMEOUT_REGISTER_DEVICE              = 10000;
-    public static final int ACTION_TIMEOUT_WRITE_CHARACTERISTICS        = 15000;
-    public static final int ACTION_TIMEOUT_DEVICE_SEARCH                = 120000;
+    public static final int ACTION_TIMEOUT_GATT_CONNECTION              = 3000;
+    public static final int ACTION_TIMEOUT_REGISTER_DEVICE              = 20000;
+    public static final int ACTION_TIMEOUT_DEVICE_SEARCH                = 60000;
+
+    public enum ErrorCode {NoDeviceFound, ConnectFailed, ConfigWriteFailed, UnexpectedDisconnect}
 
     /** State machines */
-    public enum ConfigurerState {CheckingPermissions, WaitingForPermissionsUserResponse,
-        WaitingForBluetooth, SearchingDevice, ConnectingWithDevice, PreparingCharacteristicsManager,
-        WaitingForUserInput, RegisteringDevice, WritingCharacteristics, DeviceConfigured,
-        ConnectionFailed, APICommunicationFailed}
+    private enum ConfigurerState {Init, WaitingForBluetooth, SearchingDevice, ConnectingWithDevice,
+        WaitingForUserInput, WritingConfiguration, DeviceConfigured,
+        ConnectionFailed}
 
     public interface BLEConfigurerCallbacks {
         void deviceSearchStarted();
-        void onTimeout(ConfigurerState state);
-        void onDeviceBond(boolean success);
-        void onDeviceConfigured(boolean success);
+        void onError(ErrorCode errorCode);
+        void onDeviceFound(String name);
+        void onDeviceConnected();
+        void onDeviceReady();
+        void onDeviceConfigured();
         void onWiFiListRefreshed(String wifis);
     }
 
     private ConfigurerState state;
     private BluetoothLeScanner bluetoothLeScanner;
-    private BluetoothLeService bluetoothService;
+    // GATT manager callbacks
+    private final BLEConfigurerGatt bleConfigurerGatt;
+    private BLEGattService bluetoothService;
     private String bleAddress;
     private boolean scanning;
     private final Context c;
     private final BLEConfigurerCallbacks callbacks;
     // Action timeout method handler
-    Timer timeoutWatchdogTimer;
+    TimeoutWatchdog timeoutWatchdog= new TimeoutWatchdog();
 
     // Device scan callback.
     private final ScanCallback leScanCallback =
             new ScanCallback() {
-
                 @SuppressLint("MissingPermission")
                 @Override
                 public void onScanResult(int callbackType, ScanResult result) {
                     super.onScanResult(callbackType, result);
 
                     if(state== BLEConfigurer.ConfigurerState.SearchingDevice) {
-                        Log.d("Scan new device", "Name: "+result.getDevice().getName());
                         if (result.getDevice().getName() != null &&
                                 result.getDevice().getName().contains(MG_SSID_PREFIX)) {
+                            callbacks.onDeviceFound(result.getDevice().getName());
                             scanning = false;
                             scanStopHandler.removeCallbacksAndMessages(null);
                             bluetoothLeScanner.stopScan(leScanCallback);
                             state= ConfigurerState.ConnectingWithDevice;
                             Log.d("NewDeviceActivity", "System state: ConnectingWithDevice");
-                            gattUpdateReceiver.setBleName(result.getDevice().getName());
-                            connect(result.getDevice().getAddress());
+                            bleConfigurerGatt.setBleName(result.getDevice().getName());
+                            bindGattService(result.getDevice().getAddress());
                         }
                     }
                 }
@@ -88,19 +87,22 @@ public class BLEConfigurer {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.e("ServiceConnection", "service connected");
-            bluetoothService = ((BluetoothLeService.LocalBinder) service).getService();
+            bluetoothService = ((BLEGattService.LocalBinder) service).getService();
             if (bluetoothService != null) {
                 if (bluetoothService.initialize()) {
                     if(bleAddress!=null && !bleAddress.isEmpty()) {
-                        gattUpdateReceiver.setBLEService(bluetoothService);
-                        bluetoothService.connect(bleAddress);
-                    } else
-                        Log.e("ASD", "Address empty");
+                        bleConfigurerGatt.startConnectAndReceiving(bluetoothService, bleAddress);
+                    } else {
+                        Log.e("ServiceConnection", "Address empty");
+                        callbacks.onError(ErrorCode.ConnectFailed);
+                    }
                 } else {
-                    Log.e("ASD", "BLEService init failed");
+                    Log.e("ServiceConnection", "BLEService init failed");
+                    callbacks.onError(ErrorCode.ConnectFailed);
                 }
             } else {
-                Log.e("ASD", "BLEService null");
+                Log.e("ServiceConnection", "BLEService null");
+                callbacks.onError(ErrorCode.ConnectFailed);
             }
         }
 
@@ -126,29 +128,46 @@ public class BLEConfigurer {
                             getBluetoothLeScanner();
                     callbacks.deviceSearchStarted();
                     startScan();
+                } else {
+                    checkBluetoothHandler.postDelayed(checkBluetoothRunnable, 2000);
                 }
             }
         }
     };
 
-    // GATT manager callbacks
-    private final BLEConfigurerGattCallbacks gattUpdateReceiver;
+
 
     public BLEConfigurer(Context context, BLEConfigurerCallbacks bleConfigurerCallbacks){
         c= context;
         callbacks= bleConfigurerCallbacks;
-        gattUpdateReceiver= new BLEConfigurerGattCallbacks(this, new BLEConfigurerGattCallbacks.ConfigurerGattListener() {
+        state= ConfigurerState.Init;
+
+        bleConfigurerGatt = new BLEConfigurerGatt(this, new BLEConfigurerGatt.ConfigurerGattListener() {
             @Override
-            public void onConnectionFailed() {
-                ConfigurerState onFailState= state;
+            public void onError(BLEConfigurerGatt.ErrorCode ec) {
+                if(ec== BLEConfigurerGatt.ErrorCode.DiscoverFailed || ec== BLEConfigurerGatt.ErrorCode.SyncFailed)
+                    callbacks.onError(ErrorCode.ConnectFailed);
+                else if(ec==BLEConfigurerGatt.ErrorCode.ConfigWriteFailed)
+                    callbacks.onError(ErrorCode.ConfigWriteFailed);
+                else if(ec==BLEConfigurerGatt.ErrorCode.UnexpectedDisconnect){
+                    callbacks.onError(ErrorCode.UnexpectedDisconnect);
+                }
+
+                // Disconnect device
+                // BLE Cleanup
                 state= ConfigurerState.ConnectionFailed;
-                callbacks.onTimeout(state);
             }
 
             @Override
-            public void onDeviceBond() {
-                callbacks.onDeviceBond(true);
+            public void onDeviceConnected() {
+                timeoutWatchdog.stop();
+                callbacks.onDeviceConnected();
+            }
 
+            @Override
+            public void onDeviceReady() {
+                state= ConfigurerState.WaitingForUserInput;
+                callbacks.onDeviceReady();
             }
 
             @Override
@@ -157,8 +176,9 @@ public class BLEConfigurer {
             }
 
             @Override
-            public void onConfigFinished(boolean success) {
-                callbacks.onDeviceConfigured(success);
+            public void onConfigFinished() {
+                state= ConfigurerState.DeviceConfigured;
+                callbacks.onDeviceConfigured();
             }
         });
     }
@@ -167,26 +187,28 @@ public class BLEConfigurer {
         return c;
     }
 
-    public void connect(String address){
-        ContextCompat.registerReceiver(c, gattUpdateReceiver, makeGattUpdateIntentFilter(), ContextCompat.RECEIVER_EXPORTED);
-
+    public void bindGattService(String address){
+        ContextCompat.registerReceiver(c, bleConfigurerGatt, makeGattUpdateIntentFilter(), ContextCompat.RECEIVER_EXPORTED);
         bleAddress= address;
-        Intent gattServiceIntent = new Intent(c, BluetoothLeService.class);
+        Intent gattServiceIntent = new Intent(c, BLEGattService.class);
+
+        // Call actual connect when gattService bind finished -> serviceConnection.onServiceConnected callback
         c.bindService(gattServiceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-        startTimeoutWatchdog(ACTION_TIMEOUT_GATT_CONNECTION);
+        timeoutWatchdog.start(ACTION_TIMEOUT_GATT_CONNECTION, ()->{
+            onTimeout(ErrorCode.ConnectFailed);
+        });
     }
 
     @SuppressLint("MissingPermission")
-    public void startScan(){
+    private void startScan(){
         if (!scanning) {
             Log.d("NewDeviceActivity", "Scan start!");
             // Stops scanning after a predefined scan period.
             scanStopHandler.postDelayed(() -> {
                 scanning = false;
                 bluetoothLeScanner.stopScan(leScanCallback);
-                ConfigurerState onFaileState= state;
                 state= ConfigurerState.ConnectionFailed;
-                callbacks.onTimeout(onFaileState);
+                callbacks.onError(ErrorCode.NoDeviceFound);
             }, ACTION_TIMEOUT_DEVICE_SEARCH);
 
             scanning = true;
@@ -200,7 +222,7 @@ public class BLEConfigurer {
         if(bluetoothService!=null)
             bluetoothService.close();
         try {
-            c.unregisterReceiver(gattUpdateReceiver);
+            c.unregisterReceiver(bleConfigurerGatt);
         } catch (IllegalArgumentException e){
             Log.w("NewDeviceActivity", "Gatt update receiver not registered");
         }
@@ -214,37 +236,14 @@ public class BLEConfigurer {
 
     private static IntentFilter makeGattUpdateIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
-        intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
-        intentFilter.addAction(BluetoothLeService.ACTION_DATA_WRITE_COMPLETE);
-        intentFilter.addAction(BluetoothLeService.ACTION_DESCR_WRITE_COMPLETE);
-        intentFilter.addAction(BluetoothLeService.ACTION_CHARACTERISTIC_CHANGED);
+        intentFilter.addAction(BLEGattService.ACTION_GATT_CONNECTED);
+        intentFilter.addAction(BLEGattService.ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction(BLEGattService.ACTION_GATT_SERVICES_DISCOVERED);
+        intentFilter.addAction(BLEGattService.ACTION_DATA_AVAILABLE);
+        intentFilter.addAction(BLEGattService.ACTION_DATA_WRITE_COMPLETE);
+        intentFilter.addAction(BLEGattService.ACTION_DESCR_WRITE_COMPLETE);
+        intentFilter.addAction(BLEGattService.ACTION_CHARACTERISTIC_CHANGED);
         return intentFilter;
-    }
-
-    public void startTimeoutWatchdog(long ms){
-        if(timeoutWatchdogTimer !=null){
-            timeoutWatchdogTimer.cancel();
-        }
-
-        timeoutWatchdogTimer = new Timer();
-        timeoutWatchdogTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                ConfigurerState onFaileState= state;
-                state= ConfigurerState.ConnectionFailed;
-                callbacks.onTimeout(onFaileState);
-            }
-        }, ms);
-    }
-
-    public void stopTimeoutWatchdog(){
-        if(timeoutWatchdogTimer !=null) {
-            timeoutWatchdogTimer.cancel();
-            timeoutWatchdogTimer = null;
-        }
     }
 
     public void startConnectingSystem(){
@@ -253,44 +252,37 @@ public class BLEConfigurer {
         checkBluetoothHandler.post(checkBluetoothRunnable);
     }
 
-    public ConfigurerState getState() {
-        return state;
-    }
-
-    public void setState(ConfigurerState state) {
-        this.state = state;
-    }
-
     public String getConfigWifiSSID() {
-        return gattUpdateReceiver.getConfigWifiSSID();
+        return bleConfigurerGatt.getConfigWifiSSID();
     }
 
     public String getConfigWifiPSK() {
-        return gattUpdateReceiver.getConfigWifiPSK();
-    }
-
-    public String getConfigPicklock() {
-        return gattUpdateReceiver.getConfigPicklock();
+        return bleConfigurerGatt.getConfigWifiPSK();
     }
 
     public Device.Type getConnectedDevType() {
-        return gattUpdateReceiver.getConnectedDevType();
+        return bleConfigurerGatt.getConnectedDevType();
     }
 
     public String getConfigTimezone() {
-        return gattUpdateReceiver.getConfigTimezone();
+        return bleConfigurerGatt.getConfigTimezone();
     }
 
     public String getConfigMAC() {
-        return gattUpdateReceiver.getConfigMAC();
+        return bleConfigurerGatt.getConfigMAC();
     }
 
     public String getFoundDeviceName() {
-        return gattUpdateReceiver.getFoundDeviceName();
+        return bleConfigurerGatt.getFoundDeviceName();
     }
 
-    public void writeCharacteristics(String wifiSSID, String wifiPSK, String uid, String picklock, String timezone){
-        startTimeoutWatchdog(ACTION_TIMEOUT_WRITE_CHARACTERISTICS);
-        gattUpdateReceiver.writeCharacteristics(wifiSSID, wifiPSK, uid, picklock, timezone);
+    public void writeDeviceConfig(String wifiSSID, String wifiPSK, String uid, String picklock, String timezone){
+        state= ConfigurerState.WritingConfiguration;
+        bleConfigurerGatt.startConfigWrite(wifiSSID, wifiPSK, uid, picklock, timezone);
+    }
+
+    public void onTimeout(ErrorCode ec){
+        state= ConfigurerState.ConnectionFailed;
+        callbacks.onError(ec);
     }
 }

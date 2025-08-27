@@ -1,5 +1,7 @@
 package pl.dawidkulpa.miogiapiccohome;
 
+import android.util.Log;
+
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
 import javax.crypto.Mac;
@@ -9,9 +11,11 @@ import javax.crypto.spec.SecretKeySpec;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
         import java.security.interfaces.ECPublicKey;
 import java.security.spec.*;
+import java.util.Objects;
 
 public final class BLELNKeys {
 
@@ -19,12 +23,23 @@ public final class BLELNKeys {
     private static final String CURVE = "secp256r1"; // prime256v1
     private static final String HMAC = "HmacSHA256";
     private static final String KDF_INFO_SESS = "BLEv1|sess";
-    private static final String KDF_INFO_K_C2S = "BLEv1|k_c2s";
-    private static final String KDF_INFO_K_S2C = "BLEv1|k_s2c";
+    private static final String KDF_INFO_K_C2S = "BLEv1|sessKey_c2s";
+    private static final String KDF_INFO_K_S2C = "BLEv1|sessKey_s2c";
     private static final String KDF_INFO_SID = "BLEv1|sid";
     private static final byte[] AAD_HDR = "DATAv1".getBytes(); // stały prefix AAD
 
     private static final SecureRandom RNG = new SecureRandom();
+
+    public static void hexDump(String label, byte[] data){
+        StringBuilder log=new StringBuilder();
+        log.append(label).append(": ");
+        for(int i=0; i<data.length; i++){
+            log.append(String.format("%02X", data[i]));
+            if(i<data.length-1)
+                log.append(" ");
+        }
+        Log.d("hexDump",log.toString());
+    }
 
     // ======= Sesja klienta =======
     public static final class Session {
@@ -51,35 +66,43 @@ public final class BLELNKeys {
             this.keyexRxPacket = keyexRxPacket;
         }
 
-        // ---------- (opcjonalnie) Szyfrowanie klient→serwer ----------
-        public byte[] encryptC2S(byte[] plain) throws Exception {
+        public void printKeys(){
+            hexDump("s2c", keyS2C);
+            hexDump("c2s", keyC2S);
+        }
+
+        public byte[] encryptC2S(String msg) {
+            byte[] plain= msg.getBytes(StandardCharsets.UTF_8);
+
             txCtrC2S++;
             byte[] ctrBE = intToBE(txCtrC2S);
             byte[] nonce = randomBytes(12);
             byte[] aad = makeAad(sidBE, epochLE);
 
-            Cipher c = Cipher.getInstance("AES/GCM/NoPadding");
-            SecretKey sk = new SecretKeySpec(keyC2S, "AES");
-            c.init(Cipher.ENCRYPT_MODE, sk, new GCMParameterSpec(128, nonce));
-            c.updateAAD(aad);
-            byte[] cipher = c.doFinal(plain);
+            try {
+                Cipher c = Cipher.getInstance("AES/GCM/NoPadding");
+                SecretKey sk = new SecretKeySpec(keyC2S, "AES");
+                c.init(Cipher.ENCRYPT_MODE, sk, new GCMParameterSpec(128, nonce));
+                c.updateAAD(aad);
+                byte[] cipher = c.doFinal(plain);
 
-            // podziel: tail 16B to tag
-            int tagLen = 16;
-            int ctLen = cipher.length - tagLen;
-            byte[] ct = new byte[ctLen];
-            byte[] tag = new byte[tagLen];
-            System.arraycopy(cipher, 0, ct, 0, ctLen);
-            System.arraycopy(cipher, ctLen, tag, 0, tagLen);
+                int tagLen = 16;
+                int ctLen = cipher.length - tagLen;
+                byte[] ct = new byte[ctLen];
+                byte[] tag = new byte[tagLen];
+                System.arraycopy(cipher, 0, ct, 0, ctLen);
+                System.arraycopy(cipher, ctLen, tag, 0, tagLen);
 
-            // pakiet: [ctr:4 BE][nonce:12][cipher][tag]
-            ByteBuffer buf = ByteBuffer.allocate(4 + 12 + ctLen + 16);
-            buf.put(ctrBE).put(nonce).put(ct).put(tag);
-            return buf.array();
+                // [ctr:4 BE][nonce:12][cipher][tag]
+                ByteBuffer buf = ByteBuffer.allocate(4 + 12 + ctLen + 16);
+                buf.put(ctrBE).put(nonce).put(ct).put(tag);
+                return buf.array();
+            } catch (Exception e){
+                return null;
+            }
         }
 
-        // ---------- (opcjonalnie) Odszyfrowanie serwer→klient ----------
-        public byte[] decryptS2C(byte[] packet) throws Exception {
+        public String decryptS2C(byte[] packet){
             if (packet.length < 4 + 12 + 16) throw new IllegalArgumentException("pkt too short");
             int ctr = beToInt(packet, 0);
             if (ctr <= rxCtrS2C) throw new SecurityException("replay/old ctr");
@@ -89,27 +112,65 @@ public final class BLELNKeys {
             byte[] tag = slice(packet, packet.length - 16, 16);
 
             byte[] aad = makeAad(sidBE, epochLE);
-            Cipher c = Cipher.getInstance("AES/GCM/NoPadding");
-            SecretKey sk = new SecretKeySpec(keyS2C, "AES");
-            c.init(Cipher.DECRYPT_MODE, sk, new GCMParameterSpec(128, nonce));
-            c.updateAAD(aad);
 
-            // Android oczekuje [cipher|tag] razem
-            byte[] both = new byte[ct.length + tag.length];
-            System.arraycopy(ct, 0, both, 0, ct.length);
-            System.arraycopy(tag, 0, both, ct.length, tag.length);
+            try {
+                Cipher c = Cipher.getInstance("AES/GCM/NoPadding");
+                SecretKey sk = new SecretKeySpec(keyS2C, "AES");
+                c.init(Cipher.DECRYPT_MODE, sk, new GCMParameterSpec(128, nonce));
+                c.updateAAD(aad);
 
-            byte[] plain = c.doFinal(both);
-            rxCtrS2C = ctr;
-            return plain;
+                // Android oczekuje [cipher|tag] razem
+                byte[] both = new byte[ct.length + tag.length];
+                System.arraycopy(ct, 0, both, 0, ct.length);
+                System.arraycopy(tag, 0, both, ct.length, tag.length);
+
+                byte[] plain = c.doFinal(both);
+                rxCtrS2C = ctr;
+                return new String(plain, StandardCharsets.UTF_8);
+            } catch (Exception e){
+                Log.d("decryptS2C", Objects.requireNonNull(e.getMessage()));
+                return "";
+            }
+        }
+
+        public String decryptC2S(byte[] packet){
+            if (packet.length < 4 + 12 + 16) throw new IllegalArgumentException("pkt too short");
+            int ctr = beToInt(packet, 0);
+            //if (ctr <= rxCtrS2C) throw new SecurityException("replay/old ctr");
+            byte[] nonce = slice(packet, 4, 12);
+            int ctLen = packet.length - (4 + 12 + 16);
+            byte[] ct = slice(packet, 4 + 12, ctLen);
+            byte[] tag = slice(packet, packet.length - 16, 16);
+
+            byte[] aad = makeAad(sidBE, epochLE);
+
+            try {
+                Cipher c = Cipher.getInstance("AES/GCM/NoPadding");
+                SecretKey sk = new SecretKeySpec(keyC2S, "AES");
+                c.init(Cipher.DECRYPT_MODE, sk, new GCMParameterSpec(128, nonce));
+                c.updateAAD(aad);
+
+                // Android oczekuje [cipher|tag] razem
+                byte[] both = new byte[ct.length + tag.length];
+                System.arraycopy(ct, 0, both, 0, ct.length);
+                System.arraycopy(tag, 0, both, ct.length, tag.length);
+
+                byte[] plain = c.doFinal(both);
+                //rxCtrS2C = ctr;
+                return new String(plain, StandardCharsets.UTF_8);
+            } catch (Exception e){
+                Log.d("decryptS2C", Objects.requireNonNull(e.getMessage()));
+                return "";
+            }
         }
     }
 
-    // ======= Główny entrypoint: przetwarzanie KEYEX i budowa sesji =======
-    public static Session doKeyExchange(byte[] keyexTxPayloadFromServer) throws Exception {
+    public static Session doKeyExchange(byte[] keyexTxPayloadFromServer){
         // KEYEX_TX = [ver=1][epoch:4 LE][salt:32][srvPub:65][srvNonce:12]
-        if (keyexTxPayloadFromServer == null || keyexTxPayloadFromServer.length != 1 + 4 + 32 + 65 + 12)
-            throw new IllegalArgumentException("Bad KEYEX_TX length");
+        if (keyexTxPayloadFromServer == null || keyexTxPayloadFromServer.length != 1 + 4 + 32 + 65 + 12){
+            Log.d("BLELNKeys", "doKeyExchange: Bad KEYEX_TX length");
+            return null;
+        }
 
         int off = 0;
         int ver = keyexTxPayloadFromServer[off++] & 0xFF;
@@ -119,55 +180,45 @@ public final class BLELNKeys {
         byte[] srvPub65 = slice(keyexTxPayloadFromServer, off, 65); off += 65;
         byte[] srvNonce12 = slice(keyexTxPayloadFromServer, off, 12); off += 12;
 
-        // 1) EC: wygeneruj parę klienta (P-256)
-        KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
-        kpg.initialize(new ECGenParameterSpec(CURVE));
-        KeyPair kp = kpg.generateKeyPair();
-        ECPublicKey cliPub = (ECPublicKey) kp.getPublic();
-        ECParameterSpec ecSpec = cliPub.getParams();
-        byte[] cliPub65 = encodeUncompressed(cliPub);      // 65B
-        byte[] cliNonce12 = randomBytes(12);
+        try {
+            KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
+            kpg.initialize(new ECGenParameterSpec(CURVE));
+            KeyPair kp = kpg.generateKeyPair();
+            ECPublicKey cliPub = (ECPublicKey) kp.getPublic();
+            ECParameterSpec ecSpec = cliPub.getParams();
+            byte[] cliPub65 = encodeUncompressed(cliPub);
+            byte[] cliNonce12 = randomBytes(12);
 
-        // 2) Zbuduj pakiet KEYEX_RX: [ver=1][cliPub:65][cliNonce:12]
-        ByteBuffer rx = ByteBuffer.allocate(1 + 65 + 12);
-        rx.put((byte)1).put(cliPub65).put(cliNonce12);
-        byte[] keyexRxPacket = rx.array();
+            // KEYEX_RX: [ver=1][cliPub:65][cliNonce:12]
+            ByteBuffer rx = ByteBuffer.allocate(1 + 65 + 12);
+            rx.put((byte) 1).put(cliPub65).put(cliNonce12);
+            byte[] keyexRxPacket = rx.array();
 
-        // 3) ECDH shared (32B) z serwerowym pub65
-        PublicKey srvPub = decodeUncompressedPublic(srvPub65, ecSpec);
-        KeyAgreement ka = KeyAgreement.getInstance("ECDH");
-        ka.init(kp.getPrivate());
-        ka.doPhase(srvPub, true);
-        byte[] shared = ka.generateSecret();               // powinno mieć 32B dla P-256
-        if (shared.length != 32) {
-            // niektóre implementacje zwracają fixed len – dla P-256 oczekujemy 32
-            shared = leftPad(shared, 32);
+            PublicKey srvPub = decodeUncompressedPublic(srvPub65, ecSpec);
+            KeyAgreement ka = KeyAgreement.getInstance("ECDH");
+            ka.init(kp.getPrivate());
+            ka.doPhase(srvPub, true);
+            byte[] shared = ka.generateSecret();               // powinno mieć 32B dla P-256
+            if (shared.length != 32) {
+                // niektóre implementacje zwracają fixed len – dla P-256 oczekujemy 32
+                shared = leftPad(shared, 32);
+            }
+
+            byte[] epochLE4 = intToLE(epochLE);
+            byte[] salt36 = concat(salt32, epochLE4);
+
+            byte[] prk = hkdfExtract(salt36, shared);
+            byte[] kC2S = hkdfExpand(prk, concat(KDF_INFO_K_C2S.getBytes(), srvPub65, cliPub65, srvNonce12, cliNonce12), 32);
+            byte[] kS2C = hkdfExpand(prk, concat(KDF_INFO_K_S2C.getBytes(), srvPub65, cliPub65, srvNonce12, cliNonce12), 32);
+
+            byte[] sid2 = hkdfExpand(prk, KDF_INFO_SID.getBytes(), 2);
+            int sidBE = ((sid2[0] & 0xFF) << 8) | (sid2[1] & 0xFF);
+
+            return new Session(epochLE, sidBE, kC2S, kS2C, cliPub65, cliNonce12, keyexRxPacket);
+        } catch (Exception e){
+            Log.d("BLELNKeys", "doKeyExchange: "+e.getMessage());
+            return null;
         }
-
-        // 4) HKDF: salt' = salt32 || epoch(LE)
-        byte[] epochLE4 = intToLE(epochLE);
-        byte[] salt36 = concat(salt32, epochLE4);
-
-        // info(sess) = "BLEv1|sess" || srvPub65 || cliPub65 || srvNonce || cliNonce
-        byte[] infoSess = concat(
-                KDF_INFO_SESS.getBytes(),
-                srvPub65, cliPub65, srvNonce12, cliNonce12
-        );
-
-        // Wyprowadź k_c2s, k_s2c i sid (2B)
-        byte[] prk = hkdfExtract(salt36, shared);
-        byte[] kC2S = hkdfExpand(prk, KDF_INFO_K_C2S.getBytes(), 32);
-        byte[] kS2C = hkdfExpand(prk, KDF_INFO_K_S2C.getBytes(), 32);
-        // Użyj infoSess do „wiązań” klucza – rozsądne jest dodać je jako dodatkowy krok.
-        // Możemy zrobić HKDF-Expand z infoSess jako „context”:
-        // final key = HKDF-Expand(PRK, infoSess || "BLEv1|k_*", 32)
-        kC2S = hkdfExpand(prk, concat(infoSess, KDF_INFO_K_C2S.getBytes()), 32);
-        kS2C = hkdfExpand(prk, concat(infoSess, KDF_INFO_K_S2C.getBytes()), 32);
-
-        byte[] sid2 = hkdfExpand(prk, KDF_INFO_SID.getBytes(), 2);
-        int sidBE = ((sid2[0] & 0xFF) << 8) | (sid2[1] & 0xFF);
-
-        return new Session(epochLE, sidBE, kC2S, kS2C, cliPub65, cliNonce12, keyexRxPacket);
     }
 
     // ======= Pomocnicze: AAD, HKDF, EC punkt, bajty =======

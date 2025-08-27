@@ -3,227 +3,289 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fillViewport="true"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:layout_height="match_parent"
         android:paddingStart="24dp"
         android:paddingEnd="24dp">
-        <TextView
-            android:id="@+id/step1_label"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/label_addnewdevice_step1"
-            android:layout_marginTop="36dp"
-            android:textSize="20sp" />
 
-        <TextView
-            android:id="@+id/step2_label"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/new_device_top_box"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/label_addnewdevice_step2"
-            android:layout_marginTop="8dp"
-            android:textSize="20sp"
-            app:layout_constraintTop_toBottomOf="@id/step1_label"
-            app:layout_constraintStart_toStartOf="parent"/>
+            android:layout_height="0dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/next_step_button">
 
-        <TextView
-            android:id="@+id/step3_label"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/label_addnewdevice_step3"
-            android:layout_marginTop="8dp"
-            android:textSize="20sp"
-            app:layout_constraintTop_toBottomOf="@id/step2_label"
-            app:layout_constraintStart_toStartOf="parent"/>
-
-        <TextView
-            android:id="@+id/found_device_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:layout_marginTop="12dp"
-            android:textSize="20sp"
-            app:layout_constraintTop_toBottomOf="@id/step3_label"
-            app:layout_constraintStart_toStartOf="parent"/>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/device_name_input_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:layout_marginStart="24dp"
-            android:textColorHint="@color/textSecondaryLight"
-            app:layout_constraintTop_toBottomOf="@id/found_device_text"
-            app:layout_constraintStart_toStartOf="parent">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/device_name_edit"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/new_device_inner_box"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:inputType="text"
-                android:hint="@string/hint_light_device_name"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+                <TextView
+                    android:id="@+id/step1_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_addnewdevice_step1"
+                    android:layout_marginTop="36dp"
+                    android:textSize="20sp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"/>
 
-        <TextView
-            android:id="@+id/wifi_config_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_config_wifi"
-            android:layout_marginTop="24dp"
-            android:layout_marginStart="18dp"
-            android:textSize="18sp"
-            app:layout_constraintTop_toBottomOf="@id/device_name_input_layout"
-            app:layout_constraintStart_toStartOf="parent"/>
+                <TextView
+                    android:id="@+id/step2_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_addnewdevice_step2"
+                    android:layout_marginTop="8dp"
+                    android:textSize="20sp"
+                    app:layout_constraintTop_toBottomOf="@id/step1_label"
+                    app:layout_constraintStart_toStartOf="parent"/>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/wifi_ssid_menu"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="4dp"
-            android:hint="@string/hint_ssid"
-            android:textColorHint="@color/textSecondaryLight"
-            app:layout_constraintTop_toBottomOf="@id/wifi_config_label"
-            app:layout_constraintStart_toStartOf="parent">
-            <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                android:id="@+id/wifi_ssid_autocomplete"
-                android:layout_width="match_parent"
+                <TextView
+                    android:id="@+id/step3_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_addnewdevice_step3"
+                    android:layout_marginTop="8dp"
+                    android:textSize="20sp"
+                    app:layout_constraintTop_toBottomOf="@id/step2_label"
+                    app:layout_constraintStart_toStartOf="parent"/>
+
+                <TextView
+                    android:id="@+id/found_device_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="center"
+                    android:layout_marginTop="12dp"
+                    android:textSize="20sp"
+                    app:layout_constraintTop_toBottomOf="@id/step3_label"
+                    app:layout_constraintStart_toStartOf="parent"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/device_name_input_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginStart="24dp"
+                    android:textColorHint="@color/textSecondaryLight"
+                    app:layout_constraintTop_toBottomOf="@id/found_device_text"
+                    app:layout_constraintStart_toStartOf="parent">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/device_name_edit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:inputType="text"
+                        android:hint="@string/hint_light_device_name"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/wifi_config_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_config_wifi"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginStart="18dp"
+                    android:textSize="18sp"
+                    app:layout_constraintTop_toBottomOf="@id/device_name_input_layout"
+                    app:layout_constraintStart_toStartOf="parent"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/wifi_ssid_menu"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="4dp"
+                    android:hint="@string/hint_ssid"
+                    android:textColorHint="@color/textSecondaryLight"
+                    app:layout_constraintTop_toBottomOf="@id/wifi_config_label"
+                    app:layout_constraintStart_toStartOf="parent">
+                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                        android:id="@+id/wifi_ssid_autocomplete"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/wifi_psk_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:passwordToggleDrawable="@drawable/visibility_toggle"
+                    app:passwordToggleEnabled="true"
+                    android:layout_marginStart="24dp"
+                    android:textColorHint="@color/textSecondaryLight"
+                    app:layout_constraintTop_toBottomOf="@id/wifi_ssid_menu"
+                    app:layout_constraintStart_toStartOf="parent">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/wifi_psk_edit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPassword"
+                        android:hint="@string/hint_psk"
+                        android:maxLines="1"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/placement_config_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_placement"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginStart="18dp"
+                    android:textSize="18sp"
+                    app:layout_constraintTop_toBottomOf="@id/wifi_psk_layout"
+                    app:layout_constraintStart_toStartOf="parent"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/room_select_menu"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="4dp"
+                    android:hint="@string/hint_room"
+                    android:textColorHint="@color/textSecondaryLight"
+                    app:layout_constraintTop_toBottomOf="@id/placement_config_label"
+                    app:layout_constraintStart_toStartOf="parent">
+                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                        android:id="@+id/room_select_autocomplete"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/sector_select_menu"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="4dp"
+                    android:hint="@string/hint_sector"
+                    android:textColorHint="@color/textSecondaryLight"
+                    app:layout_constraintTop_toBottomOf="@id/room_select_menu"
+                    app:layout_constraintStart_toStartOf="parent">
+                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                        android:id="@+id/sector_select_autocomplete"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/plant_select_menu"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="4dp"
+                    android:hint="@string/hint_plant"
+                    android:textColorHint="@color/textSecondaryLight"
+                    app:layout_constraintTop_toBottomOf="@id/sector_select_menu"
+                    app:layout_constraintStart_toStartOf="parent">
+                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                        android:id="@+id/plant_select_autocomplete"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/timezone_config_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_timezone"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginStart="18dp"
+                    android:textSize="18sp"
+                    app:layout_constraintTop_toBottomOf="@id/plant_select_menu"
+                    app:layout_constraintStart_toStartOf="parent"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/timezone_select_menu"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="4dp"
+                    android:hint="@string/hint_timezone"
+                    android:textColorHint="@color/textSecondaryLight"
+                    app:layout_constraintTop_toBottomOf="@id/timezone_config_label">
+                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                        android:id="@+id/timezone_select_autocomplete"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        />
+                </com.google.android.material.textfield.TextInputLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+            <androidx.emoji2.widget.EmojiTextView
+                android:id="@+id/action_done_text"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:inputType="none"
+                app:layout_constraintTop_toBottomOf="@id/new_device_inner_box"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="60dp"
+                android:textStyle="bold"
+                android:textSize="48sp"
+                android:textAlignment="center"
+                android:text="@string/message_device_configured"/>
+
+            <androidx.emoji2.widget.EmojiTextView
+                android:id="@+id/action_failed_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/new_device_inner_box"
+                android:layout_marginTop="40dp"
+                android:textSize="24sp"
+                android:textAlignment="center"
+                android:text="@string/message_device_connect_failed"
                 />
-        </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/wifi_psk_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:passwordToggleDrawable="@drawable/visibility_toggle"
-            app:passwordToggleEnabled="true"
-            android:layout_marginStart="24dp"
-            android:textColorHint="@color/textSecondaryLight"
-            app:layout_constraintTop_toBottomOf="@id/wifi_ssid_menu"
-            app:layout_constraintStart_toStartOf="parent">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/wifi_psk_edit"
-                android:layout_width="match_parent"
+            <ProgressBar
+                android:id="@+id/progressbar"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:inputType="textPassword"
-                android:hint="@string/hint_psk"
-                android:maxLines="1"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:indeterminate="true"
+                android:visibility="gone"
+                android:layout_marginTop="24dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/new_device_inner_box"/>
 
-        <TextView
-            android:id="@+id/placement_config_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_placement"
-            android:layout_marginTop="24dp"
-            android:layout_marginStart="18dp"
-            android:textSize="18sp"
-            app:layout_constraintTop_toBottomOf="@id/wifi_psk_layout"
-            app:layout_constraintStart_toStartOf="parent"/>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/room_select_menu"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="4dp"
-            android:hint="@string/hint_room"
-            android:textColorHint="@color/textSecondaryLight">
-            <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                android:id="@+id/room_select_autocomplete"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="none"
-                />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/sector_select_menu"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="4dp"
-            android:hint="@string/hint_sector"
-            android:textColorHint="@color/textSecondaryLight">
-            <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                android:id="@+id/sector_select_autocomplete"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="none"
-                />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/plant_select_menu"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="4dp"
-            android:hint="@string/hint_plant"
-            android:textColorHint="@color/textSecondaryLight">
-            <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                android:id="@+id/plant_select_autocomplete"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="none"
-                />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <TextView
-            android:id="@+id/timezone_config_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_timezone"
-            android:layout_marginTop="24dp"
-            android:layout_marginStart="18dp"
-            android:textSize="18sp" />
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/timezone_select_menu"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="4dp"
-            android:hint="@string/hint_timezone"
-            android:textColorHint="@color/textSecondaryLight">
-            <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                android:id="@+id/timezone_select_autocomplete"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="none"
-                />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <ProgressBar
-            android:id="@+id/progressbar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:indeterminate="true"
-            android:visibility="gone"
-            android:layout_marginTop="24dp"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <Button
             android:id="@+id/next_step_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginBottom="12dp"
             android:textAllCaps="false"
             android:text="@string/button_start"
             android:textColor="@android:color/white"
-            android:onClick="onNextClick"/>
-    </LinearLayout>
+            android:onClick="onNextClick"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
-
-
-
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

@@ -46,6 +46,9 @@ dependencies {
     implementation 'androidx.preference:preference:1.2.1'
 
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+
+    implementation "androidx.emoji2:emoji2:1.5.0"
+    implementation "androidx.emoji2:emoji2-views:1.5.0"
 }
 java {
     toolchain {

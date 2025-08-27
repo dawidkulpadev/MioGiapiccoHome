@@ -49,6 +49,7 @@
     <string name="button_remove">Remove</string>
     <string name="button_next">Next</string>
     <string name="button_previous">Previous</string>
+    <string name="button_try_again">Try again!</string>
 
     <string name="chip_period_day">day</string>
     <string name="chip_period_3days">3 days</string>
@@ -108,7 +109,9 @@
     <string name="message_activation_code_regenerated">I have sent a new activation code</string>
     <string name="message_remove_device">Device will be unbind from your account immediately but you may need to reset your device configuration manually pressing reset button for at least 5 seconds.\n\nDo you really want to unbind device from your account?</string>
     <string name="message_remove_room">All sectors and devices assigned to this room will be deleted!\n\nDo you really want to remove room from your account?</string>
-
+    <string name="message_device_configured">Device ready! 🎊</string>
+    <string name="message_device_connect_failed">Failed connecting with your device 😥</string>
+    <string name="message_device_unexpected_disconnect">Oh! Device disconnected unexpectedly! 🛸</string>
 
     <string name="info_login_pass_empty">Fill up login and password fields</string>
     <string name="info_signin_failed">Wrong login or password</string>
