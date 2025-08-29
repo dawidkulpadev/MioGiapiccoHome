@@ -1,4 +1,4 @@
-package pl.dawidkulpa.miogiapiccohome;
+package pl.dawidkulpa.miogiapiccohome.ble;
 
 import android.annotation.SuppressLint;
 import android.app.Service;
@@ -63,8 +63,6 @@ public class BLEGattService extends Service {
             }
         }
 
-
-
         @Override
         public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
             Log.d("onMtuChanged", "MTU=" + mtu);
@@ -74,7 +72,6 @@ public class BLEGattService extends Service {
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
-
             } else {
                 Log.e("BluetoothGattCallback", "failed onServicesDiscovered received: " + status);
             }
@@ -183,11 +180,9 @@ public class BLEGattService extends Service {
             Log.e("BluetoothLeService", "BluetoothAdapter not initialized or unspecified address.");
             return false;
         }
+
         try {
-            final BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
-            // connect to the GATT server on the device
-            byte[] pin= {0x01, 0x02, 0x03, 0x04, 0x05, 0x06};
-            device.setPin(pin);
+            BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
             bluetoothGatt = device.connectGatt(this, false, bluetoothGattCallback);
 
             return true;
@@ -240,16 +235,29 @@ public class BLEGattService extends Service {
 
     @Override
     public boolean onUnbind(Intent intent) {
-        close();
+        finish();
         return super.onUnbind(intent);
     }
 
     @SuppressLint("MissingPermission")
-    public void close() {
-        if (bluetoothGatt == null) {
-            return;
+    public void finish() {
+        if (bluetoothGatt != null) {
+            bluetoothGatt.disconnect();
+            bluetoothGatt.close();
+            bluetoothGatt= null;
         }
-        bluetoothGatt.close();
-        bluetoothGatt = null;
+
+        if(bluetoothAdapter!=null){
+            bluetoothAdapter= null;
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    public void restart() {
+        if(bluetoothGatt!=null){
+            bluetoothGatt.disconnect();
+            bluetoothGatt.close();
+            bluetoothGatt=null;
+        }
     }
 }

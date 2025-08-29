@@ -1,10 +1,11 @@
-package pl.dawidkulpa.miogiapiccohome;
+package pl.dawidkulpa.miogiapiccohome.ble;
 
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.util.Log;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -105,11 +106,55 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
                 dataTxChar !=null && dataRxChar !=null);
     }
 
+    static private List<String> splitCsvRespectingQuotes(String s) {
+        List<String> out = new ArrayList<>();
+        StringBuilder cur = new StringBuilder();
+        boolean inQuotes = false;
+        boolean startedWithQuote = false;
+
+        int n = s.length();
+        for (int i = 0; i < n; i++) {
+            char ch = s.charAt(i);
+
+            if (inQuotes) {
+                if (ch == '"') {
+                    boolean nextIsSepOrEnd = (i + 1 == n) || (s.charAt(i + 1) == ',');
+                    if (nextIsSepOrEnd) {
+                        inQuotes = false;
+                    } else {
+                        cur.append('"');
+                    }
+                } else {
+                    cur.append(ch);
+                }
+            } else {
+                if (ch == ',') {
+                    out.add(cur.toString());
+                    cur.setLength(0);
+                    startedWithQuote = false;
+                } else if (ch == '"' && cur.length() == 0) {
+                    inQuotes = true;
+                    startedWithQuote = true;
+                } else {
+                    cur.append(ch);
+                }
+            }
+        }
+
+        if (inQuotes && startedWithQuote) {
+            cur.insert(0, '"');
+        }
+        out.add(cur.toString());
+
+        return out;
+    }
+
+
     @Override
     void startWrite() {
         state= State.WritingConfig;
         timeoutWatchdog.start(TIMEOUT_WRITE_CONFIG_TIME, this::onTimeout);
-        if(!sendSetConfigCmd("wssid",configWifiSSID)){
+        if(!sendSetConfigCmd("wssid","\""+configWifiSSID+"\"")){
             actionsListener.onError(ErrorCode.WriteFailed);
         }
     }
@@ -197,13 +242,13 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
                     actionsListener.onError(ErrorCode.SyncFailed);
                 }
             } else if (state == State.ReadingConfig) {
-                String[] msg= blelnSession.decryptS2C(data).split(",");
-                if(msg.length>=3 && msg[0].equals("$CONFIG") && msg[1].equals("VAL")){
+                List<String> msg= splitCsvRespectingQuotes(blelnSession.decryptS2C(data));
+                if(msg.size()>=3 && msg.get(0).equals("$CONFIG") && msg.get(1).equals("VAL")){
                     String val="";
-                    if(msg.length==4){
-                        val= msg[3];
+                    if(msg.size()==4){
+                        val= msg.get(3);
                     }
-                    switch (msg[2]) {
+                    switch (msg.get(2)) {
                         case "wssid":
                             Log.d("BLELNCharacteristics", "WiFi SSID read");
                             configWifiSSID = val;
@@ -246,13 +291,13 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
 
     @Override
     void onReadyNotify(String uuid, byte[] data) {
-       String[] msg= blelnSession.decryptS2C(data).split(",");
+       List<String> msg= splitCsvRespectingQuotes(blelnSession.decryptS2C(data));
 
-       if(Objects.equals(msg[0], "$WIFIL")){
+       if(Objects.equals(msg.get(0), "$WIFIL")){
            StringBuilder wifisList= new StringBuilder();
-           for(int i=1; i<msg.length; i++){
-               wifisList.append(msg[i]);
-               if(i< msg.length-1) wifisList.append(",");
+           for(int i=1; i<msg.size(); i++){
+               wifisList.append(msg.get(i));
+               if(i< msg.size()-1) wifisList.append(",");
            }
            actionsListener.onRefresh(wifisList.toString());
        }
@@ -269,27 +314,36 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
         Log.e("MSG", new String(data, StandardCharsets.UTF_8));
         if(state==State.WritingConfig){
             if(uuid.equals(BLE_CHAR_UUID_DATA_TX)){
-                String[] msg= blelnSession.decryptS2C(data).split(",");
-                if(msg.length>=3 && msg[0].equals("$CONFIG") && msg[1].equals("SETOK")){
-                    switch (msg[2]) {
+                List<String> msg= splitCsvRespectingQuotes(blelnSession.decryptS2C(data));
+                if(msg.size()>=3 && msg.get(0).equals("$CONFIG") && msg.get(1).equals("SETOK")){
+                    switch (msg.get(2)) {
                         case "wssid":
                             Log.d("BLELNCharacteristics", "WiFi SSID written");
-                            if(!sendSetConfigCmd("wpsk", configWifiPSK)){
+                            if(!sendSetConfigCmd("wpsk", "\""+configWifiPSK+"\"")){
                                 actionsListener.onError(ErrorCode.WriteFailed);
                                 return;
                             }
                             break;
                         case "wpsk":
                             Log.d("BLELNCharacteristics", "WiFi PSK written");
-                            sendSetConfigCmd("pcklk", configPicklock);
+                            if(!sendSetConfigCmd("pcklk", configPicklock)){
+                                actionsListener.onError(ErrorCode.WriteFailed);
+                                return;
+                            }
                             break;
                         case "pcklk":
                             Log.d("BLELNCharacteristics", "Picklock written");
-                            sendSetConfigCmd("tzone", configTimezone);
+                            if(!sendSetConfigCmd("tzone", configTimezone)){
+                                actionsListener.onError(ErrorCode.WriteFailed);
+                                return;
+                            }
                             break;
                         case "tzone":
                             Log.d("BLELNCharacteristics", "Timezone read");
-                            sendSetConfigCmd("uid", configUID);
+                            if(!sendSetConfigCmd("uid", configUID)){
+                                actionsListener.onError(ErrorCode.WriteFailed);
+                                return;
+                            }
                             break;
                         case "uid":
                             sendRebootCmd();
@@ -308,5 +362,21 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
     @Override
     boolean writingComplete() {
         return state==State.ConfigWritten;
+    }
+
+    @Override
+    void restart() {
+        finish();
+        state = State.Init;
+    }
+
+    @Override
+    void finish() {
+        timeoutWatchdog.stop();
+        keyTxChar =null;
+        keyRxChar =null;
+        dataTxChar =null;
+        dataRxChar =null;
+        blelnSession= null;
     }
 }

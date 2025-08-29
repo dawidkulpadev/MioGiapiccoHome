@@ -37,11 +37,14 @@ import pl.dawidkulpa.miogiapiccohome.API.Room;
 import pl.dawidkulpa.miogiapiccohome.API.Sector;
 import pl.dawidkulpa.miogiapiccohome.API.User;
 import pl.dawidkulpa.miogiapiccohome.API.UserData;
-import pl.dawidkulpa.miogiapiccohome.BLEConfigurer;
+import pl.dawidkulpa.miogiapiccohome.ble.BLEConfigurer;
 import pl.dawidkulpa.miogiapiccohome.R;
 
+// TODO: Make Scan shorter and auto restart scan
+// TODO: Put messages in search -> "still working", "just a minute" etc
+
 public class NewDeviceActivity extends AppCompatActivity {
-    public enum UIState {PrepareBluetooth, SearchForDevice, SetupWiFi, DeviceConfigured, UnexpectedDisconnect, Failed}
+    public enum UIState {PrepareBluetooth, SearchForDevice, UserInputing, DeviceConfigured, UnexpectedDisconnect, Failed}
 
     private UIState uiState;
     boolean scanning = false;
@@ -85,9 +88,7 @@ public class NewDeviceActivity extends AppCompatActivity {
     ProgressBar progressBar;
     Button nextButton;
 
-
     BLEConfigurer bleConfigurer;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,7 +131,6 @@ public class NewDeviceActivity extends AppCompatActivity {
         timezoneCodes= getResources().getStringArray(R.array.timezones_codes);
         timezones.addAll(Arrays.asList(tzs));
 
-
         prepareNextStep(UIState.PrepareBluetooth);
 
         userDataReceiveState= UserDataReceiveState.WaitingForResponse;
@@ -149,7 +149,7 @@ public class NewDeviceActivity extends AppCompatActivity {
 
             @Override
             public void onDeviceFound(String name) {
-
+                findViewById(R.id.step2_found_message).setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -167,7 +167,7 @@ public class NewDeviceActivity extends AppCompatActivity {
                     Log.d("NewDeviceActivity", "System state: WaitingForUserInput");
                     prepareTimezoneListAdapter();
                     prepareRoomsListAdapter();
-                    prepareNextStep(NewDeviceActivity.UIState.SetupWiFi);
+                    prepareNextStep(NewDeviceActivity.UIState.UserInputing);
                 }
             }
 
@@ -212,9 +212,9 @@ public class NewDeviceActivity extends AppCompatActivity {
         if(pos < user.getDataHandler().getRooms().size()) {
             configRoomIdx= pos;
             prepareSectorsListAdapter(pos);
+            findViewById(R.id.new_room_input_layout).setVisibility(View.GONE);
         } else {
-            Log.d("onRoomItemSelected", "Show new room edit");
-            //TODO: ((View)findViewById(R.id.new_room_edit).getParent()).setVisibility(View.VISIBLE);
+            findViewById(R.id.new_room_input_layout).setVisibility(View.VISIBLE);
         }
     }
 
@@ -239,7 +239,7 @@ public class NewDeviceActivity extends AppCompatActivity {
                 preparePlantsListAdapter(configRoomIdx, configSectorIdx);
         } else {
             Log.d("onSectorItemSelected", "Show new sector edit");
-            //TODO: ((View)findViewById(R.id.new_sector_edit).getParent()).setVisibility(View.VISIBLE);
+            ((View)findViewById(R.id.new_sector_edit).getParent()).setVisibility(View.VISIBLE);
         }
     }
 
@@ -263,7 +263,7 @@ public class NewDeviceActivity extends AppCompatActivity {
             configPlantIdx= pos;
         }else {
             Log.d("onPlantItemSelected", "Show new plant edit");
-            //TODO: ((View)findViewById(R.id.new_plant_edit).getParent()).setVisibility(View.VISIBLE);
+            ((View)findViewById(R.id.new_plant_edit).getParent()).setVisibility(View.VISIBLE);
         }
     }
 
@@ -283,15 +283,12 @@ public class NewDeviceActivity extends AppCompatActivity {
         }
     }
 
-
-
     public void onBLEError(BLEConfigurer.ErrorCode errorCode){
-        if(errorCode== BLEConfigurer.ErrorCode.UnexpectedDisconnect && uiState==UIState.SetupWiFi){
+        if(errorCode== BLEConfigurer.ErrorCode.UnexpectedDisconnect && uiState==UIState.UserInputing){
             prepareNextStep(UIState.UnexpectedDisconnect);
         } else {
             prepareNextStep(UIState.Failed);
         }
-        bleConfigurer.finishBLE();
         Log.e("NewDeviceActivity", "BLE Error: "+ errorCode.toString());
     }
 
@@ -336,13 +333,24 @@ public class NewDeviceActivity extends AppCompatActivity {
     public void onNextClick(View v){
         Log.e("UIState", uiState.name());
         switch (uiState){
-            case SetupWiFi:
+            case UserInputing:
                 onWriteConfigClick();
                 break;
             case DeviceConfigured:
                 exitActivity();
                 break;
+            case UnexpectedDisconnect:
+            case Failed:
+                retryConnect();
+                break;
         }
+    }
+
+    private void retryConnect(){
+        bleConfigurer.restart();
+        prepareNextStep(UIState.PrepareBluetooth);
+        prepareNextStep(UIState.SearchForDevice);
+        bleConfigurer.startConnectingSystem();
     }
 
     private void onWriteConfigClick(){
@@ -409,7 +417,7 @@ public class NewDeviceActivity extends AppCompatActivity {
     }
 
     private void exitActivity(){
-        bleConfigurer.finishBLE();
+        bleConfigurer.finish(this);
         finish();
     }
 
@@ -427,178 +435,190 @@ public class NewDeviceActivity extends AppCompatActivity {
         wifiSSIDsAutoComplete.setSimpleItems(wifiSSIDsList.toArray(new String[0]));
     }
 
+    private void hideUserInputs(boolean hide, Device.Type devType){
+        int state= hide?View.GONE:View.VISIBLE;
+
+        findViewById(R.id.found_device_text).setVisibility(state);
+
+        if(devType== Device.Type.Light)
+            ((View)devicesNameEdit.getParent()).setVisibility(state);
+        else
+            ((View)devicesNameEdit.getParent()).setVisibility(View.GONE);
+
+        findViewById(R.id.wifi_config_label).setVisibility(state);
+        wifiSSIDsMenu.setVisibility(state);
+        ((View)wifiPskEdit.getParent()).setVisibility(state);
+
+        findViewById(R.id.placement_config_label).setVisibility(state);
+        roomsMenu.setVisibility(state);
+        findViewById(R.id.new_room_input_layout).setVisibility(View.GONE);
+        sectorsMenu.setVisibility(View.GONE);
+        findViewById(R.id.new_sector_input_layout).setVisibility(View.GONE);
+        plantsMenu.setVisibility(View.GONE);
+        findViewById(R.id.new_plant_input_layout).setVisibility(View.GONE);
+
+        findViewById(R.id.timezone_config_label).setVisibility(state);
+        timezonesMenu.setVisibility(state);
+    }
+
     private void prepareNextStep(@NonNull UIState next){
         switch (next){
             case PrepareBluetooth:
+                // Labels
+                step1Label.setEnabled(true);
                 step1Label.setVisibility(View.VISIBLE);
                 step1Label.setTypeface(null, Typeface.BOLD);
+                step1Label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
                 step2Label.setVisibility(View.GONE);
                 step3Label.setVisibility(View.GONE);
 
-                findViewById(R.id.found_device_text).setVisibility(View.GONE);
-                findViewById(R.id.wifi_config_label).setVisibility(View.GONE);
-                findViewById(R.id.placement_config_label).setVisibility(View.GONE);
-                findViewById(R.id.timezone_config_label).setVisibility(View.GONE);
-                wifiSSIDsMenu.setVisibility(View.GONE);
-                ((View)wifiPskEdit.getParent()).setVisibility(View.GONE);
-                ((View)devicesNameEdit.getParent()).setVisibility(View.GONE);
-                roomsMenu.setVisibility(View.GONE);
-                sectorsMenu.setVisibility(View.GONE);
-                plantsMenu.setVisibility(View.GONE);
-                timezonesMenu.setVisibility(View.GONE);
+                // Step 2 messages
+                findViewById(R.id.step2_found_message).setVisibility(View.GONE);
 
+                // User input form
+                hideUserInputs(true, Device.Type.Unknown);
+
+                // Step 3 messages
                 findViewById(R.id.action_done_text).setVisibility(View.GONE);
                 findViewById(R.id.action_failed_text).setVisibility(View.GONE);
 
+                // Others
                 progressBar.setVisibility(View.GONE);
-
-                nextButton.setVisibility(View.GONE);
+                nextButton.setVisibility(View.INVISIBLE);
                 break;
             case SearchForDevice:
                 step1Label.setEnabled(false);
                 step1Label.setTypeface(null, Typeface.NORMAL);
                 step1Label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
                 step2Label.setVisibility(View.VISIBLE);
+                step2Label.setEnabled(true);
                 step2Label.setTypeface(null, Typeface.BOLD);
+                step2Label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
 
+                // Step 2 messages
+                findViewById(R.id.step2_found_message).setVisibility(View.GONE);
+
+                // User input form
+                hideUserInputs(true, Device.Type.Unknown);
+
+                // Step 3 messages
                 findViewById(R.id.action_done_text).setVisibility(View.GONE);
                 findViewById(R.id.action_failed_text).setVisibility(View.GONE);
 
+                // Others
                 progressBar.setVisibility(View.VISIBLE);
+                nextButton.setVisibility(View.INVISIBLE);
 
                 break;
-            case SetupWiFi:
+            case UserInputing:
                 step2Label.setEnabled(false);
                 step2Label.setTypeface(null, Typeface.NORMAL);
                 step2Label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
                 step3Label.setVisibility(View.VISIBLE);
+                step3Label.setEnabled(true);
                 step3Label.setTypeface(null, Typeface.BOLD);
+                step3Label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
 
+                // Step 2 messages
+                findViewById(R.id.step2_found_message).setVisibility(View.GONE);
 
-                wifiSSIDsMenu.setVisibility(View.VISIBLE);
-                ((View)wifiPskEdit.getParent()).setVisibility(View.VISIBLE);
-                findViewById(R.id.found_device_text).setVisibility(View.VISIBLE);
+                // User input form
+                hideUserInputs(false, bleConfigurer.getConnectedDevType());
                 ((TextView)findViewById(R.id.found_device_text)).setText(bleConfigurer.getFoundDeviceName());
-                findViewById(R.id.wifi_config_label).setVisibility(View.VISIBLE);
-                findViewById(R.id.placement_config_label).setVisibility(View.VISIBLE);
-                findViewById(R.id.timezone_config_label).setVisibility(View.VISIBLE);
-                roomsMenu.setVisibility(View.VISIBLE);
-                timezonesMenu.setVisibility(View.VISIBLE);
 
-                if(bleConfigurer.getConnectedDevType()== Device.Type.Light) {
-                    ((View) devicesNameEdit.getParent()).setVisibility(View.VISIBLE);
-                }
-
-                if(bleConfigurer.getConnectedDevType()== Device.Type.Soil){
-                    plantsMenu.setVisibility(View.VISIBLE);
-                } else {
-                    plantsMenu.setVisibility(View.GONE);
-                }
-
+                // Step 3 messages
                 findViewById(R.id.action_done_text).setVisibility(View.GONE);
                 findViewById(R.id.action_failed_text).setVisibility(View.GONE);
-                progressBar.setVisibility(View.GONE);
 
+                // Others
+                progressBar.setVisibility(View.GONE);
                 nextButton.setVisibility(View.VISIBLE);
                 nextButton.setText(R.string.button_config_device);
                 break;
             case DeviceConfigured:
                 step1Label.setVisibility(View.VISIBLE);
-                step1Label.setTextColor(getColor(R.color.textDisabledLight));
+                step1Label.setEnabled(false);
                 step1Label.setTypeface(null, Typeface.NORMAL);
                 step2Label.setVisibility(View.VISIBLE);
-                step2Label.setTextColor(getColor(R.color.textDisabledLight));
+                step2Label.setEnabled(false);
                 step2Label.setTypeface(null, Typeface.NORMAL);
                 step3Label.setVisibility(View.VISIBLE);
-                step3Label.setTextColor(getColor(R.color.textDisabledLight));
+                step3Label.setEnabled(false);
                 step3Label.setTypeface(null, Typeface.NORMAL);
                 step3Label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
 
-                wifiSSIDsMenu.setVisibility(View.GONE);
-                ((View) devicesNameEdit.getParent()).setVisibility(View.GONE);
-                ((View)wifiPskEdit.getParent()).setVisibility(View.GONE);
-                findViewById(R.id.found_device_text).setVisibility(View.GONE);
-                findViewById(R.id.wifi_config_label).setVisibility(View.GONE);
-                findViewById(R.id.placement_config_label).setVisibility(View.GONE);
-                findViewById(R.id.timezone_config_label).setVisibility(View.GONE);
-                roomsMenu.setVisibility(View.GONE);
-                sectorsMenu.setVisibility(View.GONE);
-                plantsMenu.setVisibility(View.GONE);
-                timezonesMenu.setVisibility(View.GONE);
+                // Step 2 messages
+                findViewById(R.id.step2_found_message).setVisibility(View.GONE);
 
-                progressBar.setVisibility(View.GONE);
+                // User input form
+                hideUserInputs(true, Device.Type.Unknown);
 
+                // Step 3 messages
                 findViewById(R.id.action_done_text).setVisibility(View.VISIBLE);
                 findViewById(R.id.action_failed_text).setVisibility(View.GONE);
 
+                // Others
+                progressBar.setVisibility(View.GONE);
                 nextButton.setVisibility(View.VISIBLE);
                 nextButton.setText(R.string.button_finish);
                 break;
             case Failed:
                 step1Label.setVisibility(View.VISIBLE);
-                step1Label.setTextColor(getColor(R.color.textDisabledLight));
+                step1Label.setEnabled(false);
                 step1Label.setTypeface(null, Typeface.NORMAL);
                 step2Label.setVisibility(View.VISIBLE);
-                step2Label.setTextColor(getColor(R.color.textDisabledLight));
+                step2Label.setEnabled(false);
                 step2Label.setTypeface(null, Typeface.NORMAL);
                 step2Label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
                 step3Label.setVisibility(View.VISIBLE);
-                step3Label.setTextColor(getColor(R.color.textDisabledLight));
+                step3Label.setEnabled(false);
                 step3Label.setTypeface(null, Typeface.NORMAL);
                 step3Label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
 
-                wifiSSIDsMenu.setVisibility(View.GONE);
-                ((View) devicesNameEdit.getParent()).setVisibility(View.GONE);
-                ((View)wifiPskEdit.getParent()).setVisibility(View.GONE);
-                findViewById(R.id.found_device_text).setVisibility(View.GONE);
-                findViewById(R.id.wifi_config_label).setVisibility(View.GONE);
-                findViewById(R.id.placement_config_label).setVisibility(View.GONE);
-                findViewById(R.id.timezone_config_label).setVisibility(View.GONE);
-                roomsMenu.setVisibility(View.GONE);
-                sectorsMenu.setVisibility(View.GONE);
-                plantsMenu.setVisibility(View.GONE);
-                timezonesMenu.setVisibility(View.GONE);
+                // Step 2 messages
+                findViewById(R.id.step2_found_message).setVisibility(View.GONE);
 
+                // User input form
+                hideUserInputs(true, Device.Type.Unknown);
+
+                // Step 3 messages
                 findViewById(R.id.action_done_text).setVisibility(View.GONE);
                 ((EmojiTextView)findViewById(R.id.action_failed_text)).setText(R.string.message_device_connect_failed);
                 findViewById(R.id.action_failed_text).setVisibility(View.VISIBLE);
 
-                nextButton.setText(R.string.button_try_again);
-                nextButton.setVisibility(View.VISIBLE);
+                // Others
                 progressBar.setVisibility(View.GONE);
+                nextButton.setVisibility(View.VISIBLE);
+                nextButton.setText(R.string.button_try_again);
                 break;
             case UnexpectedDisconnect:
                 step1Label.setVisibility(View.VISIBLE);
-                step1Label.setTextColor(getColor(R.color.textDisabledLight));
+                step1Label.setEnabled(false);
                 step1Label.setTypeface(null, Typeface.NORMAL);
                 step2Label.setVisibility(View.VISIBLE);
-                step2Label.setTextColor(getColor(R.color.textDisabledLight));
+                step2Label.setEnabled(false);
                 step2Label.setTypeface(null, Typeface.NORMAL);
                 step2Label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
                 step3Label.setVisibility(View.VISIBLE);
-                step3Label.setTextColor(getColor(R.color.textDisabledLight));
+                step3Label.setEnabled(false);
                 step3Label.setTypeface(null, Typeface.NORMAL);
                 step3Label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
 
-                wifiSSIDsMenu.setVisibility(View.GONE);
-                ((View) devicesNameEdit.getParent()).setVisibility(View.GONE);
-                ((View)wifiPskEdit.getParent()).setVisibility(View.GONE);
-                findViewById(R.id.found_device_text).setVisibility(View.GONE);
-                findViewById(R.id.wifi_config_label).setVisibility(View.GONE);
-                findViewById(R.id.placement_config_label).setVisibility(View.GONE);
-                findViewById(R.id.timezone_config_label).setVisibility(View.GONE);
-                roomsMenu.setVisibility(View.GONE);
-                sectorsMenu.setVisibility(View.GONE);
-                plantsMenu.setVisibility(View.GONE);
-                timezonesMenu.setVisibility(View.GONE);
+                // Step 2 messages
+                findViewById(R.id.step2_found_message).setVisibility(View.GONE);
 
+                // User input form
+                hideUserInputs(true, Device.Type.Unknown);
+
+                // Step 3 messages
                 findViewById(R.id.action_done_text).setVisibility(View.GONE);
                 ((EmojiTextView)findViewById(R.id.action_failed_text)).setText(R.string.message_device_unexpected_disconnect);
                 findViewById(R.id.action_failed_text).setVisibility(View.VISIBLE);
 
-                nextButton.setText(R.string.button_try_again);
-                nextButton.setVisibility(View.VISIBLE);
+                // Others
                 progressBar.setVisibility(View.GONE);
+                nextButton.setVisibility(View.VISIBLE);
+                nextButton.setText(R.string.button_try_again);
                 break;
         }
         uiState = next;

@@ -1,6 +1,8 @@
-package pl.dawidkulpa.miogiapiccohome;
+package pl.dawidkulpa.miogiapiccohome.ble;
 
 import android.bluetooth.BluetoothGattService;
+
+import pl.dawidkulpa.miogiapiccohome.TimeoutWatchdog;
 
 abstract public class BLEConfigurerCharacteristics {
     protected String configWifiSSID="";
@@ -44,6 +46,8 @@ abstract public class BLEConfigurerCharacteristics {
     abstract void onWritingWriteComplete(String uuid);
     abstract void onWritingNotify(String uuid, byte[] data);
     abstract boolean writingComplete();
+    abstract void restart();
+    abstract void finish();
 
     public String getWiFiSSID(){
         return configWifiSSID;
@@ -84,4 +88,5 @@ abstract public class BLEConfigurerCharacteristics {
     public void setConfigTimezone(String configTimezone) {
         this.configTimezone = configTimezone;
     }
+
 }

@@ -1,4 +1,4 @@
-package pl.dawidkulpa.miogiapiccohome;
+package pl.dawidkulpa.miogiapiccohome.ble;
 
 import android.util.Log;
 

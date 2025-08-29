@@ -139,5 +139,6 @@
     <string name="hint_sector">Sektor</string>
     <string name="hint_plant">Roślina</string>
     <string name="label_config_wifi">Do której sieci podłączyć urządzenie?</string>
+    <string name="message_device_found">Znalazłem! 🐕</string>
 
 </resources>

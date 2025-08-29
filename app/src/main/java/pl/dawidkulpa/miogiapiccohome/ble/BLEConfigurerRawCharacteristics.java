@@ -1,4 +1,4 @@
-package pl.dawidkulpa.miogiapiccohome;
+package pl.dawidkulpa.miogiapiccohome.ble;
 
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
@@ -287,5 +287,41 @@ public class BLEConfigurerRawCharacteristics extends BLEConfigurerCharacteristic
     @Override
     boolean writingComplete() {
         return state==State.ConfigWritten;
+    }
+
+    @Override
+    void restart() {
+        finish();
+        state= State.Init;
+    }
+
+    @Override
+    void finish() {
+        timeoutWatchdog.stop();
+
+        wifiSSIDChar =null;
+        wifiPSKChar =null;
+        uidChar =null;
+        picklockChar =null;
+        macChar =null;
+        timezoneChar =null;
+        setFlagChar =null;
+        wifiScanResChar= null;
+
+        wifiSSIDCharRead = false;
+        wifiPSKCharRead = false;
+        uidCharRead = false;
+        picklockCharRead = false;
+        macCharRead = false;
+        timezoneCharRead = false;
+        setFlagCharRead = false;
+        wifiScanResCharRead = false;
+
+        // Config written flags
+        configWifiSSIDWritten= false;
+        configWifiPSKWritten= false;
+        configPicklockWritten= false;
+        configUIDWritten= false;
+        configTimezoneWritten= false;
     }
 }
