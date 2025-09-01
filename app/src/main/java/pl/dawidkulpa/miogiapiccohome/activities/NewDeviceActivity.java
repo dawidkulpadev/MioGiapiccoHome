@@ -365,6 +365,7 @@ public class NewDeviceActivity extends AppCompatActivity {
                 || (bleConfigurer.getConnectedDevType()== Device.Type.Light && configSectorIdx==-1)
                 || (bleConfigurer.getConnectedDevType()== Device.Type.Light && deviceName.isEmpty())
                 || (bleConfigurer.getConnectedDevType()== Device.Type.Soil && configPlantIdx==-1)
+                || (bleConfigurer.getConnectedDevType()== Device.Type.Air && configSectorIdx==-1)
                 || inputTimezone.isEmpty()){
 
             Log.d("SSID IsEmpty", String.valueOf(inputWifiSSID.isEmpty()));

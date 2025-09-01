@@ -26,6 +26,7 @@
     <string name="button_room_settings">Ustawienia pokoju</string>
     <string name="button_rename">Zmień nazwę</string>
     <string name="button_try_again">Jeszcze raz!</string>
+    <string name="cd_open_air_chart">Otwórz wykres parametrów powietrza</string>
     <string name="chip_period_day">dzień</string>
     <string name="chip_period_3days">3 dni</string>
     <string name="chip_period_month">miesiąc</string>
@@ -50,6 +51,8 @@
     <string name="message_device_configured">Gotowe! 🎊</string>
     <string name="message_device_connect_failed">Nie udało mi się połączyć z Twoim urządzeniem 😥</string>
     <string name="message_device_unexpected_disconnect">Ojć! Straciłem połączenie z Twoim nowym urządzeniem! 🛸</string>
+    <string name="message_ui_error">Dziwny błąd interfejsu 👾</string>
+    <string name="message_on_room_remove_not_empty">Musisz usunąć wszystkie sektory zanim będziesz mógł usunąć pokój.</string>
     <string name="info_login_pass_empty">Wypełnij pola login i hasło</string>
     <string name="info_signin_failed">Błędny login lub hasło</string>
     <string name="info_seconds_ago">Sekundę temu</string>

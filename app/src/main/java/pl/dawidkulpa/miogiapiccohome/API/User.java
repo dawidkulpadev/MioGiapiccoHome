@@ -376,7 +376,7 @@ public class User implements Parcelable {
         sr.start(serverAddress+"/user/getairdata.php");
     }
 
-    public void updateRoom(Room r, ActionListener actionListener){
+    public void updateRoom(Room r, String newName, ActionListener actionListener){
         ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
                 ServerRequest.METHOD_POST,
                 ServerRequest.RESPONSE_TYPE_JSON,
@@ -391,10 +391,46 @@ public class User implements Parcelable {
         sr.addRequestDataPair("login", login);
         sr.addRequestDataPair("pass", pass);
 
-        sr.addRequestDataPair(Room.JSON_TAG_NAME, r.getName());
+        sr.addRequestDataPair(Room.JSON_TAG_NAME, newName);
         sr.addRequestDataPair(Room.JSON_TAG_HUMIDITY_TARGET, r.getHumidityTarget());
 
         sr.start(serverAddress+"/user/changedata/room.php");
+    }
+
+    public void deleteRoom(Room r, ActionListener actionListener){
+        ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
+                ServerRequest.METHOD_POST,
+                ServerRequest.RESPONSE_TYPE_JSON,
+                ServerRequest.TIMEOUT_DEFAULT,
+                ((respCode, jObject) -> {
+                    if(actionListener!=null){
+                        actionListener.onFinished(respCode==200);
+                    }
+                }));
+
+        sr.addRequestDataPair(Room.JSON_TAG_ID, r.getId());
+        sr.addRequestDataPair("login", login);
+        sr.addRequestDataPair("pass", pass);
+
+        sr.start(serverAddress+"/user/delete/room.php");
+    }
+
+    public void deleteSector(Sector s, ActionListener actionListener){
+        ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
+                ServerRequest.METHOD_POST,
+                ServerRequest.RESPONSE_TYPE_JSON,
+                ServerRequest.TIMEOUT_DEFAULT,
+                ((respCode, jObject) -> {
+                    if(actionListener!=null){
+                        actionListener.onFinished(respCode==200);
+                    }
+                }));
+
+        sr.addRequestDataPair(Sector.JSON_TAG_ID, s.getId());
+        sr.addRequestDataPair("login", login);
+        sr.addRequestDataPair("pass", pass);
+
+        sr.start(serverAddress+"/user/delete/sector.php");
     }
 
     public void updateLightDevice(LightDevice d, ActionListener actionListener){

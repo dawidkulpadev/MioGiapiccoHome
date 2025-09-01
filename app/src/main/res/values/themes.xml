@@ -20,7 +20,8 @@
         <item name="colorSecondaryContainer">#8AC2C2</item>
         <item name="colorOnSecondaryContainer">#22251F</item>
 
-
+        <item name="popupMenuStyle">@style/Widget.Material3.PopupMenu</item>
+        <item name="listPopupWindowStyle">@style/Widget.Material3.PopupMenu.ListPopupWindow</item>
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
@@ -28,6 +29,10 @@
     <style name="Theme.UnsafeButton" parent="Widget.Material3.Button.TextButton">
         <item name="android:textColor">@color/unsafe_button_text_color_selector</item>
         <item name="iconTint">@color/unsafe_button_text_color_selector</item>
+    </style>
+
+    <style name="Theme.SpecialTextButton" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:textColor">?attr/colorOnSecondaryContainer</item>
     </style>
 
 

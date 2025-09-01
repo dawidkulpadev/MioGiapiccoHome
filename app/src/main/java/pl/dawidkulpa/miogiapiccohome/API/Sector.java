@@ -10,7 +10,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 
 public class Sector {
-    private static final String JSON_TAG_ID="id";
+    public static final String JSON_TAG_ID="id";
     private static final String JSON_TAG_NAME="n";
     private static final String JSON_TAG_PLANTS="ps";
     private static final String JSON_TAG_LIGHT_DEVICES="lds";
@@ -20,7 +20,7 @@ public class Sector {
     private String name;
     private ArrayList<Plant> plants= new ArrayList<>();
     private ArrayList<LightDevice> lightDevices= new ArrayList<>();
-    private ArrayList<AirDevice> airDevices= new ArrayList<>();
+    private AirDevice airDevice = null;
 
     public Sector(JSONObject jobj) throws JSONException, ParseException {
         id= jobj.getInt(JSON_TAG_ID);
@@ -42,7 +42,7 @@ public class Sector {
 
         for(int i=0; i<jairs.length(); i++){
             Log.d("Sector "+id, "Parsing Air device "+i+" "+jairs.getJSONObject(i).toString());
-            airDevices.add(new AirDevice(jairs.getJSONObject(i), Device.DEVICE_NO_PARENT_ID, id));
+            airDevice= new AirDevice(jairs.getJSONObject(i), Device.DEVICE_NO_PARENT_ID, id);
         }
     }
 
@@ -60,7 +60,5 @@ public class Sector {
     public ArrayList<LightDevice> getLightDevices(){
         return lightDevices;
     }
-    public ArrayList<AirDevice> getAirDevices(){
-        return airDevices;
-    }
+    public AirDevice getAirDevice() {return airDevice;}
 }

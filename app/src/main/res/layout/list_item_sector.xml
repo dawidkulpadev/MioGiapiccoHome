@@ -33,25 +33,20 @@
                     android:text="NAME"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     android:textSize="21sp"/>
-                <TextView
-                    android:id="@+id/sector_temp_text"
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/air_params_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="16dp"
-                    android:text="TEMP"
-                    app:layout_constraintEnd_toStartOf="@id/sector_hum_text"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"/>
-                <TextView
-                    android:id="@+id/sector_hum_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:text="HUM"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"/>
+                    style="@style/Theme.SpecialTextButton"
+                    android:text="@string/value_temp_hum"
+                    app:iconGravity="end"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.recyclerview.widget.RecyclerView

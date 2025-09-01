@@ -1,8 +1,5 @@
 package pl.dawidkulpa.miogiapiccohome.adapters;
 
-import static pl.dawidkulpa.miogiapiccohome.adapters.RoomsListAdapter.RoomViewHolder.ADH_PERIOD_LENGTH_3DAYS;
-import static pl.dawidkulpa.miogiapiccohome.adapters.RoomsListAdapter.RoomViewHolder.ADH_PERIOD_LENGTH_DAY;
-
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
@@ -30,6 +27,7 @@ import java.util.Locale;
 
 import pl.dawidkulpa.miogiapiccohome.API.AirDataHistory;
 import pl.dawidkulpa.miogiapiccohome.R;
+import pl.dawidkulpa.miogiapiccohome.dialogs.AirDataPlotDialog;
 
 public class AirDataChart {
     public class DataMarkerView extends MarkerView{
@@ -251,9 +249,9 @@ public class AirDataChart {
             xTimes.add(d.get(i).getTimestamp().getTimeInMillis());
         }
 
-        if(adhPeriodLen==ADH_PERIOD_LENGTH_DAY)
+        if(adhPeriodLen== AirDataPlotDialog.ADH_PERIOD_LENGTH_DAY)
             chartView.getXAxis().setValueFormatter(new HourValueFormatter(xTimes, usersLocale));
-        else if(adhPeriodLen==ADH_PERIOD_LENGTH_3DAYS)
+        else if(adhPeriodLen==AirDataPlotDialog.ADH_PERIOD_LENGTH_3DAYS)
             chartView.getXAxis().setValueFormatter(new DayMonValueFormatter(xTimes, usersLocale));
         else
             chartView.getXAxis().setValueFormatter(new DayMonValueFormatter(xTimes, usersLocale));

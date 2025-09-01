@@ -48,10 +48,11 @@ import pl.dawidkulpa.miogiapiccohome.API.UserData;
 import pl.dawidkulpa.miogiapiccohome.EditTextWatcher;
 import pl.dawidkulpa.miogiapiccohome.adapters.RoomsListAdapter;
 import pl.dawidkulpa.miogiapiccohome.R;
+import pl.dawidkulpa.miogiapiccohome.dialogs.AirDataPlotDialog;
 import pl.dawidkulpa.miogiapiccohome.dialogs.NewSectorDialog;
 
 public class MainActivity extends AppCompatActivity
-        implements RoomsListAdapter.DataChangeListener, NewSectorDialog.ClosedListener, RoomsListAdapter.DataRequestListener {
+        implements RoomsListAdapter.DataChangeListener, NewSectorDialog.ClosedListener, AirDataPlotDialog.AirDataRequestListener {
 
     public static final String CHANNEL_ID= "dev_notifs";
 
@@ -59,6 +60,8 @@ public class MainActivity extends AppCompatActivity
     private User user;
 
     private ProgressBar progressBar;
+
+    AirDataPlotDialog airDataPlotDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,7 +109,7 @@ public class MainActivity extends AppCompatActivity
 
         findViewById(R.id.new_room_button).setOnClickListener(v -> onAddRoomClick());
 
-
+        airDataPlotDialog= new AirDataPlotDialog();
 
         startUserDataDownload();
     }
@@ -151,6 +154,8 @@ public class MainActivity extends AppCompatActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+
+
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
@@ -294,7 +299,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onRoomDeleteClick(Room r) {
-
+        user.deleteRoom(r, this::onUpdateRoomResult);
     }
 
     @Override
@@ -313,8 +318,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onRoomDataChanged(Room r) {
-        user.updateRoom(r, this::onUpdateRoomResult);
+    public void onRoomNameChanged(Room r, String newName) {
+        user.updateRoom(r, newName, this::onUpdateRoomResult);
     }
 
     @Override
@@ -338,7 +343,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void requestAirData(AirDevice ad, User.DownloadAirDataHistoryListener dadh, Calendar start, Calendar end) {
+    public void request(AirDevice ad, User.DownloadAirDataHistoryListener dadh, Calendar start, Calendar end) {
         user.getAirDataHistory(ad, dadh, start, end);
     }
 }

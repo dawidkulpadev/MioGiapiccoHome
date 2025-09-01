@@ -51,6 +51,8 @@
     <string name="button_previous">Previous</string>
     <string name="button_try_again">Try again!</string>
 
+    <string name="cd_open_air_chart">Open air chart</string>
+
     <string name="chip_period_day">day</string>
     <string name="chip_period_3days">3 days</string>
     <string name="chip_period_month">month</string>
@@ -93,6 +95,7 @@
     <string name="hint_email" translatable="false">Email</string>
     <string name="hint_password">Password</string>
     <string name="hint_repassword">Repeat password</string>
+    <string name="hint_none" translatable="false">None</string>
 
     <string name="helper_password_rules">Minimum 8 characters long, at least one special character, one uppercase letter and one digit</string>
 
@@ -113,6 +116,8 @@
     <string name="message_device_connect_failed">Failed connecting with your device 😥</string>
     <string name="message_device_unexpected_disconnect">Oh! Device disconnected unexpectedly! 🛸</string>
     <string name="message_device_found">Found! 🐕</string>
+    <string name="message_ui_error">Strange UI Error 👾</string>
+    <string name="message_on_room_remove_not_empty">You must remove all sectors before you can delete the room.</string>
 
     <string name="info_login_pass_empty">Fill up login and password fields</string>
     <string name="info_signin_failed">Wrong login or password</string>
@@ -148,6 +153,7 @@
     <string name="value_temperature" translatable="false">%.1f&#xb0;C</string>
     <string name="value_humidity" translatable="false">%.1f%%</string>
     <string name="value_humidity_integer" translatable="false">%d%%</string>
+    <string name="value_temp_hum" translatable="false">%.1f&#xb0;C &#183; %d%%</string>
     <string name="value_no_humidity" translatable="false">-%%</string>
     <string name="value_no_temperature" translatable="false">-&#xb0;C</string>
     <string name="value_co2_ppm" translatable="false">%dppm</string>
@@ -1091,14 +1097,12 @@
     <string name="attachment_summary_on" translatable="false">Automatically download attachments for incoming emails
     </string>
     <string name="attachment_summary_off" translatable="false">Only download attachments when manually requested</string>
-    <string name="title_activity_example">ExampleActivity</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">Android Studio</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
 
-    <string name="menu_home">Home</string>
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
 
