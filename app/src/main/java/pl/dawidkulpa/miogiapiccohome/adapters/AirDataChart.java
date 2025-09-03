@@ -3,6 +3,7 @@ package pl.dawidkulpa.miogiapiccohome.adapters;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
 
@@ -150,11 +151,17 @@ public class AirDataChart {
     private final String humTitle;
     private final String tempTitle;
     private final Locale usersLocale;
+    private Context context;
+
+
+    private int colorTemperatureData;
+    private int colorHumidityData;
 
     public AirDataChart(LineChart v, String humTitleText, String tempTitleText, Context context){
         chartView= v;
         humTitle= humTitleText;
         tempTitle= tempTitleText;
+        this.context= context;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             usersLocale= context.getResources().getConfiguration().getLocales().get(0);
@@ -164,6 +171,18 @@ public class AirDataChart {
     }
 
     public void init(){
+        int colorOnSurface;
+        TypedValue typedValue= new TypedValue();
+
+        context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorOnSurface, typedValue, true);
+        colorOnSurface= typedValue.data;
+
+        context.getTheme().resolveAttribute(R.attr.colorChartHumidityData, typedValue, true);
+        colorHumidityData= typedValue.data;
+
+        context.getTheme().resolveAttribute(R.attr.colorChartTemperatureData, typedValue, true);
+        colorTemperatureData= typedValue.data;
+
 // background color
         chartView.setNoDataText("");
         chartView.setBackgroundColor(Color.TRANSPARENT);
@@ -189,7 +208,7 @@ public class AirDataChart {
         XAxis xAxis;
         {   // // X-Axis Style // //
             xAxis = chartView.getXAxis();
-            xAxis.setTextColor(Color.WHITE);
+            xAxis.setTextColor(colorOnSurface);
             xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
 
             xAxis.setYOffset(10f);
@@ -202,7 +221,7 @@ public class AirDataChart {
         YAxis yAxis;
         {   // // Y-Axis Style // //
             yAxis = chartView.getAxisLeft();
-            yAxis.setTextColor(Color.CYAN);
+            yAxis.setTextColor(colorHumidityData);
             yAxis.setTextSize(12);
 
             // horizontal grid lines
@@ -217,7 +236,7 @@ public class AirDataChart {
         YAxis yAxis2;
         {
             yAxis2= chartView.getAxisRight();
-            yAxis2.setTextColor(Color.RED);
+            yAxis2.setTextColor(colorTemperatureData);
             yAxis2.enableGridDashedLine(10f, 10f, 0f);
             yAxis2.setTextSize(12);
 
@@ -229,7 +248,7 @@ public class AirDataChart {
 
         // get the legend (only possible after setting data)
         Legend l = chartView.getLegend();
-        l.setTextColor(Color.WHITE);
+        l.setTextColor(colorOnSurface);
         l.setTextSize(12);
         l.setXEntrySpace(30);
         l.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
@@ -276,7 +295,7 @@ public class AirDataChart {
             set1.setDrawIcons(false);
 
             // black lines and points
-            set1.setColor(Color.CYAN);
+            set1.setColor(colorHumidityData);
 
             // line thickness and point size
             set1.setLineWidth(1.5f);
@@ -299,7 +318,7 @@ public class AirDataChart {
             set2.setDrawIcons(false);
 
             // black lines and points
-            set2.setColor(Color.RED);
+            set2.setColor(colorTemperatureData);
 
             // line thickness and point size
             set2.setLineWidth(1.5f);

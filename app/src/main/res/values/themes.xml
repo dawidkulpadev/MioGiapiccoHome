@@ -20,6 +20,9 @@
         <item name="colorSecondaryContainer">#8AC2C2</item>
         <item name="colorOnSecondaryContainer">#22251F</item>
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+
+        <item name="colorChartHumidityData">#006064</item>
+        <item name="colorChartTemperatureData">#C62828</item>
     </style>
 
 

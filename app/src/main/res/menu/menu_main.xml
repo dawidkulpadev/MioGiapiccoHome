@@ -7,14 +7,12 @@
         android:orderInCategory="100"
         android:title="@string/action_settings"
         android:icon="@drawable/icon_settings"
-        app:iconTint="@color/textPrimaryLight"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/action_logout"
         android:orderInCategory="100"
         android:title="@string/action_logout"
         android:icon="@drawable/icon_logout"
-        app:iconTint="@color/textPrimaryLight"
         app:showAsAction="never" />
 </menu>

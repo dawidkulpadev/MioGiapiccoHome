@@ -20,6 +20,9 @@
         <item name="colorSecondaryContainer">#3C5555</item>
         <item name="colorOnSecondaryContainer">#F5F5F5</item>
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+
+        <item name="colorChartHumidityData">#4DD0E1</item>
+        <item name="colorChartTemperatureData">#E57373</item>
     </style>
 
     <style name="Theme.MyApplication.Background" parent="Theme.MyApplication">

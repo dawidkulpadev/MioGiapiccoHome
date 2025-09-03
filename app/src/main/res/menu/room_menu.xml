@@ -8,8 +8,6 @@
         android:orderInCategory="100"
         android:title="@string/button_rename"
         android:icon="@drawable/icon_edit"
-        app:iconTint="@color/textPrimaryLight"
-        android:iconTint="@color/textPrimaryLight"
         app:showAsAction="never" />
 
     <item
@@ -17,7 +15,5 @@
         android:orderInCategory="100"
         android:title="@string/button_remove"
         android:icon="@drawable/icon_remove"
-        app:iconTint="@color/textPrimaryLight"
-        android:iconTint="@color/textPrimaryLight"
         app:showAsAction="never" />
 </menu>
