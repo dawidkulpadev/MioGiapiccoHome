@@ -20,16 +20,17 @@
         <item name="colorSecondaryContainer">#3C5555</item>
         <item name="colorOnSecondaryContainer">#F5F5F5</item>
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
-
-        <item name="popupMenuStyle">@style/Widget.Material3.PopupMenu</item>
-        <item name="listPopupWindowStyle">@style/Widget.Material3.PopupMenu.ListPopupWindow</item>
     </style>
 
     <style name="Theme.MyApplication.Background" parent="Theme.MyApplication">
         <item name="android:alpha">0.65</item>
     </style>
 
-    <style name="Theme.SpecialTextButton" parent="Widget.Material3.Button.OutlinedButton">
+    <style name="Theme.MyApplication.SpecialTextButton" parent="Widget.Material3.Button.OutlinedButton">
         <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+
+    <style name="Theme.MyApplication.MoreButton" parent="Widget.Material3.Button.IconButton">
+        <item name="iconTint">?attr/colorOnSurface</item>
     </style>
 </resources>

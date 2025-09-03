@@ -30,7 +30,7 @@ public class Room {
 
         for(int i=0; i<jSectors.length(); i++){
             Log.d("Room "+id, "Parsing sector "+i+" "+jSectors.getJSONObject(i).toString());
-            sectors.add(new Sector(jSectors.getJSONObject(i)));
+            sectors.add(new Sector(jSectors.getJSONObject(i), id));
         }
     }
 

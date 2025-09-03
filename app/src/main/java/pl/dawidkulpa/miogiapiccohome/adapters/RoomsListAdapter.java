@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,6 +25,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import java.util.ArrayList;
 
 import pl.dawidkulpa.miogiapiccohome.API.AirDevice;
+import pl.dawidkulpa.miogiapiccohome.API.Device;
 import pl.dawidkulpa.miogiapiccohome.API.LightDevice;
 import pl.dawidkulpa.miogiapiccohome.API.Plant;
 import pl.dawidkulpa.miogiapiccohome.API.Sector;
@@ -37,8 +39,8 @@ import pl.dawidkulpa.miogiapiccohome.dialogs.NewSectorDialog;
 
 public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public interface DataChangeListener {
-        void onDeviceUpdateClick(LightDevice d);
-        void onDeviceDeleteClick(LightDevice d);
+        void onDeviceUpdateEnableClick(Device d);
+        void onDeviceDeleteClick(Device d);
         void onRoomDeleteClick(Room r);
         void onRoomNameChanged(Room r, String newName);
 
@@ -47,7 +49,8 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         void onAirDeviceDataChanged(AirDevice d);
         void onPlantDataChanged(Plant p);
 
-        void onSectorDataChanged(Sector s);
+        void onSectorNameChanged(Sector s, String name);
+        void onSectorDeleteClick(Sector s);
     }
 
 
@@ -86,6 +89,7 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
             roomMoreButton.setOnClickListener(v -> {
                         PopupMenu popup = new PopupMenu(root.getContext(), v);
+
                         popup.getMenuInflater().inflate(R.menu.room_menu, popup.getMenu());
                         popup.setGravity(Gravity.END);
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -131,11 +135,11 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         void onRoomRenameClick(){
             MaterialAlertDialogBuilder madb= new MaterialAlertDialogBuilder(root.getContext());
 
-            madb.setIcon(R.drawable.icon_rename);
+            madb.setIcon(R.drawable.icon_edit);
             String title= root.getContext().getString(R.string.title_rename_room, room.getName());
             madb.setTitle(title);
             madb.setView(R.layout.dialog_change_name);
-            madb.setPositiveButton(R.string.button_delete, (dialog, which) -> {
+            madb.setPositiveButton(R.string.button_set, (dialog, which) -> {
                 TextInputEditText tiet= ((AlertDialog)dialog).findViewById(R.id.text_input);
 
                 if(tiet!=null && tiet.getText()!=null) {
@@ -168,22 +172,69 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             dialog.show();
         }
 
-        void createSectorsListAdapter(ArrayList<Sector> sectors, DataChangeListener dataChangeListener, AirDataPlotDialog.AirDataRequestListener ardl){
-            sectorsListAdapter= new SectorsListAdapter(root.getContext(), sectors, dataChangeListener, ardl);
+        void createSectorsListAdapter(ArrayList<Sector> sectors, SectorsListAdapter.DataChangeListener dataChangeListener, AirDataPlotDialog.AirDataRequestListener ardl){
+            sectorsListAdapter= new SectorsListAdapter(sectors, dataChangeListener, ardl);
             sectorsRecyclerView.setAdapter(sectorsListAdapter);
         }
     }
 
     private final Context context;
     private ArrayList<Room> rooms;
-    private final DataChangeListener dataChangeListener;
+    private final DataChangeListener dcl;
+    private final SectorsListAdapter.DataChangeListener sectorDcl;
     private final AirDataPlotDialog.AirDataRequestListener adrListener;
     private final NewSectorDialog.ClosedListener apiCreateSectorRequest;
 
     public RoomsListAdapter(Context context, ArrayList<Room> rooms, DataChangeListener dataChangeListener, AirDataPlotDialog.AirDataRequestListener adrl, NewSectorDialog.ClosedListener apiCreateSectorRequest){
         this.rooms= rooms;
         this.context= context;
-        this.dataChangeListener= dataChangeListener;
+        this.dcl = dataChangeListener;
+        sectorDcl= new SectorsListAdapter.DataChangeListener() {
+            @Override
+            public void onDeviceUpdateEnableClick(Device d) {
+                dcl.onDeviceUpdateEnableClick(d);
+            }
+
+            @Override
+            public void onDeviceDeleteClick(Device d) {
+                dcl.onDeviceDeleteClick(d);
+            }
+
+            @Override
+            public void onLightDeviceDataChanged(LightDevice d) {
+                dcl.onLightDeviceDataChanged(d);
+            }
+
+            @Override
+            public void onSoilDeviceDataChanged(SoilDevice d) {
+                dcl.onSoilDeviceDataChanged(d);
+            }
+
+            @Override
+            public void onAirDeviceDataChanged(AirDevice d) {
+                dcl.onAirDeviceDataChanged(d);
+            }
+
+            @Override
+            public void onPlantDataChanged(Plant p) {
+                dcl.onPlantDataChanged(p);
+            }
+
+            @Override
+            public void onSectorNameChanged(Sector s, String newName) {
+                dcl.onSectorNameChanged(s, newName);
+            }
+
+            @Override
+            public void onSectorDeleteClick(Sector s) {
+                dcl.onSectorDeleteClick(s);
+            }
+
+            @Override
+            public ArrayList<Room> requestRoomsList() {
+                return rooms;
+            }
+        };
         this.adrListener= adrl;
         this.apiCreateSectorRequest= apiCreateSectorRequest;
     }
@@ -199,9 +250,8 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         RoomViewHolder h= ((RoomViewHolder) holder);
         h.nameText.setText(rooms.get(position).getName());
-        h.init(rooms.get(position), dataChangeListener);
-        h.createSectorsListAdapter(rooms.get(position).getSectors(), dataChangeListener, adrListener);
-
+        h.init(rooms.get(position), dcl);
+        h.createSectorsListAdapter(rooms.get(position).getSectors(), sectorDcl, adrListener);
 
         h.newSectorDialog= new NewSectorDialog(rooms.get(position).getId(), context, apiCreateSectorRequest);
         h.newSectorButton.setOnClickListener(v -> h.newSectorDialog.show());
@@ -215,5 +265,4 @@ public class RoomsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public void updateList(ArrayList<Room> newRooms){
         rooms= newRooms;
     }
-
 }

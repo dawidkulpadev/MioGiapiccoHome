@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
         android:src="@drawable/untitled"
         style="@style/Theme.MyApplication.Background"
-        android:contentDescription="@string/content_description_background"/>
+        android:contentDescription="@string/cont_descr_background"/>
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"

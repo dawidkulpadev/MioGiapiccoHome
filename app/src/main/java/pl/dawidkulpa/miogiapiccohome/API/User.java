@@ -59,7 +59,7 @@ public class User implements Parcelable {
         void onResult(boolean success, AirDataHistory airDataHistory);
     }
 
-    private final String serverAddress= "https://dawidkulpa.pl/apis/miogiapicco/";
+    private final String serverAddress= "https://dawidkulpa.pl/apis/miogiapicco-dev/";
     private int uid;
     final private String login;
     final private String pass;
@@ -397,6 +397,26 @@ public class User implements Parcelable {
         sr.start(serverAddress+"/user/changedata/room.php");
     }
 
+    public void updateSector(Sector s, String newName, ActionListener actionListener){
+        ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
+                ServerRequest.METHOD_POST,
+                ServerRequest.RESPONSE_TYPE_JSON,
+                ServerRequest.TIMEOUT_DEFAULT,
+                (respCode, jObject) -> {
+                    if(actionListener!=null){
+                        actionListener.onFinished(respCode==200);
+                    }
+                });
+
+        sr.addRequestDataPair(Sector.JSON_TAG_ID, s.getId());
+        sr.addRequestDataPair("login", login);
+        sr.addRequestDataPair("pass", pass);
+
+        sr.addRequestDataPair(Sector.JSON_TAG_NAME, newName);
+
+        sr.start(serverAddress+"/user/changedata/sector.php");
+    }
+
     public void deleteRoom(Room r, ActionListener actionListener){
         ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
                 ServerRequest.METHOD_POST,
@@ -448,7 +468,7 @@ public class User implements Parcelable {
         sr.addRequestDataPair("login", login);
         sr.addRequestDataPair("pass", pass);
 
-        sr.addRequestDataPair("si", d.getSectorParentId());
+        sr.addRequestDataPair("si", d.getSectorId());
         sr.addRequestDataPair("n", d.getName());
         sr.addRequestDataPair("dli", d.getDli()*10);
         sr.addRequestDataPair("ds", d.getDs());
@@ -459,7 +479,7 @@ public class User implements Parcelable {
         sr.start(serverAddress+"/user/changedata/lightdevice.php");
     }
 
-    public void markLightDeviceUpgradeAllowed(LightDevice d, ActionListener actionListener){
+    public void markLightDeviceUpgradeAllowed(Device d, ActionListener actionListener){
         ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
                 ServerRequest.METHOD_POST,
                 ServerRequest.RESPONSE_TYPE_JSON,
@@ -493,7 +513,6 @@ public class User implements Parcelable {
     public String getPassword() {
         return pass;
     }
-
 
 
     /** Parcelable implementation */

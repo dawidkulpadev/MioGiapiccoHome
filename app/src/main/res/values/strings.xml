@@ -50,6 +50,7 @@
     <string name="button_next">Next</string>
     <string name="button_previous">Previous</string>
     <string name="button_try_again">Try again!</string>
+    <string name="button_save_settings">Save</string>
 
     <string name="cd_open_air_chart">Open air chart</string>
 
@@ -77,6 +78,7 @@
     <string name="label_temperature">Temperature</string>
     <string name="label_battery_level">Battery level:</string>
     <string name="label_humidity_target">Humidity target:</string>
+    <string name="label_allow_update">Allow auto update</string>
 
     <string name="hint_login">Login</string>
     <string name="hint_ssid">Wifi name</string>
@@ -145,6 +147,8 @@
     <string name="title_rename_device">Rename %s device</string>
     <string name="title_remove_room">Remove %s room</string>
     <string name="title_rename_room">Rename %s room</string>
+    <string name="title_rename_sector">Rename %s sector</string>
+    <string name="title_remove_sector">Remove %s sector</string>
     <string name="title_today">Today</string>
     <string name="title_period_all_data">All data</string>
     <string name="title_air_data">Air data</string>
@@ -174,10 +178,12 @@
     <string name="error_activation_code_expired">This activation code has expired &#128542; I have sent you a new one</string>
     <string name="error_incorrect_activation_code">This is not the correct activation code</string>
     <string name="error_connection_error">Error talking with API &#128542;</string>
+    <string name="error_reading_light_device_settings">Error reading Light Device settings</string>
 
-    <string name="content_description_background">Background</string>
-
+    <string name="cont_descr_background">Background</string>
     <string name="cont_descr_plant_state_icon">Plant state icon</string>
+    <string name="cont_descr_sector_more_button">Sector\'s menu</string>
+    <string name="cont_descr_room_more_button">Room\'s menu</string>
 
     <string-array name="timezones_names">
         <item>Africa/Abidjan</item>
@@ -1097,14 +1103,6 @@
     <string name="attachment_summary_on" translatable="false">Automatically download attachments for incoming emails
     </string>
     <string name="attachment_summary_off" translatable="false">Only download attachments when manually requested</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
-    <string name="nav_header_desc">Navigation header</string>
-
-    <string name="menu_gallery">Gallery</string>
-    <string name="menu_slideshow">Slideshow</string>
 
 
 </resources>

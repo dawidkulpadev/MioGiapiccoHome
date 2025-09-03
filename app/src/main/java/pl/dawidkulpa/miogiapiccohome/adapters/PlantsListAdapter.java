@@ -17,6 +17,10 @@ import pl.dawidkulpa.miogiapiccohome.R;
 
 public class PlantsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+    public interface DataChangeListener{
+        void onPlantDataChanged(Plant p);
+    }
+
     static class PlantViewHolder extends RecyclerView.ViewHolder{
         View root;
 
@@ -33,7 +37,7 @@ public class PlantsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             stateIcon= v.findViewById(R.id.plant_state_icon);
         }
 
-        void createUI(Plant p, RoomsListAdapter.DataChangeListener dataChangeListener){
+        void createUI(Plant p, DataChangeListener dataChangeListener){
 
 
         }
@@ -41,12 +45,12 @@ public class PlantsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     private final Context context;
     final private ArrayList<Plant> plants;
-    final private RoomsListAdapter.DataChangeListener dataChangeListener;
+    final private DataChangeListener dcl;
 
     public PlantsListAdapter(Context context, ArrayList<Plant> plants,
-                                   RoomsListAdapter.DataChangeListener dataChangeListener){
+                                   DataChangeListener dataChangeListener){
         this.plants= plants;
-        this.dataChangeListener = dataChangeListener;
+        this.dcl = dataChangeListener;
         this.context= context;
     }
 
@@ -69,7 +73,7 @@ public class PlantsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             h.soilDevHumText.setVisibility(View.GONE);
         }
 
-        h.createUI(plants.get(position), dataChangeListener);
+        h.createUI(plants.get(position), dcl);
     }
 
     @Override

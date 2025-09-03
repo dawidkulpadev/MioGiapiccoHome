@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 public class Sector {
     public static final String JSON_TAG_ID="id";
-    private static final String JSON_TAG_NAME="n";
+    public static final String JSON_TAG_NAME="n";
     private static final String JSON_TAG_PLANTS="ps";
     private static final String JSON_TAG_LIGHT_DEVICES="lds";
     private static final String JSON_TAG_AIR_DEVICES="ads";
@@ -21,10 +21,12 @@ public class Sector {
     private ArrayList<Plant> plants= new ArrayList<>();
     private ArrayList<LightDevice> lightDevices= new ArrayList<>();
     private AirDevice airDevice = null;
+    private int parentRoomId;
 
-    public Sector(JSONObject jobj) throws JSONException, ParseException {
+    public Sector(JSONObject jobj, int roomId) throws JSONException, ParseException {
         id= jobj.getInt(JSON_TAG_ID);
         name= jobj.getString(JSON_TAG_NAME);
+        parentRoomId= roomId;
 
         JSONArray jplants= jobj.getJSONArray(JSON_TAG_PLANTS);
         JSONArray jlights= jobj.getJSONArray(JSON_TAG_LIGHT_DEVICES);
@@ -37,7 +39,7 @@ public class Sector {
 
         for(int i=0; i<jlights.length(); i++){
             Log.d("Sector "+id, "Parsing Light device "+i+" "+jlights.getJSONObject(i).toString());
-            lightDevices.add(new LightDevice(jlights.getJSONObject(i), id));
+            lightDevices.add(new LightDevice(jlights.getJSONObject(i), parentRoomId, id));
         }
 
         for(int i=0; i<jairs.length(); i++){

@@ -48,7 +48,6 @@ public class Device {
                 int hw_type = (hv_code & 0x0000fc00) >> 10;
                 int hw_version = hv_code & 0x000003ff;
 
-
                 int sv_code = fwv & 0x0000ffff;
                 int sw_epoch = (sv_code & 0x0000f800) >> 11;
                 int sw_epoch_version = (sv_code & 0x000007f0) >> 4;

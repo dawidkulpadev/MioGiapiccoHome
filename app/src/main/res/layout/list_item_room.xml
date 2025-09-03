@@ -34,19 +34,18 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    android:textSize="23sp"
-                    android:textStyle="bold"
-                    android:text="NAME"/>
+                    style="@style/TextAppearance.Material3.HeadlineMedium"
+                    android:text="@string/example_name"/>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/room_menu_button"
-                    style="@style/Widget.Material3.Button.IconButton"
+                    style="@style/Theme.MyApplication.MoreButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:icon="@drawable/icon_more_vertical"
-                    />
+                    android:contentDescription="@string/cont_descr_room_more_button"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -68,7 +67,7 @@
                     android:layout_height="wrap_content"
                     app:layout_constraintTop_toTopOf="@id/humidity_hold_value_label"
                     app:layout_constraintStart_toEndOf="@id/humidity_hold_value_label"
-                    android:text="75%"
+                    android:text="@string/example_percent"
                     android:layout_marginStart="8dp"/>
 
                 <androidx.recyclerview.widget.RecyclerView

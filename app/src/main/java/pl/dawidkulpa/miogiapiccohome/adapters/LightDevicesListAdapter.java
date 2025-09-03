@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,11 +21,21 @@ import com.google.android.material.divider.MaterialDivider;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import pl.dawidkulpa.miogiapiccohome.API.Device;
 import pl.dawidkulpa.miogiapiccohome.API.LightDevice;
+import pl.dawidkulpa.miogiapiccohome.API.Room;
 import pl.dawidkulpa.miogiapiccohome.R;
 import pl.dawidkulpa.miogiapiccohome.dialogs.DLIPickerDialog;
+import pl.dawidkulpa.miogiapiccohome.dialogs.LightDeviceSettingsDialog;
 
 public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    public interface DataChangeListener{
+        void onDeviceDataChanged(LightDevice d);
+        void onDeviceDeleteClick(Device d);
+        void onDeviceUpdateEnableClick(Device d);
+        ArrayList<Room> requestRoomsList();
+    }
 
     static class LightDeviceViewHolder extends RecyclerView.ViewHolder{
         View root;
@@ -41,9 +52,10 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
         TextView configsDeText;
         TextView configsSreText;
         TextView configsSssText;
-        ConstraintLayout settingsBox;
         MaterialDivider divider;
         Button settingsButton;
+
+        LightDeviceSettingsDialog lightDeviceSettingsDialog;
 
         LightDeviceViewHolder(View v){
             super(v);
@@ -60,14 +72,13 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
             configsDeText= v.findViewById(R.id.ld_de_text);
             configsDliText= v.findViewById(R.id.ld_dli_text);
 
-            settingsBox= v.findViewById(R.id.ld_settingsbox_layout);
-
             settingsButton= v.findViewById(R.id.ld_settings_button);
 
             divider= v.findViewById(R.id.divider);
+            lightDeviceSettingsDialog= new LightDeviceSettingsDialog();
         }
 
-        void setLightDeviceDetails(LightDevice ld, RoomsListAdapter.DataChangeListener dataChangeListener){
+        void setLightDeviceDetails(LightDevice ld, DataChangeListener dataChangeListener){
             nameText.setText(String.valueOf(ld.getName()));
             configsDliText.setText(root.getContext().getString(R.string.value_dli, ld.getDli()));
             configsDsText.setText(ld.getStringDs());
@@ -75,34 +86,9 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
             configsSssText.setText(ld.getStringSss());
             configsDeText.setText(ld.getStringDe());
 
-            if(ld.getSoftwareVersion().isEmpty() || ld.getHardwareVersion().isEmpty()){
-                settingsBox.findViewById(R.id.software_version_info_layout).setVisibility(View.GONE);
-                settingsBox.findViewById(R.id.hardware_version_info_layout).setVisibility(View.GONE);
-            } else {
-                String svText = root.getContext().getString(R.string.info_software_version, ld.getSoftwareVersion());
-                String hvText = root.getContext().getString(R.string.info_hardware_version, ld.getHardwareVersion());
-
-                ((TextView) settingsBox.findViewById(R.id.software_version_text)).setText(svText);
-                ((TextView) settingsBox.findViewById(R.id.hardware_version_text)).setText(hvText);
-
-                if(ld.isUpdateAvailable()){
-                    root.findViewById(R.id.ld_update_available_icon).setVisibility(View.VISIBLE);
-                    settingsBox.findViewById(R.id.software_update_button).setVisibility(View.VISIBLE);
-                }
+            if(ld.isUpdateAvailable()){
+                root.findViewById(R.id.ld_update_available_icon).setVisibility(View.VISIBLE);
             }
-
-
-            settingsBox.findViewById(R.id.delete_button).setOnClickListener(v ->
-                    openDeleteDialog(ld, dataChangeListener));
-
-            settingsBox.findViewById(R.id.software_update_button).setOnClickListener(v ->
-                    openUpdateDialog(ld, dataChangeListener));
-
-
-            settingsBox.findViewById(R.id.rename_button).setOnClickListener(v ->
-                    openRenameDialog(ld, dataChangeListener));
-
-            settingsBox.setVisibility(View.GONE);
 
             setStateData(ld);
             setConfigsUI(ld, dataChangeListener);
@@ -129,26 +115,6 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
             });
         }
 
-        private void openDeleteDialog(LightDevice ld, RoomsListAdapter.DataChangeListener dataChangeListener){
-            MaterialAlertDialogBuilder adb= new MaterialAlertDialogBuilder(root.getContext());
-
-            adb.setTitle(root.getContext().getString(R.string.title_remove_device, ld.getName()));
-            adb.setMessage(R.string.message_remove_device);
-            adb.setPositiveButton(R.string.button_remove, (dialog, which) -> dataChangeListener.onDeviceDeleteClick(ld));
-            adb.setNegativeButton(R.string.button_cancel, null);
-
-            adb.create().show();
-        }
-
-        private void openRenameDialog(LightDevice ld, RoomsListAdapter.DataChangeListener dataChangeListener){
-
-        }
-
-        private void openUpdateDialog(LightDevice ld, RoomsListAdapter.DataChangeListener dataChangeListener){
-            dataChangeListener.onDeviceUpdateClick(ld);
-        }
-
-
         private void setStateData(LightDevice ld){
             // Set state icon and next change time text
             Calendar cn= Calendar.getInstance();
@@ -167,7 +133,7 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
             }
         }
 
-        private void setConfigsUI(LightDevice ld, RoomsListAdapter.DataChangeListener dataChangeListener){
+        private void setConfigsUI(LightDevice ld, DataChangeListener dataChangeListener){
             root.findViewById(R.id.ld_sre_box).setOnClickListener(
                     view -> openTimePicker(LightDevice.FIELD_SRE_ID, ld, dataChangeListener));
             root.findViewById(R.id.ld_ds_box).setOnClickListener(
@@ -181,29 +147,27 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
                     view -> openChangeDLIDialog(ld, dataChangeListener));
 
             settingsButton.setOnClickListener(v -> {
-                changeSettingsVisibility();
+                lightDeviceSettingsDialog.show(ld, dataChangeListener.requestRoomsList(),
+                        ((AppCompatActivity) root.getContext()).getSupportFragmentManager(),
+                        "light_settings",
+                        new LightDeviceSettingsDialog.SettingsActions() {
+                            @Override
+                            public void onClose(LightDevice device, boolean write) {
+                                if(write)
+                                    dataChangeListener.onDeviceDataChanged(device);
+                            }
+
+                            @Override
+                            public void onDeleteClick(LightDevice device) {
+                                dataChangeListener.onDeviceDeleteClick(device);
+                            }
+
+                            @Override
+                            public void onUpdateAllowedChange(LightDevice device) {
+                                dataChangeListener.onDeviceUpdateEnableClick(device);
+                            }
+                        });
             });
-        }
-
-        private void changeSettingsVisibility(){
-            if(settingsBox.getVisibility()==View.GONE) {
-                settingsBox.setVisibility(View.VISIBLE);
-            } else {
-                settingsBox.setVisibility(View.GONE);
-            }
-
-            int prevHeight = root.getHeight();
-            root.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-            int targetHeight = root.getMeasuredHeight();
-
-            ValueAnimator animator = ValueAnimator.ofInt(prevHeight, targetHeight);
-            animator.addUpdateListener(animation -> {
-                ViewGroup.LayoutParams layoutParams = root.getLayoutParams();
-                layoutParams.height = (int) animation.getAnimatedValue();
-                root.setLayoutParams(layoutParams);
-            });
-            animator.setDuration(400); // Czas trwania animacji
-            animator.start();
         }
 
         private void setStateIconAndChangeText(int iconRes, String timeText){
@@ -211,20 +175,20 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
             changeTimeText.setText(root.getContext().getString(R.string.info_light_state_change, timeText));
         }
 
-        void openTimePicker(final int field, final LightDevice d, RoomsListAdapter.DataChangeListener dataChangeListener){
+        void openTimePicker(final int field, final LightDevice d, DataChangeListener dataChangeListener){
             TimePickerDialog tpd= new TimePickerDialog(root.getContext(), (timePicker, hours, mins) -> {
                 int t= hours*60+mins;
 
                 d.setTimeOf(field, t);
-                dataChangeListener.onLightDeviceDataChanged(d);
+                dataChangeListener.onDeviceDataChanged(d);
             }, d.getTimeOf(field)/60, d.getTimeOf(field)%60, true);
             tpd.show();
         }
 
-        void openChangeDLIDialog(final LightDevice device, RoomsListAdapter.DataChangeListener dataChangeListener){
+        void openChangeDLIDialog(final LightDevice device, DataChangeListener dataChangeListener){
             DLIPickerDialog dialog= new DLIPickerDialog(device, (d, v) -> {
                 d.setDli(v);
-                dataChangeListener.onLightDeviceDataChanged(d);
+                dataChangeListener.onDeviceDataChanged(d);
             });
 
             dialog.show(root.getContext());
@@ -232,12 +196,13 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
     }
 
     final private ArrayList<LightDevice> lightDevices;
-    final private RoomsListAdapter.DataChangeListener dataChangeListener;
+    final private DataChangeListener dcl;
+
 
     public LightDevicesListAdapter(ArrayList<LightDevice> lightDevices,
-                                   RoomsListAdapter.DataChangeListener dataChangeListener){
+                                   DataChangeListener dataChangeListener){
         this.lightDevices= lightDevices;
-        this.dataChangeListener = dataChangeListener;
+        this.dcl = dataChangeListener;
     }
 
     @NonNull
@@ -250,7 +215,7 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         LightDeviceViewHolder h= ((LightDeviceViewHolder) holder);
-        h.setLightDeviceDetails(lightDevices.get(position), dataChangeListener);
+        h.setLightDeviceDetails(lightDevices.get(position), dcl);
 
         if(position==lightDevices.size()-1){
             h.divider.setVisibility(View.GONE);

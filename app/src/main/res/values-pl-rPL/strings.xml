@@ -26,6 +26,7 @@
     <string name="button_room_settings">Ustawienia pokoju</string>
     <string name="button_rename">Zmień nazwę</string>
     <string name="button_try_again">Jeszcze raz!</string>
+    <string name="button_save_settings">Zapisz</string>
     <string name="cd_open_air_chart">Otwórz wykres parametrów powietrza</string>
     <string name="chip_period_day">dzień</string>
     <string name="chip_period_3days">3 dni</string>
@@ -42,6 +43,7 @@
     <string name="label_addnewdevice_step3">3) Ustaw dane access pointa i nazwę urządzenia</string>
     <string name="label_timezone">Wybierz swoją strefę czasową</string>
     <string name="label_placement">Gdzie ustawisz nowe urządzenie?</string>
+    <string name="label_allow_update">Automatyczna aktualizacja</string>
     <string name="hint_login">Login</string>
     <string name="hint_ssid">Nazwa wifi</string>
     <string name="hint_psk">Hasło</string>
@@ -69,6 +71,7 @@
     <string name="label_add_new_plant">Nowa roślina…</string>
     <string name="title_light_device_settings">Ustawienia</string>
     <string name="title_remove_device">Usuń urządzenie %s</string>
+    <string name="title_remove_sector">Usuń sektor %s</string>
     <string name="title_today">Dzisiaj</string>
     <string name="title_air_data">Parametry powietrza</string>
     <string name="title_room_settings">Ustawienia pokoju</string>
@@ -79,7 +82,8 @@
     <string name="error_server_error">Nieznany błąd serwera &#128542;</string>
     <string name="error_signup_form_error">Nieznany błąd formularza &#128542; Zrestartuj aplikację…</string>
     <string name="error_signup_email_exists">Konto z podanym adresem email już istnieje</string>
-    <string name="content_description_background">Tło</string>
+    <string name="error_reading_light_device_settings">Nie udało się wycztać ustawień urządzenia</string>
+    <string name="cont_descr_background">Tło</string>
     <string name="cont_descr_plant_state_icon">Symbol stanu rośliny</string>
     <string name="next">Następny</string>
     <string name="previous">Poprzedni</string>
@@ -143,5 +147,8 @@
     <string name="hint_plant">Roślina</string>
     <string name="label_config_wifi">Do której sieci podłączyć urządzenie?</string>
     <string name="message_device_found">Znalazłem! 🐕</string>
+    <string name="cont_descr_sector_more_button">Menu sektora</string>
+    <string name="cont_descr_room_more_button">Menu pokoju</string>
+    <string name="title_rename_sector">Zmień nazwę sektora %s</string>
 
 </resources>

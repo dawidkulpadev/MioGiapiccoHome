@@ -16,6 +16,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.text.ParseException;
+import java.util.Objects;
 
 import pl.dawidkulpa.miogiapiccohome.activities.MainActivity;
 import pl.dawidkulpa.miogiapiccohome.R;
@@ -45,7 +46,7 @@ public class StateWatcher extends BroadcastReceiver {
                             try {
                                 onGetResponse(jObject.getJSONArray("array"));
                             } catch (JSONException je) {
-                                Log.e("MainAcitivty", je.getMessage());
+                                Log.e("StateWatcher", Objects.requireNonNull(je.getMessage()));
                             }
                         }
 

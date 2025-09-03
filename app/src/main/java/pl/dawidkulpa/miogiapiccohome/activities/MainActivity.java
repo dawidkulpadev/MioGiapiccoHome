@@ -37,6 +37,7 @@ import java.util.Calendar;
 import java.util.Objects;
 
 import pl.dawidkulpa.miogiapiccohome.API.AirDevice;
+import pl.dawidkulpa.miogiapiccohome.API.Device;
 import pl.dawidkulpa.miogiapiccohome.API.LightDevice;
 import pl.dawidkulpa.miogiapiccohome.API.Plant;
 import pl.dawidkulpa.miogiapiccohome.API.Room;
@@ -288,12 +289,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onDeviceUpdateClick(LightDevice d) {
+    public void onDeviceUpdateEnableClick(Device d) {
         user.markLightDeviceUpgradeAllowed(d, success -> startUserDataDownload());
     }
 
     @Override
-    public void onDeviceDeleteClick(LightDevice d) {
+    public void onDeviceDeleteClick(Device d) {
         user.unregisterDevice(d, this::onUpdateLightDeviceResult);
     }
 
@@ -323,8 +324,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onSectorDataChanged(Sector s) {
+    public void onSectorNameChanged(Sector s, String newName) {
+        user.updateSector(s, newName, this::onUpdateRoomResult);
+    }
 
+    @Override
+    public void onSectorDeleteClick(Sector s) {
+        user.deleteSector(s, this::onUpdateRoomResult);
     }
 
     @Override

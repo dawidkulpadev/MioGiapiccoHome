@@ -21,6 +21,7 @@ public class LightDevice extends Device{
     public static final int FIELD_SSD_ID=6;
 
     private int sectorParentId;
+    private int roomParentId;
 
     private String name;
 
@@ -41,10 +42,12 @@ public class LightDevice extends Device{
     public int getSrd() {return sunriseEndAt-dayStartAt;}
     public int getSsd() {return dayEndAt-sunsetStartAt;}
 
-    public LightDevice(JSONObject jobj, int plantId) throws JSONException, ParseException {
+    public LightDevice(JSONObject jobj, int roomId, int sectorId) throws JSONException, ParseException {
         super(jobj, Type.Light);
 
-        sectorParentId= plantId;
+        sectorParentId= sectorId;
+        roomParentId= roomId;
+
         name= jobj.getString(JSON_TAG_NAME);
 
         dli = jobj.getInt(JSON_TAG_DLI);
@@ -79,7 +82,8 @@ public class LightDevice extends Device{
         return textTime;
     }
 
-    public int getSectorParentId(){
+    public int getRoomId() {return roomParentId;}
+    public int getSectorId(){
         return sectorParentId;
     }
 
@@ -151,14 +155,17 @@ public class LightDevice extends Device{
         }
     }
 
+    public void setRoomId(int id){
+        roomParentId= id;
+    }
+
+    public void setSectorId(int id){
+        sectorParentId= id;
+    }
     public void setName(String newName){
         name= newName;
     }
     public String getName(){
         return name;
-    }
-
-    public void unbind(){
-        sectorParentId= -1;
     }
 }
