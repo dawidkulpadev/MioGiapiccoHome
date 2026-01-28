@@ -84,6 +84,7 @@
     <string name="label_lights_list">🔆 Lights</string>
     <string name="label_air_params">☁️ Air</string>
     <string name="label_plants_list">🪴 Plants</string>
+    <string name="label_device_server_role">Act as server</string>
 
     <string name="hint_login">Login</string>
     <string name="hint_ssid">Wifi name</string>

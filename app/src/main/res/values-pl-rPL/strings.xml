@@ -48,6 +48,7 @@
     <string name="label_lights_list">🔆 Światło</string>
     <string name="label_air_params">☁️ Powietrze</string>
     <string name="label_plants_list">🪴 Rośliny</string>
+    <string name="label_device_server_role">Rola serwera</string>
     <string name="hint_login">Login</string>
     <string name="hint_ssid">Nazwa wifi</string>
     <string name="hint_psk">Hasło</string>
