@@ -361,12 +361,14 @@ public class NewDeviceActivity extends AppCompatActivity {
         // Remove trailing and leading spaces
         deviceName= deviceName.trim();
 
-        if(inputWifiPSK.isEmpty() || inputWifiSSID.isEmpty() || configRoomIdx==-1
+        if( (inputWifiPSK.isEmpty() && bleConfigurer.getConnectedDevType() == Device.Type.Light)
+                || (inputWifiSSID.isEmpty() && bleConfigurer.getConnectedDevType() == Device.Type.Light)
+                || configRoomIdx==-1
                 || (bleConfigurer.getConnectedDevType()== Device.Type.Light && configSectorIdx==-1)
                 || (bleConfigurer.getConnectedDevType()== Device.Type.Light && deviceName.isEmpty())
                 || (bleConfigurer.getConnectedDevType()== Device.Type.Soil && configPlantIdx==-1)
                 || (bleConfigurer.getConnectedDevType()== Device.Type.Air && configSectorIdx==-1)
-                || inputTimezone.isEmpty()){
+                || (inputTimezone.isEmpty() && bleConfigurer.getConnectedDevType() == Device.Type.Light)){
 
             Log.d("SSID IsEmpty", String.valueOf(inputWifiSSID.isEmpty()));
             Log.d("PSK IsEmpty", String.valueOf(inputWifiPSK.isEmpty()));
@@ -441,14 +443,32 @@ public class NewDeviceActivity extends AppCompatActivity {
 
         findViewById(R.id.found_device_text).setVisibility(state);
 
-        if(devType== Device.Type.Light)
-            ((View)devicesNameEdit.getParent()).setVisibility(state);
-        else
-            ((View)devicesNameEdit.getParent()).setVisibility(View.GONE);
+        if(devType== Device.Type.Light) {
+            // Name
+            ((View) devicesNameEdit.getParent()).setVisibility(state);
 
-        findViewById(R.id.wifi_config_label).setVisibility(state);
-        wifiSSIDsMenu.setVisibility(state);
-        ((View)wifiPskEdit.getParent()).setVisibility(state);
+            // WiFi
+            findViewById(R.id.wifi_config_label).setVisibility(state);
+            wifiSSIDsMenu.setVisibility(state);
+            ((View)wifiPskEdit.getParent()).setVisibility(state);
+
+            // Timezone
+            findViewById(R.id.timezone_config_label).setVisibility(state);
+            timezonesMenu.setVisibility(state);
+        } else {
+            ((View) devicesNameEdit.getParent()).setVisibility(View.GONE);
+
+            // WiFi
+            findViewById(R.id.wifi_config_label).setVisibility(View.GONE);
+            wifiSSIDsMenu.setVisibility(View.GONE);
+            ((View)wifiPskEdit.getParent()).setVisibility(View.GONE);
+
+            // Timezone
+            findViewById(R.id.timezone_config_label).setVisibility(View.GONE);
+            timezonesMenu.setVisibility(View.GONE);
+        }
+
+
 
         findViewById(R.id.placement_config_label).setVisibility(state);
         roomsMenu.setVisibility(state);
@@ -458,8 +478,7 @@ public class NewDeviceActivity extends AppCompatActivity {
         plantsMenu.setVisibility(View.GONE);
         findViewById(R.id.new_plant_input_layout).setVisibility(View.GONE);
 
-        findViewById(R.id.timezone_config_label).setVisibility(state);
-        timezonesMenu.setVisibility(state);
+
     }
 
     private void prepareNextStep(@NonNull UIState next){

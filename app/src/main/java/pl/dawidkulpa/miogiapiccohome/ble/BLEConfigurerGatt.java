@@ -27,6 +27,7 @@ public class BLEConfigurerGatt extends BroadcastReceiver {
     public enum ErrorCode {ConnectFailed, DiscoverFailed, SyncFailed, ConfigWriteFailed, UnexpectedDisconnect}
 
     public static final String SERVICE_UUID                 = "952cb13b-57fa-4885-a445-57d1f17328fd";
+    public static final String SERVICE_GEN2_UUID            = "e0611e96-d399-4101-8507-1f23ee392891";
 
     public interface ConfigurerGattListener {
         void onDeviceConnected();
@@ -165,7 +166,12 @@ public class BLEConfigurerGatt extends BroadcastReceiver {
                     break;
                 case BLEGattService.ACTION_GATT_SERVICES_DISCOVERED:
                     timeoutWatchdog.stop();
-                    if (discoverService()) {
+                    String searchUUID= SERVICE_UUID;
+                    if(bleName.contains("Gen2")){
+                        searchUUID= SERVICE_GEN2_UUID;
+                    }
+
+                    if (discoverService(searchUUID)) {
                         listener.onDeviceConnected();
                         state = State.Syncing;
                         Log.d("BLEConfigurerGattCallbacks", "System state: Syncing");
@@ -254,7 +260,7 @@ public class BLEConfigurerGatt extends BroadcastReceiver {
         }
     }
 
-    private boolean discoverService(){
+    private boolean discoverService(String searchedUUID){
         boolean discoverResult= false;
 
         List<BluetoothGattService> gattServices= bluetoothService.getSupportedGattServices();
@@ -266,7 +272,7 @@ public class BLEConfigurerGatt extends BroadcastReceiver {
         for (BluetoothGattService gattService : gattServices) {
             uuid = gattService.getUuid().toString();
 
-            if(uuid.equals(SERVICE_UUID)){
+            if(uuid.equals(searchedUUID) ){
                 discoverResult= characteristicsManager.discoverCharacteristics(gattService);
                 break;
             }

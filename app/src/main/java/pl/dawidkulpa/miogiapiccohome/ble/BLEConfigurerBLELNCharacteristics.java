@@ -311,7 +311,6 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
 
     @Override
     void onWritingNotify(String uuid, byte[] data) {
-        Log.e("MSG", new String(data, StandardCharsets.UTF_8));
         if(state==State.WritingConfig){
             if(uuid.equals(BLE_CHAR_UUID_DATA_TX)){
                 List<String> msg= splitCsvRespectingQuotes(blelnSession.decryptS2C(data));

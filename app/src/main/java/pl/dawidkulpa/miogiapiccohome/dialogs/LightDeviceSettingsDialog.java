@@ -184,7 +184,10 @@ public class LightDeviceSettingsDialog extends BottomSheetDialogFragment {
 
         adb.setTitle(dialog.getContext().getString(R.string.title_remove_device, device.getName()));
         adb.setMessage(R.string.message_remove_device);
-        adb.setPositiveButton(R.string.button_remove, (dialog, which) -> actions.onDeleteClick(device));
+        adb.setPositiveButton(R.string.button_remove, (dialog, which) -> {
+            dismiss();
+            actions.onDeleteClick(device);
+        });
         adb.setNegativeButton(R.string.button_cancel, null);
 
         adb.create().show();

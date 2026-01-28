@@ -1,7 +1,7 @@
 <resources>
     <dimen name="device_info_font_size">16sp</dimen>
     <dimen name="fab_margin">16dp</dimen>
-    <dimen name="device_name_font_size">16sp</dimen>
+    <dimen name="device_name_font_size">17sp</dimen>
     <dimen name="configs_light_font_size">15sp</dimen>
 
     <dimen name="details_light_icon_size">28dp</dimen>

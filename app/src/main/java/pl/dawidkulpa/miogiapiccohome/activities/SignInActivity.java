@@ -26,9 +26,9 @@ import pl.dawidkulpa.miogiapiccohome.R;
 public class SignInActivity extends AppCompatActivity {
     private User user;
 
-    private static final String SHARED_PREFS_NAME = "def-prefs";
-    private static final String USERNAME_KEY = "username_key";
-    private static final String PASSWORD_KEY = "password_key";
+    public static final String SHARED_PREFS_NAME = "def-prefs";
+    public static final String USERNAME_KEY = "username_key";
+    public static final String PASSWORD_KEY = "password_key";
 
     SharedPreferences prefs;
 

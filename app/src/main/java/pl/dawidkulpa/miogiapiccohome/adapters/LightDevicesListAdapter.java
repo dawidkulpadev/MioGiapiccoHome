@@ -1,7 +1,6 @@
 package pl.dawidkulpa.miogiapiccohome.adapters;
 
 import android.animation.ValueAnimator;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import android.app.TimePickerDialog;
 import android.view.LayoutInflater;
@@ -17,6 +16,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.divider.MaterialDivider;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -42,7 +42,9 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
 
         // Main box data
         TextView nameText;
-        TextView changeTimeText;
+        TextView daypartStartTimeText;
+        TextView daypartEndTimeText;
+        LinearProgressIndicator daypartProgressIndicator;
         ImageView stateIcon;
 
         // Config box data
@@ -63,7 +65,9 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
 
             nameText= v.findViewById(R.id.ld_name_text);
             stateIcon= v.findViewById(R.id.ld_state_icon);
-            changeTimeText= v.findViewById(R.id.ld_change_time_text);
+            daypartStartTimeText= v.findViewById(R.id.ld_daypart_start_text);
+            daypartEndTimeText= v.findViewById(R.id.ld_daypart_end_text);
+            daypartProgressIndicator= v.findViewById(R.id.ld_daypart_progress);
 
             configsBox= v.findViewById(R.id.ld_config_box);
             configsDsText= v.findViewById(R.id.ld_ds_text);
@@ -121,15 +125,20 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
             int nowMins= cn.get(Calendar.HOUR_OF_DAY) * 60 + cn.get(Calendar.MINUTE);
 
             if(nowMins>ld.getDe()){
-                setStateIconAndChangeText(R.drawable.moon, ld.getStringDs());
+                int progress= (nowMins-ld.getDe())*100 / ((24*60 - ld.getDe()) + ld.getDs());
+                setStateIconAndChangeText(R.drawable.moon, ld.getStringDe(), ld.getStringDs(), progress);
             } else if(nowMins>ld.getSss()){
-                setStateIconAndChangeText(R.drawable.sunset, ld.getStringDe());
+                int progress= (nowMins-ld.getSss())*100 / (ld.getDe()-ld.getSss());
+                setStateIconAndChangeText(R.drawable.sunset, ld.getStringSss(), ld.getStringDe(), progress);
             } else if(nowMins>ld.getSre()){
-                setStateIconAndChangeText(R.drawable.sun, ld.getStringSss());
+                int progress= (nowMins-ld.getSre())*100 / (ld.getSss()-ld.getSre());
+                setStateIconAndChangeText(R.drawable.sun, ld.getStringSre(), ld.getStringSss(),progress);
             } else if(nowMins>ld.getDs()) {
-                setStateIconAndChangeText(R.drawable.sunrise, ld.getStringSre());
+                int progress= (nowMins-ld.getDs())*100 / (ld.getSre()-ld.getDs());
+                setStateIconAndChangeText(R.drawable.sunrise, ld.getStringDs(), ld.getStringSre(), progress);
             } else {
-                setStateIconAndChangeText(R.drawable.moon, ld.getStringDs());
+                int progress= (nowMins + (24*60 - ld.getDe()))*100 / ((24*60 - ld.getDe()) + ld.getDs());
+                setStateIconAndChangeText(R.drawable.moon, ld.getStringDe(), ld.getStringDs(), progress);
             }
         }
 
@@ -170,9 +179,11 @@ public class LightDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.V
             });
         }
 
-        private void setStateIconAndChangeText(int iconRes, String timeText){
+        private void setStateIconAndChangeText(int iconRes, String startTimeText, String endTimeText, int progress){
             stateIcon.setImageResource(iconRes);
-            changeTimeText.setText(root.getContext().getString(R.string.info_light_state_change, timeText));
+            daypartStartTimeText.setText(root.getContext().getString(R.string.info_light_time, startTimeText));
+            daypartEndTimeText.setText(root.getContext().getString(R.string.info_light_time, endTimeText));
+            daypartProgressIndicator.setProgressCompat(progress, false);
         }
 
         void openTimePicker(final int field, final LightDevice d, DataChangeListener dataChangeListener){

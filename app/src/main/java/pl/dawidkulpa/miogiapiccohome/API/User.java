@@ -307,6 +307,7 @@ public class User implements Parcelable {
                 ServerRequest.TIMEOUT_DEFAULT,
                 (respCode, jObject) -> {
                     if(actionListener !=null){
+                        Log.d("Server response code", String.valueOf(respCode));
                         actionListener.onFinished(respCode == 200);
                     }
                 });

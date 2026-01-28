@@ -4,7 +4,7 @@
     <string name="action_settings">Ustawienia</string>
     <string name="channel_name">Powiadomienia stanu urządzeń</string>
     <string name="channel_description">Powiadom gdy wykryte zostanie uszkodzonie urządzenia</string>
-    <string name="malfunction_detected">Znaleziono uszkodzone urządzenie</string>
+    <string name="malfunction_detected">Przynajmniej jedno z twoich urządzeń nie działa poprawnie</string>
     <string name="button_signin">Zaloguj</string>
     <string name="button_create_account">Stwórz nowe konto!</string>
     <string name="button_start">Rozpocznij</string>
@@ -27,6 +27,7 @@
     <string name="button_rename">Zmień nazwę</string>
     <string name="button_try_again">Jeszcze raz!</string>
     <string name="button_save_settings">Zapisz</string>
+    <string name="button_open_chart">Wykres</string>
     <string name="cd_open_air_chart">Otwórz wykres parametrów powietrza</string>
     <string name="chip_period_day">dzień</string>
     <string name="chip_period_3days">3 dni</string>
@@ -44,6 +45,9 @@
     <string name="label_timezone">Wybierz swoją strefę czasową</string>
     <string name="label_placement">Gdzie ustawisz nowe urządzenie?</string>
     <string name="label_allow_update">Automatyczna aktualizacja</string>
+    <string name="label_lights_list">🔆 Światło</string>
+    <string name="label_air_params">☁️ Powietrze</string>
+    <string name="label_plants_list">🪴 Rośliny</string>
     <string name="hint_login">Login</string>
     <string name="hint_ssid">Nazwa wifi</string>
     <string name="hint_psk">Hasło</string>
@@ -65,7 +69,6 @@
     <string name="hint_plants_name">Nazwa rośliny</string>
     <string name="info_no_devices_bind">Brak przypisanych urządzeń</string>
     <string name="info_no_soil_device_assigned">Brak przypisanego urządzenia</string>
-    <string name="info_light_state_change">do %s</string>
     <string name="title_create_plant_dialog">Nowa roślina</string>
     <string name="info_seen_long_ago">Daaawno temu się odzywał</string>
     <string name="label_add_new_plant">Nowa roślina…</string>

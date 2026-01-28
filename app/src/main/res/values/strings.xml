@@ -6,7 +6,7 @@
     <string name="channel_name">Device state notifications</string>
     <string name="channel_description">Shown when device malfunction detected</string>
 
-    <string name="malfunction_detected">malfunction detected</string>
+    <string name="malfunction_detected">At least one of your devices is not working properly</string>
     <string name="last_seen" translatable="false">Last seen</string>
 
     <string name="example_name" translatable="false">Name</string>
@@ -15,6 +15,7 @@
     <string name="example_percent" translatable="false">50%</string>
     <string name="example_title" translatable="false">Title</string>
     <string name="example_message" translatable="false">Example message</string>
+    <string name="example_temperature" translatable="false">23&#xb0;C</string>
 
     <string name="mg_device_name_light" translatable="false">MioGiapicco Light</string>
     <string name="mg_device_name_air" translatable="false">MioGiapicco Air</string>
@@ -51,6 +52,7 @@
     <string name="button_previous">Previous</string>
     <string name="button_try_again">Try again!</string>
     <string name="button_save_settings">Save</string>
+    <string name="button_open_chart">Plot</string>
 
     <string name="cd_open_air_chart">Open air chart</string>
 
@@ -79,6 +81,9 @@
     <string name="label_battery_level">Battery level:</string>
     <string name="label_humidity_target">Humidity target:</string>
     <string name="label_allow_update">Allow auto update</string>
+    <string name="label_lights_list">🔆 Lights</string>
+    <string name="label_air_params">☁️ Air</string>
+    <string name="label_plants_list">🪴 Plants</string>
 
     <string name="hint_login">Login</string>
     <string name="hint_ssid">Wifi name</string>
@@ -130,7 +135,7 @@
     <string name="info_no_devices_bind">No devices connected</string>
     <string name="info_seen_long_ago">Seen looong time ago</string>
     <string name="info_no_soil_device_assigned">No soil device</string>
-    <string name="info_light_state_change">-> %s</string>
+    <string name="info_light_time" translatable="false">%s</string>
     <string name="info_software_version">Software: %s</string>
     <string name="info_hardware_version">Hardware: %s</string>
 

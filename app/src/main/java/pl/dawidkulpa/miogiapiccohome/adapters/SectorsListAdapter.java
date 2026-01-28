@@ -1,6 +1,5 @@
 package pl.dawidkulpa.miogiapiccohome.adapters;
 
-import android.content.Context;
 import android.os.Build;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -63,7 +62,11 @@ public class SectorsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         RecyclerView lightsRecyclerView;
         LightDevicesListAdapter lightsListAdapter;
 
-        Button airParamsButton;
+        Button airParamsChartButton;
+        TextView airHumLabelText;
+        TextView airHumValueText;
+        TextView airTempLabelText;
+        TextView airTempValueText;
         Button sectorMoreButton;
         AirDataPlotDialog.AirDataRequestListener adrListener;
         AirDataPlotDialog airDataPlotDialog;
@@ -76,7 +79,11 @@ public class SectorsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             root= v;
 
             nameText= v.findViewById(R.id.sector_name_text);
-            airParamsButton= v.findViewById(R.id.air_params_button);
+            airParamsChartButton = v.findViewById(R.id.air_chart_button);
+            airHumLabelText= v.findViewById(R.id.air_humidity_label);
+            airHumValueText= v.findViewById(R.id.air_humidity_value_text);
+            airTempLabelText= v.findViewById(R.id.air_temperature_label);
+            airTempValueText= v.findViewById(R.id.air_temperature_value_text);
 
             plantsRecyclerView= v.findViewById(R.id.sector_plants_list);
             RecyclerView.LayoutManager plantsLayoutManager = new LinearLayoutManager(v.getContext());
@@ -94,19 +101,19 @@ public class SectorsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         void init(AirDataPlotDialog.AirDataRequestListener adrl, Sector s, DataChangeListener dataChangeListener){
             adrListener= adrl;
             sector= s;
-            airParamsButton.setOnClickListener(v->toggleDetails());
+            airParamsChartButton.setOnClickListener(v->toggleDetails());
             dcl= dataChangeListener;
 
             if(s.getAirDevice()==null){
-                airParamsButton.setVisibility(View.GONE);
+                root.findViewById(R.id.air_device_box).setVisibility(View.GONE);
             } else {
                 float hum = (float)s.getAirDevice().getAirHumidity();
                 float temp = (float)s.getAirDevice().getAitTemperature();
 
-                airParamsButton.setVisibility(View.VISIBLE);
+                root.findViewById(R.id.air_device_box).setVisibility(View.VISIBLE);
 
-                String airParamsText = root.getContext().getString(R.string.value_temp_hum, temp, Math.round(hum));
-                airParamsButton.setText(airParamsText);
+                airTempValueText.setText(root.getContext().getString(R.string.value_temperature, temp));
+                airHumValueText.setText(root.getContext().getString(R.string.value_humidity, hum));
             }
 
             sectorMoreButton.setOnClickListener(v -> {
@@ -194,13 +201,23 @@ public class SectorsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
 
         void createPlantsListAdapter(ArrayList<Plant> plants, PlantsListAdapter.DataChangeListener plantsDcl){
-            plantsListAdapter= new PlantsListAdapter(root.getContext(), plants, plantsDcl);
-            plantsRecyclerView.setAdapter(plantsListAdapter);
+            if(plants.isEmpty()){
+                root.findViewById(R.id.plants_label).setVisibility(View.GONE);
+            } else {
+                root.findViewById(R.id.plants_label).setVisibility(View.VISIBLE);
+                plantsListAdapter= new PlantsListAdapter(root.getContext(), plants, plantsDcl);
+                plantsRecyclerView.setAdapter(plantsListAdapter);
+            }
         }
 
         void createLightsListAdapter(ArrayList<LightDevice> lights, LightDevicesListAdapter.DataChangeListener dataChangeListener){
-            lightsListAdapter= new LightDevicesListAdapter(lights, dataChangeListener);
-            lightsRecyclerView.setAdapter(lightsListAdapter);
+            if(!lights.isEmpty()) {
+                root.findViewById(R.id.lights_label).setVisibility(View.VISIBLE);
+                lightsListAdapter = new LightDevicesListAdapter(lights, dataChangeListener);
+                lightsRecyclerView.setAdapter(lightsListAdapter);
+            } else {
+                root.findViewById(R.id.lights_label).setVisibility(View.GONE);
+            }
         }
 
         void toggleDetails(){
@@ -232,6 +249,7 @@ public class SectorsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         h.init(adrListener, sectors.get(position), dcl);
 
         h.createPlantsListAdapter(sectors.get(position).getPlants(), dcl::onPlantDataChanged);
+
         h.createLightsListAdapter(sectors.get(position).getLightDevices(), new LightDevicesListAdapter.DataChangeListener() {
             @Override
             public void onDeviceDataChanged(LightDevice d) {
