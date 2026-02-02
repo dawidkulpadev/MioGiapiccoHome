@@ -26,7 +26,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import pl.dawidkulpa.miogiapiccohome.API.AirDataHistory;
+import pl.dawidkulpa.miogiapiccohome.API.data.AirDataHistory;
 import pl.dawidkulpa.miogiapiccohome.R;
 import pl.dawidkulpa.miogiapiccohome.dialogs.AirDataPlotDialog;
 

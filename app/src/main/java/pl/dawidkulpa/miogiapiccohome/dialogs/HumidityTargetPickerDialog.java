@@ -12,8 +12,7 @@ import com.google.android.material.slider.Slider;
 
 import java.util.Objects;
 
-import pl.dawidkulpa.miogiapiccohome.API.LightDevice;
-import pl.dawidkulpa.miogiapiccohome.API.Room;
+import pl.dawidkulpa.miogiapiccohome.API.data.Room;
 import pl.dawidkulpa.miogiapiccohome.R;
 
 public class HumidityTargetPickerDialog {

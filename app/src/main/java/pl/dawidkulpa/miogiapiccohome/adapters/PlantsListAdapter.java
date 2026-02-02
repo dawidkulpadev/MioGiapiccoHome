@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-import pl.dawidkulpa.miogiapiccohome.API.Plant;
+import pl.dawidkulpa.miogiapiccohome.API.data.Plant;
 import pl.dawidkulpa.miogiapiccohome.R;
 
 public class PlantsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {

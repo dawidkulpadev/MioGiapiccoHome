@@ -14,7 +14,7 @@ import androidx.core.content.ContextCompat;
 
 import java.util.List;
 
-import pl.dawidkulpa.miogiapiccohome.API.Device;
+import pl.dawidkulpa.miogiapiccohome.API.data.Device;
 import pl.dawidkulpa.miogiapiccohome.R;
 import pl.dawidkulpa.miogiapiccohome.TimeoutWatchdog;
 

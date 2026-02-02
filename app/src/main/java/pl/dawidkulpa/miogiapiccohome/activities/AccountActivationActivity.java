@@ -1,9 +1,9 @@
 package pl.dawidkulpa.miogiapiccohome.activities;
 
-import static pl.dawidkulpa.miogiapiccohome.API.User.ACTIVATION_CODE_EXPIRED;
-import static pl.dawidkulpa.miogiapiccohome.API.User.ACTIVATION_CODE_INCORRECT;
-import static pl.dawidkulpa.miogiapiccohome.API.User.ACTIVATION_CONN_ERROR;
-import static pl.dawidkulpa.miogiapiccohome.API.User.ACTIVATION_SUCCESS;
+import static pl.dawidkulpa.miogiapiccohome.API.data.User.ACTIVATION_CODE_EXPIRED;
+import static pl.dawidkulpa.miogiapiccohome.API.data.User.ACTIVATION_CODE_INCORRECT;
+import static pl.dawidkulpa.miogiapiccohome.API.data.User.ACTIVATION_CONN_ERROR;
+import static pl.dawidkulpa.miogiapiccohome.API.data.User.ACTIVATION_SUCCESS;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -21,7 +21,7 @@ import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 
-import pl.dawidkulpa.miogiapiccohome.API.User;
+import pl.dawidkulpa.miogiapiccohome.API.data.User;
 import pl.dawidkulpa.miogiapiccohome.R;
 
 public class AccountActivationActivity extends AppCompatActivity {

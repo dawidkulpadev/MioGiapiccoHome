@@ -24,9 +24,9 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
 
-import pl.dawidkulpa.miogiapiccohome.API.LightDevice;
-import pl.dawidkulpa.miogiapiccohome.API.Room;
-import pl.dawidkulpa.miogiapiccohome.API.Sector;
+import pl.dawidkulpa.miogiapiccohome.API.data.LightDevice;
+import pl.dawidkulpa.miogiapiccohome.API.data.Room;
+import pl.dawidkulpa.miogiapiccohome.API.data.Sector;
 import pl.dawidkulpa.miogiapiccohome.R;
 
 public class LightDeviceSettingsDialog extends BottomSheetDialogFragment {

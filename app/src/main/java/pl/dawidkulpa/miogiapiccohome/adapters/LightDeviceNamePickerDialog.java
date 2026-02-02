@@ -7,7 +7,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import pl.dawidkulpa.miogiapiccohome.API.LightDevice;
+import pl.dawidkulpa.miogiapiccohome.API.data.LightDevice;
 import pl.dawidkulpa.miogiapiccohome.R;
 
 public class LightDeviceNamePickerDialog {

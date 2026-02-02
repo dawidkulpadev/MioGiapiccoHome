@@ -31,12 +31,12 @@ import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import pl.dawidkulpa.miogiapiccohome.API.Device;
-import pl.dawidkulpa.miogiapiccohome.API.Plant;
-import pl.dawidkulpa.miogiapiccohome.API.Room;
-import pl.dawidkulpa.miogiapiccohome.API.Sector;
-import pl.dawidkulpa.miogiapiccohome.API.User;
-import pl.dawidkulpa.miogiapiccohome.API.UserData;
+import pl.dawidkulpa.miogiapiccohome.API.data.Device;
+import pl.dawidkulpa.miogiapiccohome.API.data.Plant;
+import pl.dawidkulpa.miogiapiccohome.API.data.Room;
+import pl.dawidkulpa.miogiapiccohome.API.data.Sector;
+import pl.dawidkulpa.miogiapiccohome.API.data.User;
+import pl.dawidkulpa.miogiapiccohome.API.data.UserData;
 import pl.dawidkulpa.miogiapiccohome.ble.BLEConfigurer;
 import pl.dawidkulpa.miogiapiccohome.R;
 

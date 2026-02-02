@@ -9,7 +9,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
 
-import pl.dawidkulpa.miogiapiccohome.API.Device;
+import pl.dawidkulpa.miogiapiccohome.API.data.Device;
 
 public class BLEConfigurer {
     /** Constants */

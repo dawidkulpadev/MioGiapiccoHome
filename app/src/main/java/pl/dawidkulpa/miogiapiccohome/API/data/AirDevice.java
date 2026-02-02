@@ -1,11 +1,10 @@
-package pl.dawidkulpa.miogiapiccohome.API;
+package pl.dawidkulpa.miogiapiccohome.API.data;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 
 import java.text.ParseException;
 
-public class AirDevice extends Device{
+public class AirDevice extends Device {
     private static final String JSON_TAG_NAME="n";
     private static final String JSON_TAG_AIR_HUM="ah";
     private static final String JSON_TAG_AIR_TEMP="at";
@@ -22,18 +21,18 @@ public class AirDevice extends Device{
     private final int humidWaterLvl;
     private final double batteryVoltage;
 
-    public AirDevice(JSONObject jobj, int roomId, int sectorId) throws JSONException, ParseException {
+    public AirDevice(JsonObject jobj, int roomId, int sectorId) throws ParseException {
         super(jobj, Type.Air);
 
         roomParentId= roomId;
         sectorParentId= sectorId;
 
-        name= jobj.getString(JSON_TAG_NAME);
+        name= jobj.get(JSON_TAG_NAME).getAsString();
 
-        airHumidity= jobj.getDouble(JSON_TAG_AIR_HUM);
-        aitTemperature= jobj.getDouble(JSON_TAG_AIR_TEMP);
-        humidWaterLvl= jobj.getInt(JSON_TAG_HUMIDIFIER_WATER_LEVEL);
-        batteryVoltage= jobj.getDouble(JSON_TAG_BATTERY_VOLTAGE);
+        airHumidity= jobj.get(JSON_TAG_AIR_HUM).getAsDouble();
+        aitTemperature= jobj.get(JSON_TAG_AIR_TEMP).getAsDouble();
+        humidWaterLvl= jobj.get(JSON_TAG_HUMIDIFIER_WATER_LEVEL).getAsInt();
+        batteryVoltage= jobj.get(JSON_TAG_BATTERY_VOLTAGE).getAsDouble();
     }
 
     public double getAirHumidity() {

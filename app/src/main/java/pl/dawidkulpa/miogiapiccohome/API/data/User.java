@@ -1,4 +1,4 @@
-package pl.dawidkulpa.miogiapiccohome.API;
+package pl.dawidkulpa.miogiapiccohome.API.data;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -6,16 +6,25 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 
-import java.text.ParseException;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-import pl.dawidkulpa.scm.Query;
-import pl.dawidkulpa.scm.ServerRequest;
+import pl.dawidkulpa.miogiapiccohome.API.requests.ActivationRequest;
+import pl.dawidkulpa.miogiapiccohome.API.ApiClient;
+import pl.dawidkulpa.miogiapiccohome.API.requests.LoginRequest;
+import pl.dawidkulpa.miogiapiccohome.API.MioGiapiccoApi;
+import pl.dawidkulpa.miogiapiccohome.API.requests.RegisterDeviceRequest;
+import pl.dawidkulpa.miogiapiccohome.API.requests.RoomCreateRequest;
+import pl.dawidkulpa.miogiapiccohome.API.requests.RoomDeleteRequest;
+import pl.dawidkulpa.miogiapiccohome.API.requests.SectorCreateRequest;
+import pl.dawidkulpa.miogiapiccohome.API.requests.SectorDeleteRequest;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class User implements Parcelable {
     public static final int ACTIVATION_SUCCESS=0;
@@ -59,12 +68,14 @@ public class User implements Parcelable {
         void onResult(boolean success, AirDataHistory airDataHistory);
     }
 
-    private final String serverAddress= "https://dawidkulpa.pl/apis/miogiapicco/";
     private int uid;
     final private String login;
     final private String pass;
+    private String token;
     private String picklock;
     private final UserData data;
+
+    private final MioGiapiccoApi api = ApiClient.getClient();
 
     public User(String login, String pass){
         this.login= login;
@@ -77,46 +88,75 @@ public class User implements Parcelable {
     }
 
     /** SIGN IN / UP */
-    public void signIn(SignInUpListener signInUpListener){
-        ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
-                ServerRequest.METHOD_POST,
-                ServerRequest.RESPONSE_TYPE_JSON,
-                ServerRequest.TIMEOUT_DEFAULT,
-                (respCode, jObject) -> onSignInFinished(respCode, jObject, signInUpListener));
+    public void signIn(SignInUpListener listener){
+        Call<JsonObject> call = api.login(new LoginRequest(login, pass));
 
-        sr.addRequestDataPair("login", login);
-        sr.addRequestDataPair("pass", pass);
+        call.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    JsonObject body = response.body();
+                    token = "Bearer " + body.get("token").getAsString();
+                    Log.e("Token", token);
+                    uid = body.get("uid").getAsInt();
+                    if(listener != null) listener.onFinished(User.this, SIGN_IN_RESULT_SUCCESS);
+                } else {
+                    try {
+                        Log.e("Login", response.errorBody().string());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    int code = response.code();
+                    int result = (code == 401) ? SIGN_IN_RESULT_AUTH_ERROR : SIGN_IN_RESULT_SERVER_ERROR;
+                    if(listener != null) listener.onFinished(User.this, result);
+                }
+            }
 
-        sr.start(serverAddress+"/user/signin.php");
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                // Błąd połączenia (brak neta, timeout)
+                if(listener != null) listener.onFinished(User.this, SIGN_IN_RESULT_CONN_ERROR);
+            }
+        });
     }
 
-    public void signUp(SignInUpListener signInUpListener){
-        ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
-                ServerRequest.METHOD_POST,
-                ServerRequest.RESPONSE_TYPE_JSON,
-                ServerRequest.TIMEOUT_DEFAULT,
-                (respCode, jObject) -> onSignUpFinished(respCode, jObject, signInUpListener));
+    public void signUp(SignInUpListener listener){
+        Call<JsonObject> call = api.register(new LoginRequest(login, pass));
 
-        sr.addRequestDataPair("login", login);
-        sr.addRequestDataPair("pass", pass);
+        call.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
+                if (response.isSuccessful()) {
+                    JsonObject body= response.body();
+                    uid = body.get("uid").getAsInt();
+                    picklock= body.get("picklock").getAsString();
+                    if(listener != null) listener.onFinished(User.this, SIGN_UP_RESULT_SUCCESS);
+                } else {
+                    // 409 Conflict - użytkownik istnieje
+                    int result = (response.code() == 409) ? SIGN_UP_RESULT_ACCOUNT_EXISTS : SIGN_UP_RESULT_SERVER_ERROR;
+                    if(listener != null) listener.onFinished(User.this, result);
+                }
+            }
 
-        sr.start(serverAddress+"/user/create/account.php");
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                if(listener != null) listener.onFinished(User.this, SIGN_UP_RESULT_CONN_ERROR);
+            }
+        });
     }
 
     public void activateAccount(String activationCode, ActivationListener activationListener){
-        ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
-                ServerRequest.METHOD_POST,
-                ServerRequest.RESPONSE_TYPE_JSON,
-                ServerRequest.TIMEOUT_DEFAULT,
-                ((respCode, jObject) -> {
+        Call<JsonObject> call = api.activate(new ActivationRequest(login, pass, activationCode));
+
+        call.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                if (response.isSuccessful()) {
+                    if(activationListener != null)
+                        activationListener.onFinished(ACTIVATION_SUCCESS);
+                } else {
                     int res;
-
-                    Log.e("User", "Signup response code: "+respCode);
-
-                    switch (respCode){
-                        case 200:
-                            res= ACTIVATION_SUCCESS;
-                            break;
+                    switch (response.code()){
                         case 400:
                             res= ACTIVATION_CODE_EXPIRED;
                             break;
@@ -138,118 +178,77 @@ public class User implements Parcelable {
 
                     if(activationListener!=null)
                         activationListener.onFinished(res);
-                }));
-
-        sr.addRequestDataPair("login", login);
-        sr.addRequestDataPair("pass", pass);
-        sr.addRequestDataPair("pin", activationCode);
-
-        sr.start(serverAddress+"/user/activate.php");
-    }
-
-    public void onSignInFinished(int respCode, JSONObject jObject, SignInUpListener signInUpListener){
-        if(signInUpListener !=null){
-            Log.e("User", "Signup response code: "+respCode);
-            if(respCode==200) {
-                try {
-                    uid = jObject.getInt("uid");
-                    picklock= jObject.getString("picklock");
-                    signInUpListener.onFinished(this,SIGN_IN_RESULT_SUCCESS);
-                } catch (JSONException e){
-                    signInUpListener.onFinished(this,SIGN_IN_RESULT_SERVER_ERROR);
                 }
-            } else if(respCode==401) {
-                signInUpListener.onFinished(this, SIGN_IN_RESULT_AUTH_ERROR);
-            } else if(respCode==423){
-                signInUpListener.onFinished(this, SIGN_IN_RESULT_NOT_ACTIVATED);
-            } else if(respCode==500) {
-                signInUpListener.onFinished(this, SIGN_IN_RESULT_CONN_ERROR);
-            }else {
-                signInUpListener.onFinished(this, SIGN_IN_RESULT_SERVER_ERROR);
-            }
-        }
-    }
-
-    public void onSignUpFinished(int respCode, JSONObject jObject, SignInUpListener signInUpListener){
-        if(signInUpListener!=null){
-            Log.d("User", "Resp code: "+respCode);
-            int result= SIGN_UP_RESULT_CONN_ERROR;
-
-            if(respCode==200){
-                try {
-                    uid = jObject.getInt("uid");
-                    picklock= jObject.getString("picklock");
-                    Log.d("User", picklock);
-                    result =SIGN_UP_RESULT_SUCCESS;
-                } catch (JSONException ignored){}
-
-            } else if(respCode==409){
-                result= SIGN_UP_RESULT_ACCOUNT_EXISTS;
-            } else if(respCode==500){
-                result= SIGN_UP_RESULT_SERVER_ERROR;
             }
 
-            signInUpListener.onFinished(this, result);
-        }
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                if(activationListener != null) activationListener.onFinished(ACTIVATION_SERVER_ERROR);
+            }
+        });
     }
 
     public void regenerateActivationCode(ActionListener actionListener){
-        ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
-                ServerRequest.METHOD_POST,
-                ServerRequest.RESPONSE_TYPE_JSON,
-                ServerRequest.TIMEOUT_DEFAULT,
-                (respCode, jObject) -> {
-                    Log.d("User", "resp: "+respCode);
-                    if(actionListener !=null){
-                        actionListener.onFinished(respCode == 200);
-                    }
-                });
+        Call<JsonObject> call = api.regenerateActivationPin(new LoginRequest(login, pass));
 
-        sr.addRequestDataPair("login", login);
-        sr.addRequestDataPair("pass", pass);
+        call.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                if(actionListener!=null)
+                    actionListener.onFinished(response.isSuccessful());
+            }
 
-        sr.start(serverAddress+"/user/changedata/regenerateactivationcode.php");
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                if(actionListener!=null)
+                    actionListener.onFinished(false);
+            }
+        });
     }
 
 
-    public void createRoom(String name, ActionListener actionListener){
-        ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
-                ServerRequest.METHOD_POST,
-                ServerRequest.RESPONSE_TYPE_JSON,
-                ServerRequest.TIMEOUT_DEFAULT,
-                (respCode, jObject) -> {
-                    if(actionListener !=null){
-                        actionListener.onFinished(respCode == 200);
-                    }
-                });
+    public void createRoom(String name, ActionListener listener){
+        Call<JsonObject> call = api.createRoom(token, new RoomCreateRequest(name));
 
-        sr.addRequestDataPair("login", login);
-        sr.addRequestDataPair("pass", pass);
-        sr.addRequestDataPair("name", name);
+        call.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                boolean success = response.isSuccessful(); // Kod 200-299
+                if(listener != null) listener.onFinished(success);
+            }
 
-        sr.start(serverAddress+"/user/create/room.php");
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                if(listener != null) listener.onFinished(false);
+            }
+        });
     }
 
     public void createSector(String name, int roomId, ActionListener actionListener){
-        ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
-                ServerRequest.METHOD_POST,
-                ServerRequest.RESPONSE_TYPE_JSON,
-                ServerRequest.TIMEOUT_DEFAULT,
-                (respCode, jObject) -> {
-                    if(actionListener !=null){
-                        actionListener.onFinished(respCode == 200);
+        Call<JsonObject> call = api.createSector(token, new SectorCreateRequest(name, roomId));
+
+        call.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                if(!response.isSuccessful()){
+                    try {
+                        Log.e("Sector", "Returned "+response.errorBody().string());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
                     }
-                });
+                }
+                if(actionListener !=null)
+                    actionListener.onFinished(response.isSuccessful());
+            }
 
-        sr.addRequestDataPair("login", login);
-        sr.addRequestDataPair("pass", pass);
-        sr.addRequestDataPair("name", name);
-        sr.addRequestDataPair("roomid", roomId);
-
-        sr.start(serverAddress+"/user/create/sector.php");
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                if(actionListener != null) actionListener.onFinished(false);
+            }
+        });
     }
 
-    public void createPlant(String name, int secId, ActionListener actionListener){
+    /*public void createPlant(String name, int secId, ActionListener actionListener){
         ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
                 ServerRequest.METHOD_POST,
                 ServerRequest.RESPONSE_TYPE_JSON,
@@ -266,42 +265,37 @@ public class User implements Parcelable {
         sr.addRequestDataPair("secid", secId);
 
         sr.start(serverAddress+"/user/create/plant.php");
-    }
+    }*/
 
     public void registerDevice(String id, int roomId, int sectorId, int plantId, String name,
                                Device.Type devType,
                                ActionListener actionListener){
-        ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
-                ServerRequest.METHOD_POST,
-                ServerRequest.RESPONSE_TYPE_JSON,
-                ServerRequest.TIMEOUT_DEFAULT,
-                (respCode, jObject) -> {
-                    if(actionListener !=null){
-                        actionListener.onFinished(respCode == 200);
-                    }
-                });
+        Call<JsonObject> call = api.registerDevice(
+                token, new RegisterDeviceRequest(
+                        id,
+                        devType.ordinal(),
+                        roomId,
+                        sectorId,
+                        plantId,
+                        name));
 
-        sr.addRequestDataPair("f", "register");
-        if(devType== Device.Type.Soil)
-            sr.addRequestDataPair("t", "soil");
-        else if(devType==Device.Type.Light)
-            sr.addRequestDataPair("t", "light");
-        else if(devType==Device.Type.Air)
-            sr.addRequestDataPair("t", "air");
-        sr.addRequestDataPair("login", login);
-        sr.addRequestDataPair("pass", pass);
-        sr.addRequestDataPair("id", id);
+        call.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
+                if(actionListener!=null)
+                    actionListener.onFinished(response.isSuccessful());
+            }
 
-        sr.addRequestDataPair("roomId", roomId);
-        sr.addRequestDataPair("sectorId", sectorId);
-        sr.addRequestDataPair("plantId", plantId);
-        sr.addRequestDataPair("name", name);
-
-        sr.start(serverAddress+"/user/create/registerdevice.php");
+            @Override
+            public void onFailure(@NonNull Call<JsonObject> call, Throwable t) {
+                if(actionListener!=null)
+                    actionListener.onFinished(false);
+            }
+        });
     }
 
     public void unregisterDevice(Device device, ActionListener actionListener){
-        ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
+    /*    ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
                 ServerRequest.METHOD_POST,
                 ServerRequest.RESPONSE_TYPE_JSON,
                 ServerRequest.TIMEOUT_DEFAULT,
@@ -322,36 +316,33 @@ public class User implements Parcelable {
         sr.addRequestDataPair("pass", pass);
         sr.addRequestDataPair("id", device.getId());
 
-        sr.start(serverAddress+"/user/delete/unregisterdevice.php");
+        sr.start(serverAddress+"/user/delete/unregisterdevice.php");*/
     }
 
     public void downloadData(final DownloadDataListener ddl){
-        ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
-                ServerRequest.METHOD_POST, ServerRequest.RESPONSE_TYPE_JSON,
-                ServerRequest.TIMEOUT_DEFAULT, (respCode, jObject) -> {
-                    if(respCode==200) {
-                        if (data.parse(jObject)){
-                            ddl.onResult(true, data);
-                        } else {
-                            if(ddl!=null){
-                                ddl.onResult(false, null);
-                            }
-                        }
-                    } else {
-                        if(ddl!=null){
-                            ddl.onResult(false, null);
-                        }
-                    }
-                });
+        Call<JsonObject> call = api.getDevices(token);
 
-        sr.addRequestDataPair("login", login);
-        sr.addRequestDataPair("pass", pass);
+        call.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
+                if(response.isSuccessful() && response.body() != null){
+                    Log.e("DownloadData", response.body().toString());
+                    data.parse(response.body());
+                    ddl.onResult(true, data);
+                } else {
+                    if(ddl != null) ddl.onResult(false, null);
+                }
+            }
 
-        sr.start(serverAddress+"/user/getdata.php");
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                if(ddl != null) ddl.onResult(false, null);
+            }
+        });
     }
 
     public void getAirDataHistory(AirDevice airDevice, @NonNull DownloadAirDataHistoryListener dadhl, Calendar start, Calendar end){
-        ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
+    /*    ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
                 ServerRequest.METHOD_POST, ServerRequest.RESPONSE_TYPE_JSON,
                 ServerRequest.TIMEOUT_DEFAULT, (respCode, jObject) -> {
                     if(respCode==200) {
@@ -374,11 +365,11 @@ public class User implements Parcelable {
         if(end!=null)
             sr.addRequestDataPair("he", sqlSDF.format(end.getTime()));
 
-        sr.start(serverAddress+"/user/getairdata.php");
+        sr.start(serverAddress+"/user/getairdata.php");*/
     }
 
     public void updateRoom(Room r, String newName, ActionListener actionListener){
-        ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
+       /* ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
                 ServerRequest.METHOD_POST,
                 ServerRequest.RESPONSE_TYPE_JSON,
                 ServerRequest.TIMEOUT_DEFAULT,
@@ -395,11 +386,11 @@ public class User implements Parcelable {
         sr.addRequestDataPair(Room.JSON_TAG_NAME, newName);
         sr.addRequestDataPair(Room.JSON_TAG_HUMIDITY_TARGET, r.getHumidityTarget());
 
-        sr.start(serverAddress+"/user/changedata/room.php");
+        sr.start(serverAddress+"/user/changedata/room.php");*/
     }
 
     public void updateSector(Sector s, String newName, ActionListener actionListener){
-        ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
+       /* ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
                 ServerRequest.METHOD_POST,
                 ServerRequest.RESPONSE_TYPE_JSON,
                 ServerRequest.TIMEOUT_DEFAULT,
@@ -415,47 +406,45 @@ public class User implements Parcelable {
 
         sr.addRequestDataPair(Sector.JSON_TAG_NAME, newName);
 
-        sr.start(serverAddress+"/user/changedata/sector.php");
+        sr.start(serverAddress+"/user/changedata/sector.php");*/
     }
 
     public void deleteRoom(Room r, ActionListener actionListener){
-        ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
-                ServerRequest.METHOD_POST,
-                ServerRequest.RESPONSE_TYPE_JSON,
-                ServerRequest.TIMEOUT_DEFAULT,
-                ((respCode, jObject) -> {
-                    if(actionListener!=null){
-                        actionListener.onFinished(respCode==200);
-                    }
-                }));
+        Call<JsonObject> call = api.deleteRoom(token, new RoomDeleteRequest(r.getId()));
 
-        sr.addRequestDataPair(Room.JSON_TAG_ID, r.getId());
-        sr.addRequestDataPair("login", login);
-        sr.addRequestDataPair("pass", pass);
+        call.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                if(actionListener !=null)
+                    actionListener.onFinished(response.isSuccessful());
+            }
 
-        sr.start(serverAddress+"/user/delete/room.php");
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                if(actionListener != null) actionListener.onFinished(false);
+            }
+        });
     }
 
     public void deleteSector(Sector s, ActionListener actionListener){
-        ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
-                ServerRequest.METHOD_POST,
-                ServerRequest.RESPONSE_TYPE_JSON,
-                ServerRequest.TIMEOUT_DEFAULT,
-                ((respCode, jObject) -> {
-                    if(actionListener!=null){
-                        actionListener.onFinished(respCode==200);
-                    }
-                }));
+        Call<JsonObject> call = api.deleteSector(token, new SectorDeleteRequest(s.getParentRoomId(), s.getId()));
 
-        sr.addRequestDataPair(Sector.JSON_TAG_ID, s.getId());
-        sr.addRequestDataPair("login", login);
-        sr.addRequestDataPair("pass", pass);
+        call.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                if(actionListener !=null)
+                    actionListener.onFinished(response.isSuccessful());
+            }
 
-        sr.start(serverAddress+"/user/delete/sector.php");
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                if(actionListener != null) actionListener.onFinished(false);
+            }
+        });
     }
 
     public void updateLightDevice(LightDevice d, ActionListener actionListener){
-        ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
+    /*    ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
                 ServerRequest.METHOD_POST,
                 ServerRequest.RESPONSE_TYPE_JSON,
                 ServerRequest.TIMEOUT_DEFAULT,
@@ -477,11 +466,11 @@ public class User implements Parcelable {
         sr.addRequestDataPair("ssd", d.getSsd());
         sr.addRequestDataPair("srd", d.getSrd());
 
-        sr.start(serverAddress+"/user/changedata/lightdevice.php");
+        sr.start(serverAddress+"/user/changedata/lightdevice.php");*/
     }
 
     public void markLightDeviceUpgradeAllowed(Device d, ActionListener actionListener){
-        ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
+    /*    ServerRequest sr= new ServerRequest(Query.FormatType.Pairs,
                 ServerRequest.METHOD_POST,
                 ServerRequest.RESPONSE_TYPE_JSON,
                 ServerRequest.TIMEOUT_DEFAULT,
@@ -495,7 +484,7 @@ public class User implements Parcelable {
         sr.addRequestDataPair("login", login);
         sr.addRequestDataPair("pass", pass);
 
-        sr.start(serverAddress+"/user/changedata/allowupdate.php");
+        sr.start(serverAddress+"/user/changedata/allowupdate.php");*/
     }
 
 
@@ -522,6 +511,7 @@ public class User implements Parcelable {
     }
 
     public void writeToParcel(Parcel out, int flags) {
+        out.writeString(token);
         out.writeInt(uid);
         out.writeString(login);
         out.writeString(pass);
@@ -539,6 +529,7 @@ public class User implements Parcelable {
     };
 
     private User(Parcel in) {
+        token= in.readString();
         uid= in.readInt();
         login= in.readString();
         pass= in.readString();
