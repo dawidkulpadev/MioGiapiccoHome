@@ -136,7 +136,7 @@ public class NewDeviceActivity extends AppCompatActivity {
         userDataReceiveState= UserDataReceiveState.WaitingForResponse;
         user.downloadData(this::onDownloadUserDataResult);
 
-        bleConfigurer= new BLEConfigurer(this, new BLEConfigurer.BLEConfigurerCallbacks() {
+        bleConfigurer = new BLEConfigurer(this, new BLEConfigurer.BLEConfigurerCallbacks() {
             @Override
             public void deviceSearchStarted() {
                 prepareNextStep(NewDeviceActivity.UIState.SearchForDevice);
@@ -144,7 +144,7 @@ public class NewDeviceActivity extends AppCompatActivity {
 
             @Override
             public void onError(BLEConfigurer.ErrorCode errorCode) {
-                onBLEError(errorCode);
+                runOnUiThread(() -> onBLEError(errorCode));
             }
 
             @Override

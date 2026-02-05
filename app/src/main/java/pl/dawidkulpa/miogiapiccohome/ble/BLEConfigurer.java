@@ -90,7 +90,7 @@ public class BLEConfigurer {
         @Override
         public void run() {
             BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            if(state==BLEConfigurer.ConfigurerState.WaitingForBluetooth){
+            if(state== BLEConfigurer.ConfigurerState.WaitingForBluetooth){
                 if(mBluetoothAdapter!=null && mBluetoothAdapter.isEnabled()){
                     state= BLEConfigurer.ConfigurerState.SearchingDevice;
                     Log.d("NewDeviceActivity", "System state: SearchingForDevice");
@@ -182,13 +182,7 @@ public class BLEConfigurer {
     public void finish(Context c){
         scanStopHandler.removeCallbacks(scanStopTask);
         bleConfigurerGatt.finish(c);
-        try {
-            c.unregisterReceiver(bleConfigurerGatt);
-        } catch (IllegalArgumentException e){
-            Log.w("NewDeviceActivity", "Gatt update receiver not registered");
-        }
     }
-
 
     public void startConnectingSystem(){
         state= ConfigurerState.WaitingForBluetooth;

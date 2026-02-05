@@ -3,12 +3,16 @@ package pl.dawidkulpa.miogiapiccohome.API;
 import com.google.gson.JsonObject;
 
 import pl.dawidkulpa.miogiapiccohome.API.requests.ActivationRequest;
+import pl.dawidkulpa.miogiapiccohome.API.requests.AddPlantRequest;
+import pl.dawidkulpa.miogiapiccohome.API.requests.AirDataHistoryRequest;
+import pl.dawidkulpa.miogiapiccohome.API.requests.DeletePlantRequest;
 import pl.dawidkulpa.miogiapiccohome.API.requests.LoginRequest;
 import pl.dawidkulpa.miogiapiccohome.API.requests.RegisterDeviceRequest;
 import pl.dawidkulpa.miogiapiccohome.API.requests.RoomCreateRequest;
 import pl.dawidkulpa.miogiapiccohome.API.requests.RoomDeleteRequest;
 import pl.dawidkulpa.miogiapiccohome.API.requests.SectorCreateRequest;
 import pl.dawidkulpa.miogiapiccohome.API.requests.SectorDeleteRequest;
+import pl.dawidkulpa.miogiapiccohome.API.requests.UnregisterDeviceRequest;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -45,4 +49,16 @@ public interface MioGiapiccoApi {
 
     @POST("device/register")
     Call<JsonObject> registerDevice(@Header("authorization") String token, @Body RegisterDeviceRequest body);
+
+    @POST("device/unregister")
+    Call<JsonObject> unregisterDevice(@Header("authorization") String token, @Body UnregisterDeviceRequest body);
+
+    @GET("device/air-history")
+    Call<JsonObject> getAirDataHistory(@Header("authorization") String token, @Body AirDataHistoryRequest body);
+
+    @POST("plant/create")
+    Call<JsonObject> createPlant(@Header("authorization") String token, @Body AddPlantRequest body);
+
+    @POST("plant/delete")
+    Call<JsonObject> deletePlant(@Header("authorization") String token, @Body DeletePlantRequest body);
 }

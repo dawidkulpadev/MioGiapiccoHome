@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
     compileSdk 36
@@ -33,6 +34,9 @@ android {
             excludes += ['META-INF/versions/9/OSGI-INF/MANIFEST.MF']
         }
     }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
 
 }
 
@@ -58,6 +62,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:3.0.0'
     implementation 'com.squareup.retrofit2:converter-gson:3.0.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:5.3.2'
+    implementation 'androidx.core:core-ktx:1.17.0'
 }
 java {
     toolchain {

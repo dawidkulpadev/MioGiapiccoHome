@@ -34,7 +34,6 @@ public class BLEConfigurerRawCharacteristics extends BLEConfigurerCharacteristic
     private boolean picklockCharRead = false;
     private boolean macCharRead = false;
     private boolean timezoneCharRead = false;
-    private boolean setFlagCharRead = false;
     private boolean wifiScanResCharRead = false;
 
     // Config written flags
@@ -113,17 +112,11 @@ public class BLEConfigurerRawCharacteristics extends BLEConfigurerCharacteristic
         configUIDWritten= false;
         configTimezoneWritten= false;
 
-        wifiSSIDChar.setValue(configWifiSSID);
-        wifiPSKChar.setValue(configWifiPSK);
-        uidChar.setValue(configUID);
-        picklockChar.setValue(configPicklock);
-        timezoneChar.setValue(configTimezone);
-
-        bleService.writeCharacteristic(timezoneChar);
-        bleService.writeCharacteristic(wifiSSIDChar);
-        bleService.writeCharacteristic(wifiPSKChar);
-        bleService.writeCharacteristic(uidChar);
-        bleService.writeCharacteristic(picklockChar);
+        bleService.writeCharacteristic(timezoneChar, configTimezone.getBytes());
+        bleService.writeCharacteristic(wifiSSIDChar, configWifiSSID.getBytes());
+        bleService.writeCharacteristic(wifiPSKChar, configWifiPSK.getBytes());
+        bleService.writeCharacteristic(uidChar, configUID.getBytes());
+        bleService.writeCharacteristic(picklockChar, configPicklock.getBytes());
     }
 
     @Override
@@ -134,7 +127,6 @@ public class BLEConfigurerRawCharacteristics extends BLEConfigurerCharacteristic
         picklockCharRead = false;
         macCharRead = false;
         timezoneCharRead = false;
-        setFlagCharRead = false;
         wifiScanResCharRead = false;
 
         bleService.readCharacteristic(wifiSSIDChar);
@@ -157,7 +149,7 @@ public class BLEConfigurerRawCharacteristics extends BLEConfigurerCharacteristic
     }
 
     @Override
-    void onPreparingDataAvailable(String uuid, byte[] data) {
+    void preparingStateOnValueReceived(String uuid, byte[] data) {
         String dataStr= new String(data, StandardCharsets.UTF_8);
 
         switch (Objects.requireNonNull(uuid)) {
@@ -205,8 +197,7 @@ public class BLEConfigurerRawCharacteristics extends BLEConfigurerCharacteristic
     }
 
     @Override
-    void onPreparingDescriptorUpdate(String uuid) {
-        // TODO: Check which descriptor was updated
+    void preparingStateOnDescriptorUpdate(String uuid) {
         if(state==State.EnablingSetFlagNotifications){
             state= State.EnablingWiFiScanNotifications;
             bleService.allowNotificationsFor(wifiScanResChar);
@@ -216,19 +207,19 @@ public class BLEConfigurerRawCharacteristics extends BLEConfigurerCharacteristic
     }
 
     @Override
-    void onPreparingNotify(String uuid, byte[] data) {
+    void preparingStateOnNotify(String uuid, byte[] data) {
 
     }
 
     @Override
-    void onReadyNotify(String uuid, byte[] data) {
+    void readyStateOnNotify(String uuid, byte[] data) {
         if(Objects.equals(uuid, BLE_CHAR_UUID_WIFI_SCAN_RES)) {
             bleService.readCharacteristic(wifiScanResChar);
         }
     }
 
     @Override
-    void onReadyDataAvailable(String uuid, byte[] data) {
+    void readyStateOnValueReceived(String uuid, byte[] data) {
         String dataStr= new String(data, StandardCharsets.UTF_8);
 
         if(Objects.equals(uuid, BLE_CHAR_UUID_WIFI_SCAN_RES) && data!=null){
@@ -242,7 +233,7 @@ public class BLEConfigurerRawCharacteristics extends BLEConfigurerCharacteristic
     }
 
     @Override
-    void onWritingWriteComplete(String uuid) {
+    void writingStateOnWriteComplete(String uuid) {
         switch (Objects.requireNonNull(uuid)) {
             case BLE_CHAR_UUID_PICKLOCK:
                 configPicklockWritten= true;
@@ -266,17 +257,12 @@ public class BLEConfigurerRawCharacteristics extends BLEConfigurerCharacteristic
         }
 
         if (allCharWriten()) {
-            //parent.stopTimeoutWatchdog();
-            //parent.setState(BLEConfigurer.ConfigurerState.NotifyingCharacteristicsReady);
-            //Log.d("NewDeviceActivity", "System state: NotifyingCharacteristicsReady");
-            setFlagChar.setValue(new byte[]{0x01});
-            bleService.writeCharacteristic(setFlagChar);
-            //parent.startTimeoutWatchdog(ACTION_TIMEOUT_DEVICE_CONFIGURED_RESPONSE);
+            bleService.writeCharacteristic(setFlagChar, new byte[]{0x01});
         }
     }
 
     @Override
-    void onWritingNotify(String uuid, byte[] data) {
+    void writingStateOnNotify(String uuid, byte[] data) {
         String dataStr= new String(data, StandardCharsets.UTF_8);
 
         if(uuid!=null && uuid.equals(BLE_CHAR_UUID_SET_FLAG) && dataStr.equals("0")) {
@@ -314,7 +300,6 @@ public class BLEConfigurerRawCharacteristics extends BLEConfigurerCharacteristic
         picklockCharRead = false;
         macCharRead = false;
         timezoneCharRead = false;
-        setFlagCharRead = false;
         wifiScanResCharRead = false;
 
         // Config written flags

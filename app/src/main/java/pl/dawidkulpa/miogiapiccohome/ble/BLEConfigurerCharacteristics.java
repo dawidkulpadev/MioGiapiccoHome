@@ -36,15 +36,15 @@ abstract public class BLEConfigurerCharacteristics {
     abstract boolean preparedAndReady();
 
 
-    abstract void onPreparingDataAvailable(String uuid, byte[] data);
-    abstract void onPreparingDescriptorUpdate(String uuid);
-    abstract void onPreparingNotify(String uuid, byte[] data);
+    abstract void preparingStateOnValueReceived(String uuid, byte[] data);
+    abstract void preparingStateOnDescriptorUpdate(String uuid);
+    abstract void preparingStateOnNotify(String uuid, byte[] data);
 
-    abstract void onReadyNotify(String uuid, byte[] data);
-    abstract void onReadyDataAvailable(String uuid, byte[] data);
+    abstract void readyStateOnNotify(String uuid, byte[] data);
+    abstract void readyStateOnValueReceived(String uuid, byte[] data);
 
-    abstract void onWritingWriteComplete(String uuid);
-    abstract void onWritingNotify(String uuid, byte[] data);
+    abstract void writingStateOnWriteComplete(String uuid);
+    abstract void writingStateOnNotify(String uuid, byte[] data);
     abstract boolean writingComplete();
     abstract void restart();
     abstract void finish();

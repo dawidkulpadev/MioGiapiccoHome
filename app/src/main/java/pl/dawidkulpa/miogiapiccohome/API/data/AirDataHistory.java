@@ -40,7 +40,6 @@ public class AirDataHistory implements Iterable<AirData> {
     }
 
     @Override
-    @RequiresApi(24)
     public void forEach(@NonNull Consumer<? super AirData> action) {
         for(AirData d: data){
             action.accept(d);
@@ -49,7 +48,6 @@ public class AirDataHistory implements Iterable<AirData> {
 
     @NonNull
     @Override
-    @RequiresApi(24)
     public Spliterator<AirData> spliterator() {
         return data.spliterator();
     }
