@@ -1,4 +1,4 @@
-package pl.dawidkulpa.miogiapiccohome.ble.encryption;
+package pl.dawidkulpa.miogiapiccohome.ble.bleln_encryption;
 
 public class BLELNCert {
     private final int gen;

@@ -1,4 +1,4 @@
-package pl.dawidkulpa.miogiapiccohome.API.data;
+package pl.dawidkulpa.miogiapiccohome.API;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -15,12 +15,17 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import pl.dawidkulpa.miogiapiccohome.API.data.AirDataHistory;
+import pl.dawidkulpa.miogiapiccohome.API.data.AirDevice;
+import pl.dawidkulpa.miogiapiccohome.API.data.Device;
+import pl.dawidkulpa.miogiapiccohome.API.data.LightDevice;
+import pl.dawidkulpa.miogiapiccohome.API.data.Room;
+import pl.dawidkulpa.miogiapiccohome.API.data.Sector;
+import pl.dawidkulpa.miogiapiccohome.API.data.UserData;
 import pl.dawidkulpa.miogiapiccohome.API.requests.ActivationRequest;
-import pl.dawidkulpa.miogiapiccohome.API.ApiClient;
 import pl.dawidkulpa.miogiapiccohome.API.requests.AddPlantRequest;
 import pl.dawidkulpa.miogiapiccohome.API.requests.AirDataHistoryRequest;
 import pl.dawidkulpa.miogiapiccohome.API.requests.LoginRequest;
-import pl.dawidkulpa.miogiapiccohome.API.MioGiapiccoApi;
 import pl.dawidkulpa.miogiapiccohome.API.requests.RegisterDeviceRequest;
 import pl.dawidkulpa.miogiapiccohome.API.requests.RoomCreateRequest;
 import pl.dawidkulpa.miogiapiccohome.API.requests.RoomDeleteRequest;
@@ -32,6 +37,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class User implements Parcelable {
+    private static final String TAG="User";
+
+
     public static final int ACTIVATION_SUCCESS=0;
     public static final int ACTIVATION_CODE_EXPIRED =1;
     public static final int ACTIVATION_CODE_INCORRECT=2;
@@ -66,7 +74,7 @@ public class User implements Parcelable {
     }
 
     public interface ActionListener {
-        void onFinished(boolean success);
+        void onFinished(boolean success, JsonObject data);
     }
 
     public interface DownloadDataListener {
@@ -199,13 +207,13 @@ public class User implements Parcelable {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
                 if(actionListener!=null)
-                    actionListener.onFinished(response.isSuccessful());
+                    actionListener.onFinished(response.isSuccessful(), response.body());
             }
 
             @Override
             public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) {
                 if(actionListener!=null)
-                    actionListener.onFinished(false);
+                    actionListener.onFinished(false, null);
             }
         });
     }
@@ -218,12 +226,12 @@ public class User implements Parcelable {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
                 boolean success = response.isSuccessful(); // Kod 200-299
-                if(listener != null) listener.onFinished(success);
+                if(listener != null) listener.onFinished(success, response.body());
             }
 
             @Override
             public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) {
-                if(listener != null) listener.onFinished(false);
+                if(listener != null) listener.onFinished(false, null);
             }
         });
     }
@@ -235,12 +243,12 @@ public class User implements Parcelable {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
                 if(actionListener !=null)
-                    actionListener.onFinished(response.isSuccessful());
+                    actionListener.onFinished(response.isSuccessful(), response.body());
             }
 
             @Override
             public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) {
-                if(actionListener != null) actionListener.onFinished(false);
+                if(actionListener != null) actionListener.onFinished(false, null);
             }
         });
     }
@@ -252,13 +260,13 @@ public class User implements Parcelable {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
                 if(actionListener!=null){
-                    actionListener.onFinished(response.isSuccessful());
+                    actionListener.onFinished(response.isSuccessful(), response.body());
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) {
-                actionListener.onFinished(false);
+                actionListener.onFinished(false, null);
             }
         });
     }
@@ -279,13 +287,31 @@ public class User implements Parcelable {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
                 if(actionListener!=null)
-                    actionListener.onFinished(response.isSuccessful());
+                    actionListener.onFinished(response.isSuccessful(), response.body());
+
+                if(response.isSuccessful()){
+                    if(response.body()!=null){
+                        Log.e(TAG, "registerDevice: "+response.body().toString());
+                    } else {
+                        Log.e(TAG, "registerDevice: received empty body");
+                    }
+                } else {
+                    if(response.errorBody()!=null){
+                        try {
+                            Log.e(TAG, "registerDevice: " + response.errorBody().string());
+                        } catch (IOException e){
+                            Log.e(TAG, "registerDevice: received empty error body");
+                        }
+                    }
+                }
             }
 
             @Override
             public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) {
                 if(actionListener!=null)
-                    actionListener.onFinished(false);
+                    actionListener.onFinished(false, null);
+
+                Log.e(TAG, "registerDevice: WTF?");
             }
         });
     }
@@ -297,13 +323,13 @@ public class User implements Parcelable {
                     @Override
                     public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
                         if(actionListener!=null)
-                            actionListener.onFinished(response.isSuccessful());
+                            actionListener.onFinished(response.isSuccessful(), response.body());
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) {
                         if(actionListener!=null)
-                            actionListener.onFinished(false);
+                            actionListener.onFinished(false, null);
                     }
                 }
             );
@@ -407,12 +433,12 @@ public class User implements Parcelable {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
                 if(actionListener !=null)
-                    actionListener.onFinished(response.isSuccessful());
+                    actionListener.onFinished(response.isSuccessful(), response.body());
             }
 
             @Override
             public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) {
-                if(actionListener != null) actionListener.onFinished(false);
+                if(actionListener != null) actionListener.onFinished(false, null);
             }
         });
     }
@@ -424,12 +450,12 @@ public class User implements Parcelable {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
                 if(actionListener !=null)
-                    actionListener.onFinished(response.isSuccessful());
+                    actionListener.onFinished(response.isSuccessful(), response.body());
             }
 
             @Override
             public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) {
-                if(actionListener != null) actionListener.onFinished(false);
+                if(actionListener != null) actionListener.onFinished(false, null);
             }
         });
     }

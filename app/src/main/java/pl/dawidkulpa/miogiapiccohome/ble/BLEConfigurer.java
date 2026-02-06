@@ -214,8 +214,8 @@ public class BLEConfigurer {
         return bleConfigurerGatt.getFoundDeviceName();
     }
 
-    public void writeDeviceConfig(String wifiSSID, String wifiPSK, String uid, String picklock, String timezone){
+    public void writeDeviceConfig(String wifiSSID, String wifiPSK, String uid, String picklock, String timezone, int role){
         state= ConfigurerState.WritingConfiguration;
-        bleConfigurerGatt.startConfigWrite(wifiSSID, wifiPSK, uid, picklock, timezone);
+        bleConfigurerGatt.startConfigWrite(wifiSSID, wifiPSK, uid, picklock, timezone, role);
     }
 }

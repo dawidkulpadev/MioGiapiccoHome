@@ -10,9 +10,9 @@ import java.util.HexFormat;
 import java.util.List;
 import java.util.Objects;
 
-import pl.dawidkulpa.miogiapiccohome.ble.encryption.BLELNAuthentication;
-import pl.dawidkulpa.miogiapiccohome.ble.encryption.BLELNCert;
-import pl.dawidkulpa.miogiapiccohome.ble.encryption.BLELNConnCtx;
+import pl.dawidkulpa.miogiapiccohome.ble.bleln_encryption.BLELNAuthentication;
+import pl.dawidkulpa.miogiapiccohome.ble.bleln_encryption.BLELNCert;
+import pl.dawidkulpa.miogiapiccohome.ble.bleln_encryption.BLELNConnCtx;
 
 /**
  *
@@ -76,9 +76,10 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
     }
 
     public void onTimeout(){
-        if(state==State.EnablingNotifications || state==State.KeyExchangeProcess || state==State.ReadingConfig)
+        if(state==State.EnablingNotifications || state==State.KeyExchangeProcess || state==State.ReadingConfig) {
+            Log.e(TAG, "Timeout on " + state.name());
             actionsListener.onError(ErrorCode.SyncFailed);
-        else if(state==State.WritingConfig){
+        } else if(state==State.WritingConfig){
             actionsListener.onError(ErrorCode.WriteFailed);
         }
     }
@@ -156,7 +157,7 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
             }
         }
 
-        if (inQuotes && startedWithQuote) {
+        if (inQuotes) {
             cur.insert(0, '"');
         }
         out.add(cur.toString());
@@ -305,8 +306,10 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
                                         bleService.writeCharacteristic(keyRxChar, encMsg);
                                         state= State.ReadingConfig;
                                         timeoutWatchdog.start(TIMEOUT_READ_CONFIG_TIME, this::onTimeout);
-                                        if(!sendGetConfigCmd("wssid"))
+                                        if(!sendGetConfigCmd("wssid")) {
+                                            Log.e(TAG, "Error sending wssid get command");
                                             actionsListener.onError(ErrorCode.SyncFailed);
+                                        }
                                     } else {
                                         Log.e(TAG, "failed encrypting cert msg");
                                     }
@@ -315,13 +318,16 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
                                     actionsListener.onError(ErrorCode.SyncFailed);
                                 }
                             } else {
+                                Log.e(TAG, "Server challenge response answer incorrect");
                                 actionsListener.onError(ErrorCode.SyncFailed);
                             }
                         } else {
+                            Log.e(TAG, "Server challenge response answer decrypt error");
                             actionsListener.onError(ErrorCode.SyncFailed);
                         }
                     }
                 } else {
+                    Log.e(TAG, "Authentication - connection context is null");
                     actionsListener.onError(ErrorCode.SyncFailed);
                 }
             }
@@ -338,6 +344,7 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
                             Log.d(TAG, "WiFi SSID read");
                             configWifiSSID = val;
                             if(!sendGetConfigCmd("pcklk")){
+                                Log.e(TAG, "Error sending pcklk get command");
                                 actionsListener.onError(ErrorCode.SyncFailed);
                                 return;
                             }
@@ -346,6 +353,7 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
                             Log.d(TAG, "Picklock read");
                             configPicklock = val;
                             if(!sendGetConfigCmd("tzone")){
+                                Log.e(TAG, "Error sending tzone get command");
                                 actionsListener.onError(ErrorCode.SyncFailed);
                                 return;
                             }
@@ -354,18 +362,27 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
                             Log.d(TAG, "Timezone read");
                             configWifiSSID = val;
                             if(!sendGetConfigCmd("mac")){
+                                Log.e(TAG, "Error sending mac get command");
                                 actionsListener.onError(ErrorCode.SyncFailed);
                                 return;
                             }
                             break;
                         case "mac":
-                            timeoutWatchdog.stop();
-                            Log.d(TAG, "MAC read");
+                            Log.d(TAG, "MAC read: "+ val);
                             configMAC = val;
+                            if(!sendGetConfigCmd("role")){
+                                Log.e(TAG, "Error sending role get command");
+                                actionsListener.onError(ErrorCode.SyncFailed);
+                                return;
+                            }
+                            break;
+                        case "role":
+                            timeoutWatchdog.stop();
+                            configRole= Integer.parseInt(val);
                             state = State.Ready;
-
                             break;
                         default:
+                            Log.e(TAG, "Received unknown message: "+msg);
                             actionsListener.onError(ErrorCode.SyncFailed);
                             break;
                     }
@@ -461,18 +478,27 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
                             }
                             break;
                         case "tzone":
-                            Log.d(TAG, "Timezone read");
+                            Log.d(TAG, "Timezone written");
                             if(!sendSetConfigCmd("uid", configUID)){
                                 actionsListener.onError(ErrorCode.WriteFailed);
                                 return;
                             }
                             break;
                         case "uid":
+                            Log.d(TAG, "UId written");
+                            if(!sendSetConfigCmd("role", String.valueOf(configRole))){
+                                actionsListener.onError(ErrorCode.WriteFailed);
+                                return;
+                            }
+                            break;
+                        case "role":
+                            Log.d(TAG, "Role written");
                             sendRebootCmd();
                             timeoutWatchdog.stop();
                             state = State.ConfigWritten;
                             break;
                         default:
+                            Log.e(TAG, "Unknown set command response "+msg);
                             actionsListener.onError(ErrorCode.SyncFailed);
                             break;
                     }
@@ -499,7 +525,8 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
         keyRxChar =null;
         dataTxChar =null;
         dataRxChar =null;
-        connCtx.delete();
+        if(connCtx!=null)
+            connCtx.delete();
         connCtx= null;
     }
 }

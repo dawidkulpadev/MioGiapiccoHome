@@ -1,9 +1,9 @@
 package pl.dawidkulpa.miogiapiccohome.activities;
 
-import static pl.dawidkulpa.miogiapiccohome.API.data.User.ACTIVATION_CODE_EXPIRED;
-import static pl.dawidkulpa.miogiapiccohome.API.data.User.ACTIVATION_CODE_INCORRECT;
-import static pl.dawidkulpa.miogiapiccohome.API.data.User.ACTIVATION_CONN_ERROR;
-import static pl.dawidkulpa.miogiapiccohome.API.data.User.ACTIVATION_SUCCESS;
+import static pl.dawidkulpa.miogiapiccohome.API.User.ACTIVATION_CODE_EXPIRED;
+import static pl.dawidkulpa.miogiapiccohome.API.User.ACTIVATION_CODE_INCORRECT;
+import static pl.dawidkulpa.miogiapiccohome.API.User.ACTIVATION_CONN_ERROR;
+import static pl.dawidkulpa.miogiapiccohome.API.User.ACTIVATION_SUCCESS;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -20,8 +20,9 @@ import android.view.View;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.gson.JsonObject;
 
-import pl.dawidkulpa.miogiapiccohome.API.data.User;
+import pl.dawidkulpa.miogiapiccohome.API.User;
 import pl.dawidkulpa.miogiapiccohome.R;
 
 public class AccountActivationActivity extends AppCompatActivity {
@@ -109,7 +110,7 @@ public class AccountActivationActivity extends AppCompatActivity {
         user.regenerateActivationCode(this::onCodeRegenerated);
     }
 
-    private void onCodeRegenerated(boolean success){
+    private void onCodeRegenerated(boolean success, JsonObject data){
         if(success){
             Snackbar.make(findViewById(R.id.contextView), R.string.message_activation_code_regenerated, BaseTransientBottomBar.LENGTH_SHORT).show();
         } else {

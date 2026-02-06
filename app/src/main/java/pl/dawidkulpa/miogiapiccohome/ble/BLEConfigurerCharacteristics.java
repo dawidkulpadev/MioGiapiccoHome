@@ -12,6 +12,7 @@ abstract public class BLEConfigurerCharacteristics {
     protected String configMAC="";
     protected String configTimezone="";
     protected String wifiSSIDsCSV="";
+    protected int configRole=0;
 
     public enum ErrorCode {SyncFailed, WriteFailed}
 
@@ -69,6 +70,8 @@ abstract public class BLEConfigurerCharacteristics {
         return configTimezone;
     }
 
+    public int getRole(){ return configRole; }
+
     public void setConfigWifiSSID(String configWifiSSID) {
         this.configWifiSSID = configWifiSSID;
     }
@@ -87,6 +90,10 @@ abstract public class BLEConfigurerCharacteristics {
 
     public void setConfigTimezone(String configTimezone) {
         this.configTimezone = configTimezone;
+    }
+
+    public void setConfigRole(int role){
+        this.configRole= role;
     }
 
 }

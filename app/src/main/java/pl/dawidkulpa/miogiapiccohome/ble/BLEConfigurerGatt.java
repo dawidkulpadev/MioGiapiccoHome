@@ -15,6 +15,7 @@ import pl.dawidkulpa.miogiapiccohome.R;
 import pl.dawidkulpa.miogiapiccohome.TimeoutWatchdog;
 
 public class BLEConfigurerGatt implements BLEGattListener {
+    private static final String TAG= "BLEConfigurerGatt";
     public static final int ACTION_TIMEOUT_GATT_CONNECTION              = 3000;
 
     private enum State {Idle, Connecting, Syncing, WaitingForUserInput, WritingConfig, DeviceConfigured, ConnectionFailed}
@@ -23,7 +24,7 @@ public class BLEConfigurerGatt implements BLEGattListener {
     public enum ErrorCode {ConnectFailed, DiscoverFailed, SyncFailed, ConfigWriteFailed, UnexpectedDisconnect}
 
     public static final String SERVICE_UUID                 = "952cb13b-57fa-4885-a445-57d1f17328fd";
-    public static final String SERVICE_GEN2_UUID            = "952cb13b-57fa-4885-a445-57d1f17328fd";
+    public static final String SERVICE_GEN2_UUID            = "e0611e96-d399-4101-8507-1f23ee392891";
 
     public interface ConfigurerGattListener {
         void onDeviceConnected();
@@ -103,6 +104,7 @@ public class BLEConfigurerGatt implements BLEGattListener {
     }
 
     private void onConnctTimeout(){
+        Log.e(TAG, "Timeout on: "+state.name());
         state = State.ConnectionFailed;
         listener.onError(ErrorCode.ConnectFailed);
     }
@@ -168,13 +170,14 @@ public class BLEConfigurerGatt implements BLEGattListener {
         return foundDeviceName;
     }
 
-    public void startConfigWrite(String wifiSSID, String wifiPSK, String uid, String picklock, String timezone){
+    public void startConfigWrite(String wifiSSID, String wifiPSK, String uid, String picklock, String timezone, int role){
         state= State.WritingConfig;
         characteristicsManager.setConfigWifiSSID(wifiSSID);
         characteristicsManager.setConfigWifiPSK(wifiPSK);
         characteristicsManager.setConfigUID(uid);
         characteristicsManager.setConfigPicklock(picklock);
         characteristicsManager.setConfigTimezone(timezone);
+        characteristicsManager.setConfigRole(role);
 
         characteristicsManager.startWrite();
     }

@@ -1,4 +1,4 @@
-package pl.dawidkulpa.miogiapiccohome.ble.encryption;
+package pl.dawidkulpa.miogiapiccohome.ble.bleln_encryption;
 
 import android.util.Log;
 
@@ -11,7 +11,6 @@ import java.security.PublicKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.ECParameterSpec;
-import java.util.HexFormat;
 import java.util.Objects;
 
 import javax.crypto.Cipher;
@@ -57,14 +56,14 @@ public class BLELNSessionEnc {
         epochLE = ByteBuffer.wrap(keyexPacket, off, 4).order(ByteOrder.LITTLE_ENDIAN).getInt(); off += 4;
         byte[] psk_salt = BLELNEncryption.slice(keyexPacket, off, 32); off += 32;
         byte[] friendsPub65 = BLELNEncryption.slice(keyexPacket, off, 65); off += 65;
-        byte[] friendsNonce12 = BLELNEncryption.slice(keyexPacket, off, 12); off += 12;
+        byte[] friendsNonce12 = BLELNEncryption.slice(keyexPacket, off, 12);
 
         try{
             PublicKey srvPub = BLELNEncryption.decodeUncompressedPublic(friendsPub65, ecSpec);
             KeyAgreement ka = KeyAgreement.getInstance("ECDH");
             ka.init(kp.getPrivate());
             ka.doPhase(srvPub, true);
-            byte[] shared = ka.generateSecret();               // powinno mieć 32B dla P-256
+            byte[] shared = ka.generateSecret();
             if (shared.length != 32) {
                 shared = BLELNEncryption.leftPad(shared, 32);
             }

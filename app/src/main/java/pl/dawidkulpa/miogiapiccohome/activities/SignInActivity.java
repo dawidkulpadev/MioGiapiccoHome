@@ -12,7 +12,7 @@ import android.widget.TextView;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 
-import pl.dawidkulpa.miogiapiccohome.API.data.User;
+import pl.dawidkulpa.miogiapiccohome.API.User;
 import pl.dawidkulpa.miogiapiccohome.R;
 
 public class SignInActivity extends AppCompatActivity {

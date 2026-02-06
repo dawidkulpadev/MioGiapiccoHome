@@ -15,6 +15,7 @@ import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.gson.JsonObject;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AlertDialog;
@@ -43,8 +44,8 @@ import pl.dawidkulpa.miogiapiccohome.API.data.Plant;
 import pl.dawidkulpa.miogiapiccohome.API.data.Room;
 import pl.dawidkulpa.miogiapiccohome.API.data.Sector;
 import pl.dawidkulpa.miogiapiccohome.API.data.SoilDevice;
-import pl.dawidkulpa.miogiapiccohome.API.StateWatcher;
-import pl.dawidkulpa.miogiapiccohome.API.data.User;
+import pl.dawidkulpa.miogiapiccohome.API.BackgroundWatcher;
+import pl.dawidkulpa.miogiapiccohome.API.User;
 import pl.dawidkulpa.miogiapiccohome.API.data.UserData;
 import pl.dawidkulpa.miogiapiccohome.EditTextWatcher;
 import pl.dawidkulpa.miogiapiccohome.adapters.RoomsListAdapter;
@@ -240,7 +241,7 @@ public class MainActivity extends AppCompatActivity
         AlarmManager alarmManager =
                 (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
 
-        Intent i = new Intent(this, StateWatcher.class);
+        Intent i = new Intent(this, BackgroundWatcher.class);
         PendingIntent pi= PendingIntent.getBroadcast(this,0,i,PendingIntent.FLAG_IMMUTABLE);
 
         alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
@@ -256,7 +257,7 @@ public class MainActivity extends AppCompatActivity
         progressBar.setVisibility(View.INVISIBLE);
     }
 
-    private void onCreateRoomResult(boolean success){
+    private void onCreateRoomResult(boolean success, JsonObject data){
         if(success) {
             startUserDataDownload();
         } else {
@@ -265,7 +266,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void onUpdateLightDeviceResult(boolean success){
+    private void onUpdateLightDeviceResult(boolean success, JsonObject data){
         if(success) {
             startUserDataDownload();
         } else {
@@ -274,7 +275,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void onUpdateRoomResult(boolean success){
+    private void onUpdateRoomResult(boolean success, JsonObject data){
         if(success) {
             startUserDataDownload();
         } else {
@@ -290,7 +291,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onDeviceUpdateEnableClick(Device d) {
-        user.markLightDeviceUpgradeAllowed(d, success -> startUserDataDownload());
+        user.markLightDeviceUpgradeAllowed(d, (success, data) -> startUserDataDownload());
     }
 
     @Override
@@ -339,7 +340,7 @@ public class MainActivity extends AppCompatActivity
         user.createSector(name, roomId, this::onCreateSectorResult);
     }
 
-    private void onCreateSectorResult(boolean success){
+    private void onCreateSectorResult(boolean success, JsonObject data){
         if(success) {
             startUserDataDownload();
         } else {

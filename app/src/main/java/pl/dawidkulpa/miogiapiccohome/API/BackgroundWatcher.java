@@ -23,7 +23,7 @@ import pl.dawidkulpa.miogiapiccohome.activities.SignInActivity;
 import pl.dawidkulpa.scm.Query;
 import pl.dawidkulpa.scm.ServerRequest;
 
-public class StateWatcher extends BroadcastReceiver {
+public class BackgroundWatcher extends BroadcastReceiver {
     private Context context;
 
     @Override

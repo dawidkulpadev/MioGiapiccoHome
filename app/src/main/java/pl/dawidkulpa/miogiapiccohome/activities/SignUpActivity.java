@@ -18,7 +18,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import pl.dawidkulpa.miogiapiccohome.API.data.User;
+import pl.dawidkulpa.miogiapiccohome.API.User;
 import pl.dawidkulpa.miogiapiccohome.R;
 
 

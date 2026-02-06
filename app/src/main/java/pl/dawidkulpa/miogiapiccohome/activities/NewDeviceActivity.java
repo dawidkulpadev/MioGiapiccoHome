@@ -25,6 +25,7 @@ import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +36,7 @@ import pl.dawidkulpa.miogiapiccohome.API.data.Device;
 import pl.dawidkulpa.miogiapiccohome.API.data.Plant;
 import pl.dawidkulpa.miogiapiccohome.API.data.Room;
 import pl.dawidkulpa.miogiapiccohome.API.data.Sector;
-import pl.dawidkulpa.miogiapiccohome.API.data.User;
+import pl.dawidkulpa.miogiapiccohome.API.User;
 import pl.dawidkulpa.miogiapiccohome.API.data.UserData;
 import pl.dawidkulpa.miogiapiccohome.ble.BLEConfigurer;
 import pl.dawidkulpa.miogiapiccohome.R;
@@ -44,6 +45,7 @@ import pl.dawidkulpa.miogiapiccohome.R;
 // TODO: Put messages in search -> "still working", "just a minute" etc
 
 public class NewDeviceActivity extends AppCompatActivity {
+    private static final String TAG="NewDeviceActivity";
     public enum UIState {PrepareBluetooth, SearchForDevice, UserInputing, DeviceConfigured, UnexpectedDisconnect, Failed}
 
     private UIState uiState;
@@ -65,6 +67,7 @@ public class NewDeviceActivity extends AppCompatActivity {
     String inputWifiSSID;
     String inputWifiPSK;
     String inputTimezone;
+    int inputRole;
 
 
     /** UI Elements */
@@ -149,7 +152,7 @@ public class NewDeviceActivity extends AppCompatActivity {
 
             @Override
             public void onDeviceFound(String name) {
-                findViewById(R.id.step2_found_message).setVisibility(View.VISIBLE);
+                runOnUiThread(() -> findViewById(R.id.step2_found_message).setVisibility(View.VISIBLE));
             }
 
             @Override
@@ -159,26 +162,28 @@ public class NewDeviceActivity extends AppCompatActivity {
 
             @Override
             public void onDeviceReady() {
-                if (userDataReceiveState != UserDataReceiveState.Success) {
-                    Log.d("NewDeviceActivity", "Failed reading user data!");
-                    onBLEError(BLEConfigurer.ErrorCode.ConnectFailed);
-                    prepareNextStep(NewDeviceActivity.UIState.Failed);
-                } else {
-                    Log.d("NewDeviceActivity", "System state: WaitingForUserInput");
-                    prepareTimezoneListAdapter();
-                    prepareRoomsListAdapter();
-                    prepareNextStep(NewDeviceActivity.UIState.UserInputing);
-                }
+                runOnUiThread(() -> {
+                    if (userDataReceiveState != UserDataReceiveState.Success) {
+                        Log.d("NewDeviceActivity", "Failed reading user data!");
+                        onBLEError(BLEConfigurer.ErrorCode.ConnectFailed);
+                        prepareNextStep(UIState.Failed);
+                    } else {
+                        Log.d("NewDeviceActivity", "System state: WaitingForUserInput");
+                        prepareTimezoneListAdapter();
+                        prepareRoomsListAdapter();
+                        prepareNextStep(UIState.UserInputing);
+                    }
+                });
             }
 
             @Override
             public void onDeviceConfigured() {
-                prepareNextStep(NewDeviceActivity.UIState.DeviceConfigured);
+                runOnUiThread(() -> prepareNextStep(UIState.DeviceConfigured));
             }
 
             @Override
             public void onWiFiListRefreshed(String wifis) {
-                refreshAvailableWiFiSSIDs(wifis);
+                runOnUiThread(() -> refreshAvailableWiFiSSIDs(wifis));
             }
         });
 
@@ -284,12 +289,15 @@ public class NewDeviceActivity extends AppCompatActivity {
     }
 
     public void onBLEError(BLEConfigurer.ErrorCode errorCode){
-        if(errorCode== BLEConfigurer.ErrorCode.UnexpectedDisconnect && uiState==UIState.UserInputing){
-            prepareNextStep(UIState.UnexpectedDisconnect);
-        } else {
-            prepareNextStep(UIState.Failed);
-        }
-        Log.e("NewDeviceActivity", "BLE Error: "+ errorCode.toString());
+        runOnUiThread(() -> {
+            if(errorCode== BLEConfigurer.ErrorCode.UnexpectedDisconnect && uiState==UIState.UserInputing){
+                prepareNextStep(UIState.UnexpectedDisconnect);
+            } else {
+                prepareNextStep(UIState.Failed);
+            }
+            Log.e("NewDeviceActivity", "BLE Error: "+ errorCode.toString());
+        });
+
     }
 
     public void checkAndRequestPermissions(){
@@ -398,22 +406,23 @@ public class NewDeviceActivity extends AppCompatActivity {
                         .get(configSectorIdx).getPlants().get(configPlantIdx).getId();
             }
 
+            Log.e(TAG, "MAC: "+bleConfigurer.getConfigMAC());
+
             user.registerDevice(bleConfigurer.getConfigMAC(), roomId, sectorId, plantId,
                     deviceName, bleConfigurer.getConnectedDevType(),
                     this::onDeviceRegisterResult);
         }
     }
 
-    private void onDeviceRegisterResult(boolean success){
+    private void onDeviceRegisterResult(boolean success, JsonObject data){
         stopUITimeoutWatchdog();
-        if(success){
+        if(success && data!=null && data.has("picklock")){
             Log.d("NewDeviceActivity", "New version");
             Log.d("NewDeviceActivity", "System state: WritingCharacteristics");
             Log.d("NewDeviceActivity", "Populate device in database success");
-            bleConfigurer.writeDeviceConfig(inputWifiSSID, inputWifiPSK, String.valueOf(user.getUid()), user.getPicklock(), inputTimezone);
-
+            String picklock= data.get("picklock").getAsString();
+            bleConfigurer.writeDeviceConfig(inputWifiSSID, inputWifiPSK, String.valueOf(user.getUid()), picklock, inputTimezone, inputRole);
         } else {
-            Log.e("NewDeviceActivity", "System state: ConnectionFailed");
             Log.e("NewDeviceActivity", "Populate device in database failed");
             onBLEError(BLEConfigurer.ErrorCode.ConfigWriteFailed);
         }
