@@ -21,6 +21,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
@@ -140,6 +141,15 @@ public class NewDeviceActivity extends AppCompatActivity {
 
         userDataReceiveState= UserDataReceiveState.WaitingForResponse;
         user.downloadData(this::onDownloadUserDataResult);
+
+
+
+        findViewById(R.id.role_card).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                BottomSheetDialog bsd= new BottomSheetDialog(view.getContext());
+            }
+        });
 
         bleConfigurer = new BLEConfigurer(this, new BLEConfigurer.BLEConfigurerCallbacks() {
             @Override

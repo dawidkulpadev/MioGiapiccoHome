@@ -4,7 +4,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
-    private static final String BASE_URL = "https://dawidkulpa.pl/miogiapicco/api/"; // Twój nowy endpoint Node.js
+    private static final String BASE_URL = "https://dawidkulpa.pl/miogiapicco/api/";
     private static Retrofit retrofit = null;
 
     public static MioGiapiccoApi getClient() {

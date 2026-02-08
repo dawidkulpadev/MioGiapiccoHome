@@ -324,6 +324,16 @@ public class User implements Parcelable {
                     public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
                         if(actionListener!=null)
                             actionListener.onFinished(response.isSuccessful(), response.body());
+
+                        if(response.isSuccessful())
+                            Log.e(TAG, "Unregister: "+response.body().toString());
+                        else {
+                            try {
+                                Log.e(TAG, "Unregister: "+response.errorBody().string());
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
                     }
 
                     @Override

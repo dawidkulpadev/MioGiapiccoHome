@@ -130,8 +130,6 @@ public class BLEGattService extends Service {
                 );
             }
         }
-
-
     };
 
     public void setBleEventListener(BLEGattListener listener) {
