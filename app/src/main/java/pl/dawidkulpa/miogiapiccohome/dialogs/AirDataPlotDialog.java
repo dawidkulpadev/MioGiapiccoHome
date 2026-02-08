@@ -24,8 +24,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-import pl.dawidkulpa.miogiapiccohome.API.AirDataHistory;
-import pl.dawidkulpa.miogiapiccohome.API.AirDevice;
+import pl.dawidkulpa.miogiapiccohome.API.data.AirDataHistory;
+import pl.dawidkulpa.miogiapiccohome.API.data.AirDevice;
 import pl.dawidkulpa.miogiapiccohome.API.User;
 import pl.dawidkulpa.miogiapiccohome.R;
 import pl.dawidkulpa.miogiapiccohome.adapters.AirDataChart;

@@ -1,11 +1,10 @@
-package pl.dawidkulpa.miogiapiccohome.API;
+package pl.dawidkulpa.miogiapiccohome.API.data;
 
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 
 import java.text.ParseException;
 
@@ -21,13 +20,13 @@ public class Plant {
 
     private boolean showingDetails= false;
 
-    public Plant(JSONObject jobj) throws JSONException, ParseException {
-        this.id= jobj.getInt(JSON_TAG_ID);
-        this.name= jobj.getString(JSON_TAG_NAME);
+    public Plant(JsonObject jobj) throws ParseException {
+        this.id= jobj.get(JSON_TAG_ID).getAsInt();
+        this.name= jobj.get(JSON_TAG_NAME).getAsString();
 
-        if(!jobj.isNull(JSON_TAG_SOIL_DEVICE)){
-            Log.e("Plant "+id, "Parsing Soil device "+jobj.getJSONObject(JSON_TAG_SOIL_DEVICE).toString());
-            soilDevice = new SoilDevice(this, jobj.getJSONObject(JSON_TAG_SOIL_DEVICE));
+        if(jobj.has(JSON_TAG_SOIL_DEVICE)){
+            Log.e("Plant "+id, "Parsing Soil device "+jobj.get(JSON_TAG_SOIL_DEVICE).toString());
+            soilDevice = new SoilDevice(this, jobj.get(JSON_TAG_SOIL_DEVICE).getAsJsonObject());
         }
     }
 

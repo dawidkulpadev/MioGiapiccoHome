@@ -21,22 +21,25 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import pl.dawidkulpa.miogiapiccohome.API.Device;
-import pl.dawidkulpa.miogiapiccohome.API.Plant;
-import pl.dawidkulpa.miogiapiccohome.API.Room;
-import pl.dawidkulpa.miogiapiccohome.API.Sector;
+import pl.dawidkulpa.miogiapiccohome.API.data.Device;
+import pl.dawidkulpa.miogiapiccohome.API.data.Plant;
+import pl.dawidkulpa.miogiapiccohome.API.data.Room;
+import pl.dawidkulpa.miogiapiccohome.API.data.Sector;
 import pl.dawidkulpa.miogiapiccohome.API.User;
-import pl.dawidkulpa.miogiapiccohome.API.UserData;
+import pl.dawidkulpa.miogiapiccohome.API.data.UserData;
 import pl.dawidkulpa.miogiapiccohome.ble.BLEConfigurer;
 import pl.dawidkulpa.miogiapiccohome.R;
 
@@ -44,6 +47,7 @@ import pl.dawidkulpa.miogiapiccohome.R;
 // TODO: Put messages in search -> "still working", "just a minute" etc
 
 public class NewDeviceActivity extends AppCompatActivity {
+    private static final String TAG="NewDeviceActivity";
     public enum UIState {PrepareBluetooth, SearchForDevice, UserInputing, DeviceConfigured, UnexpectedDisconnect, Failed}
 
     private UIState uiState;
@@ -65,6 +69,7 @@ public class NewDeviceActivity extends AppCompatActivity {
     String inputWifiSSID;
     String inputWifiPSK;
     String inputTimezone;
+    int inputRole;
 
 
     /** UI Elements */
@@ -136,7 +141,7 @@ public class NewDeviceActivity extends AppCompatActivity {
         userDataReceiveState= UserDataReceiveState.WaitingForResponse;
         user.downloadData(this::onDownloadUserDataResult);
 
-        bleConfigurer= new BLEConfigurer(this, new BLEConfigurer.BLEConfigurerCallbacks() {
+        bleConfigurer = new BLEConfigurer(this, new BLEConfigurer.BLEConfigurerCallbacks() {
             @Override
             public void deviceSearchStarted() {
                 prepareNextStep(NewDeviceActivity.UIState.SearchForDevice);
@@ -144,12 +149,26 @@ public class NewDeviceActivity extends AppCompatActivity {
 
             @Override
             public void onError(BLEConfigurer.ErrorCode errorCode) {
-                onBLEError(errorCode);
+                runOnUiThread(() -> onBLEError(errorCode));
             }
 
             @Override
             public void onDeviceFound(String name) {
-                findViewById(R.id.step2_found_message).setVisibility(View.VISIBLE);
+                runOnUiThread(() -> findViewById(R.id.step2_found_message).setVisibility(View.VISIBLE));
+                progressBar.setVisibility(View.GONE);
+                ((LinearProgressIndicator)findViewById(R.id.step2_found_progress)).setProgress(0, false);
+                ((TextView)findViewById(R.id.step2_found_progress_message)).setText(R.string.message_connect_step_gen2_connecting);
+                findViewById(R.id.step2_found_progress).setVisibility(View.VISIBLE);
+                findViewById(R.id.step2_found_progress_message).setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onConnectProgress(int progress, String msg) {
+                runOnUiThread(() -> {
+                    ((LinearProgressIndicator)findViewById(R.id.step2_found_progress)).setProgress(progress, true);
+                    if(!msg.isEmpty()) ((TextView)findViewById(R.id.step2_found_progress_message)).setText(msg);
+                });
+
             }
 
             @Override
@@ -159,26 +178,28 @@ public class NewDeviceActivity extends AppCompatActivity {
 
             @Override
             public void onDeviceReady() {
-                if (userDataReceiveState != UserDataReceiveState.Success) {
-                    Log.d("NewDeviceActivity", "Failed reading user data!");
-                    onBLEError(BLEConfigurer.ErrorCode.ConnectFailed);
-                    prepareNextStep(NewDeviceActivity.UIState.Failed);
-                } else {
-                    Log.d("NewDeviceActivity", "System state: WaitingForUserInput");
-                    prepareTimezoneListAdapter();
-                    prepareRoomsListAdapter();
-                    prepareNextStep(NewDeviceActivity.UIState.UserInputing);
-                }
+                runOnUiThread(() -> {
+                    if (userDataReceiveState != UserDataReceiveState.Success) {
+                        Log.d("NewDeviceActivity", "Failed reading user data!");
+                        onBLEError(BLEConfigurer.ErrorCode.ConnectFailed);
+                        prepareNextStep(UIState.Failed);
+                    } else {
+                        Log.d("NewDeviceActivity", "System state: WaitingForUserInput");
+                        prepareTimezoneListAdapter();
+                        prepareRoomsListAdapter();
+                        prepareNextStep(UIState.UserInputing);
+                    }
+                });
             }
 
             @Override
             public void onDeviceConfigured() {
-                prepareNextStep(NewDeviceActivity.UIState.DeviceConfigured);
+                runOnUiThread(() -> prepareNextStep(UIState.DeviceConfigured));
             }
 
             @Override
             public void onWiFiListRefreshed(String wifis) {
-                refreshAvailableWiFiSSIDs(wifis);
+                runOnUiThread(() -> refreshAvailableWiFiSSIDs(wifis));
             }
         });
 
@@ -284,12 +305,15 @@ public class NewDeviceActivity extends AppCompatActivity {
     }
 
     public void onBLEError(BLEConfigurer.ErrorCode errorCode){
-        if(errorCode== BLEConfigurer.ErrorCode.UnexpectedDisconnect && uiState==UIState.UserInputing){
-            prepareNextStep(UIState.UnexpectedDisconnect);
-        } else {
-            prepareNextStep(UIState.Failed);
-        }
-        Log.e("NewDeviceActivity", "BLE Error: "+ errorCode.toString());
+        runOnUiThread(() -> {
+            if(errorCode== BLEConfigurer.ErrorCode.UnexpectedDisconnect && uiState==UIState.UserInputing){
+                prepareNextStep(UIState.UnexpectedDisconnect);
+            } else {
+                prepareNextStep(UIState.Failed);
+            }
+            Log.e("NewDeviceActivity", "BLE Error: "+ errorCode.toString());
+        });
+
     }
 
     public void checkAndRequestPermissions(){
@@ -358,6 +382,12 @@ public class NewDeviceActivity extends AppCompatActivity {
         inputWifiSSID= wifiSSIDsAutoComplete.getText().toString();
         inputWifiPSK= wifiPskEdit.getText().toString();
 
+        if(((SwitchMaterial)findViewById(R.id.role_server_switch)).isChecked()){
+            inputRole= 1;
+        } else {
+            inputRole= 0;
+        }
+
         // Remove trailing and leading spaces
         deviceName= deviceName.trim();
 
@@ -398,22 +428,23 @@ public class NewDeviceActivity extends AppCompatActivity {
                         .get(configSectorIdx).getPlants().get(configPlantIdx).getId();
             }
 
+            Log.e(TAG, "MAC: "+bleConfigurer.getConfigMAC());
+
             user.registerDevice(bleConfigurer.getConfigMAC(), roomId, sectorId, plantId,
                     deviceName, bleConfigurer.getConnectedDevType(),
                     this::onDeviceRegisterResult);
         }
     }
 
-    private void onDeviceRegisterResult(boolean success){
+    private void onDeviceRegisterResult(boolean success, JsonObject data){
         stopUITimeoutWatchdog();
-        if(success){
+        if(success && data!=null && data.has("picklock")){
             Log.d("NewDeviceActivity", "New version");
             Log.d("NewDeviceActivity", "System state: WritingCharacteristics");
             Log.d("NewDeviceActivity", "Populate device in database success");
-            bleConfigurer.writeDeviceConfig(inputWifiSSID, inputWifiPSK, String.valueOf(user.getUid()), user.getPicklock(), inputTimezone);
-
+            String picklock= data.get("picklock").getAsString();
+            bleConfigurer.writeDeviceConfig(inputWifiSSID, inputWifiPSK, String.valueOf(user.getUid()), picklock, inputTimezone, inputRole);
         } else {
-            Log.e("NewDeviceActivity", "System state: ConnectionFailed");
             Log.e("NewDeviceActivity", "Populate device in database failed");
             onBLEError(BLEConfigurer.ErrorCode.ConfigWriteFailed);
         }
@@ -446,29 +477,43 @@ public class NewDeviceActivity extends AppCompatActivity {
         if(devType== Device.Type.Light) {
             // Name
             ((View) devicesNameEdit.getParent()).setVisibility(state);
+            findViewById(R.id.name_divider).setVisibility(state);
+
+            // Role
+            findViewById(R.id.role_layout).setVisibility(state);
+            findViewById(R.id.role_divider).setVisibility(state);
 
             // WiFi
             findViewById(R.id.wifi_config_label).setVisibility(state);
             wifiSSIDsMenu.setVisibility(state);
             ((View)wifiPskEdit.getParent()).setVisibility(state);
+            findViewById(R.id.wifi_divider).setVisibility(state);
+
+            findViewById(R.id.placement_divider).setVisibility(state);
 
             // Timezone
             findViewById(R.id.timezone_config_label).setVisibility(state);
             timezonesMenu.setVisibility(state);
         } else {
             ((View) devicesNameEdit.getParent()).setVisibility(View.GONE);
+            findViewById(R.id.name_divider).setVisibility(View.GONE);
+
+            // Role
+            findViewById(R.id.role_layout).setVisibility(View.GONE);
+            findViewById(R.id.role_divider).setVisibility(View.GONE);
 
             // WiFi
             findViewById(R.id.wifi_config_label).setVisibility(View.GONE);
             wifiSSIDsMenu.setVisibility(View.GONE);
             ((View)wifiPskEdit.getParent()).setVisibility(View.GONE);
+            findViewById(R.id.wifi_divider).setVisibility(View.GONE);
+
+            findViewById(R.id.placement_divider).setVisibility(View.GONE);
 
             // Timezone
             findViewById(R.id.timezone_config_label).setVisibility(View.GONE);
             timezonesMenu.setVisibility(View.GONE);
         }
-
-
 
         findViewById(R.id.placement_config_label).setVisibility(state);
         roomsMenu.setVisibility(state);
@@ -494,6 +539,8 @@ public class NewDeviceActivity extends AppCompatActivity {
 
                 // Step 2 messages
                 findViewById(R.id.step2_found_message).setVisibility(View.GONE);
+                findViewById(R.id.step2_found_progress).setVisibility(View.GONE);
+                findViewById(R.id.step2_found_progress_message).setVisibility(View.GONE);
 
                 // User input form
                 hideUserInputs(true, Device.Type.Unknown);
@@ -517,6 +564,8 @@ public class NewDeviceActivity extends AppCompatActivity {
 
                 // Step 2 messages
                 findViewById(R.id.step2_found_message).setVisibility(View.GONE);
+                findViewById(R.id.step2_found_progress).setVisibility(View.GONE);
+                findViewById(R.id.step2_found_progress_message).setVisibility(View.GONE);
 
                 // User input form
                 hideUserInputs(true, Device.Type.Unknown);
@@ -541,6 +590,8 @@ public class NewDeviceActivity extends AppCompatActivity {
 
                 // Step 2 messages
                 findViewById(R.id.step2_found_message).setVisibility(View.GONE);
+                findViewById(R.id.step2_found_progress).setVisibility(View.GONE);
+                findViewById(R.id.step2_found_progress_message).setVisibility(View.GONE);
 
                 // User input form
                 hideUserInputs(false, bleConfigurer.getConnectedDevType());
@@ -569,6 +620,8 @@ public class NewDeviceActivity extends AppCompatActivity {
 
                 // Step 2 messages
                 findViewById(R.id.step2_found_message).setVisibility(View.GONE);
+                findViewById(R.id.step2_found_progress).setVisibility(View.GONE);
+                findViewById(R.id.step2_found_progress_message).setVisibility(View.GONE);
 
                 // User input form
                 hideUserInputs(true, Device.Type.Unknown);
@@ -597,6 +650,8 @@ public class NewDeviceActivity extends AppCompatActivity {
 
                 // Step 2 messages
                 findViewById(R.id.step2_found_message).setVisibility(View.GONE);
+                findViewById(R.id.step2_found_progress).setVisibility(View.GONE);
+                findViewById(R.id.step2_found_progress_message).setVisibility(View.GONE);
 
                 // User input form
                 hideUserInputs(true, Device.Type.Unknown);
@@ -626,6 +681,8 @@ public class NewDeviceActivity extends AppCompatActivity {
 
                 // Step 2 messages
                 findViewById(R.id.step2_found_message).setVisibility(View.GONE);
+                findViewById(R.id.step2_found_progress_message).setVisibility(View.GONE);
+                findViewById(R.id.step2_found_progress).setVisibility(View.GONE);
 
                 // User input form
                 hideUserInputs(true, Device.Type.Unknown);

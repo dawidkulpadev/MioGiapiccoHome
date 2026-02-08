@@ -1,13 +1,14 @@
 apply plugin: 'com.android.application'
+apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
 
         applicationId "pl.dawidkulpa.miogiapiccohome"
-        minSdkVersion 23
-        targetSdkVersion 35
+        minSdkVersion 34
+        targetSdkVersion 36
         versionCode 8
         versionName "1.4.7"
 
@@ -27,6 +28,14 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/versions/9/OSGI-INF/MANIFEST.MF']
+        }
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
     }
 
 }
@@ -49,6 +58,11 @@ dependencies {
 
     implementation "androidx.emoji2:emoji2:1.6.0"
     implementation "androidx.emoji2:emoji2-views:1.6.0"
+
+    implementation 'com.squareup.retrofit2:retrofit:3.0.0'
+    implementation 'com.squareup.retrofit2:converter-gson:3.0.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:5.3.2'
+    implementation 'androidx.core:core-ktx:1.17.0'
 }
 java {
     toolchain {

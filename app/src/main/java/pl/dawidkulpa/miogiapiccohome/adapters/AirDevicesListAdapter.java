@@ -1,6 +1,5 @@
 package pl.dawidkulpa.miogiapiccohome.adapters;
 
-import android.app.TimePickerDialog;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,8 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-import pl.dawidkulpa.miogiapiccohome.API.AirDevice;
-import pl.dawidkulpa.miogiapiccohome.API.LightDevice;
+import pl.dawidkulpa.miogiapiccohome.API.data.AirDevice;
 import pl.dawidkulpa.miogiapiccohome.R;
 
 public class AirDevicesListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {

@@ -1,11 +1,10 @@
-package pl.dawidkulpa.miogiapiccohome.API;
+package pl.dawidkulpa.miogiapiccohome.API.data;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -17,12 +16,12 @@ public class AirDataHistory implements Iterable<AirData> {
 
     private final ArrayList<AirData> data;
 
-    public AirDataHistory(JSONObject jobj) throws JSONException, ParseException{
+    public AirDataHistory(JsonObject jobj) throws ParseException{
         data= new ArrayList<>();
-        JSONArray jarr = jobj.getJSONArray("data");
+        JsonArray jarr = jobj.getAsJsonArray("data");
 
-        for(int i=0; i<jarr.length(); i++){
-            data.add(new AirData(jarr.getJSONObject(i)));
+        for(int i=0; i<jarr.size(); i++){
+            data.add(new AirData(jarr.get(i).getAsJsonObject()));
         }
     }
 
@@ -41,7 +40,6 @@ public class AirDataHistory implements Iterable<AirData> {
     }
 
     @Override
-    @RequiresApi(24)
     public void forEach(@NonNull Consumer<? super AirData> action) {
         for(AirData d: data){
             action.accept(d);
@@ -50,7 +48,6 @@ public class AirDataHistory implements Iterable<AirData> {
 
     @NonNull
     @Override
-    @RequiresApi(24)
     public Spliterator<AirData> spliterator() {
         return data.spliterator();
     }

@@ -1,10 +1,9 @@
-package pl.dawidkulpa.miogiapiccohome.API;
+package pl.dawidkulpa.miogiapiccohome.API.data;
 
 import android.util.Log;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -13,25 +12,23 @@ public class UserData {
     private ArrayList<Room> rooms= new ArrayList<>();
     private ArrayList<Device> looseDevices= new ArrayList<>();
 
-    public boolean parse(JSONObject jobj){
+    public boolean parse(JsonObject jobj){
         // TODO: Dump data update! Make smart data update
-
         rooms.clear();
 
-        try {
-            JSONArray jarr= jobj.getJSONArray("rs");
+        JsonArray jarr= jobj.getAsJsonArray("rs");
 
-            for (int i = 0; i < jarr.length(); i++) {
-                JSONObject jRoomObj= jarr.getJSONObject(i);
-                Log.d("UserData", "Parsing room "+i+" "+jRoomObj.toString());
+        for (int i = 0; i < jarr.size(); i++) {
+            JsonObject jRoomObj= jarr.get(i).getAsJsonObject();
+            Log.d("UserData", "Parsing room "+i+" "+jRoomObj.toString());
+            try {
                 rooms.add(new Room(jRoomObj));
+            } catch (ParseException e){
+                Log.e("UserData", "Failed parsing room: "+i+" with message: "+ e.getMessage());
             }
-
-            return true;
-        } catch (JSONException | ParseException e){
-            Log.e("UserData", "parse: "+e.getMessage());
-            return false;
         }
+
+        return true;
     }
 
     public ArrayList<Room> getRooms(){

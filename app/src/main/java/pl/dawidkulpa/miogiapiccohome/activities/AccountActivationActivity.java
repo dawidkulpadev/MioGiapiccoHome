@@ -20,6 +20,7 @@ import android.view.View;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.gson.JsonObject;
 
 import pl.dawidkulpa.miogiapiccohome.API.User;
 import pl.dawidkulpa.miogiapiccohome.R;
@@ -109,7 +110,7 @@ public class AccountActivationActivity extends AppCompatActivity {
         user.regenerateActivationCode(this::onCodeRegenerated);
     }
 
-    private void onCodeRegenerated(boolean success){
+    private void onCodeRegenerated(boolean success, JsonObject data){
         if(success){
             Snackbar.make(findViewById(R.id.contextView), R.string.message_activation_code_regenerated, BaseTransientBottomBar.LENGTH_SHORT).show();
         } else {

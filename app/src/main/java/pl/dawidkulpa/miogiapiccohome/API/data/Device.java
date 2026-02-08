@@ -1,7 +1,6 @@
-package pl.dawidkulpa.miogiapiccohome.API;
+package pl.dawidkulpa.miogiapiccohome.API.data;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -20,7 +19,7 @@ public class Device {
     private static final String JSON_TAG_UPDATE_ALLOWED="ua";
     private static final String JSON_TAG_UPDATE_AVAILABLE="uav";
 
-    public static SimpleDateFormat sqlSDF= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+    public static SimpleDateFormat sqlSDF= new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
 
     private final String id;
     private final Calendar lastSeen;
@@ -30,8 +29,8 @@ public class Device {
     private final boolean updateAvailable;
     private final Type type;
 
-    public Device(JSONObject jobj, Type t) throws JSONException, ParseException {
-        id= jobj.getString(JSON_TAG_ID);
+    public Device(JsonObject jobj, Type t) throws ParseException {
+        id= jobj.get(JSON_TAG_ID).getAsString();
         type= t;
 
         if(jobj.has(JSON_TAG_FIRMWARE_VERSION)){
@@ -41,7 +40,7 @@ public class Device {
              * Hardware id: (6-bit) hw type, (10-bit) hw type version
              * Software version: (5-bit) sw epoch, (7-bit) sw epoch version, (4-bit) sw epoch version fix
              */
-            int fwv= jobj.getInt(JSON_TAG_FIRMWARE_VERSION);
+            int fwv= jobj.get(JSON_TAG_FIRMWARE_VERSION).getAsInt();
 
             if(fwv!=0) {
                 int hv_code = (fwv & 0xffff0000) >> 16;
@@ -65,12 +64,12 @@ public class Device {
         }
 
         if(jobj.has(JSON_TAG_UPDATE_ALLOWED)){
-            updateAllowed= jobj.getInt(JSON_TAG_UPDATE_ALLOWED)==1;
+            updateAllowed= jobj.get(JSON_TAG_UPDATE_ALLOWED).getAsInt()==1;
         } else {
             updateAllowed= false;
         }
 
-        String strLS= jobj.getString(JSON_TAG_LAST_SEEN);
+        String strLS= jobj.get(JSON_TAG_LAST_SEEN).getAsString();
         lastSeen= Calendar.getInstance();
         lastSeen.setTime(Objects.requireNonNull(sqlSDF.parse(strLS)));
         //updateAvailable= (jobj.getInt(JSON_TAG_UPDATE_AVAILABLE)==1);

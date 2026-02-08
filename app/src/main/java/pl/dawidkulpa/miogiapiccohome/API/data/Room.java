@@ -1,10 +1,9 @@
-package pl.dawidkulpa.miogiapiccohome.API;
+package pl.dawidkulpa.miogiapiccohome.API.data;
 
 import android.util.Log;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -20,17 +19,17 @@ public class Room {
     private int humidityTarget;
     private final ArrayList<Sector> sectors= new ArrayList<>();
 
-    public Room(JSONObject jObj) throws JSONException, ParseException {
-        id= jObj.getInt(JSON_TAG_ID);
-        name= jObj.getString(JSON_TAG_NAME);
+    public Room(JsonObject jObj) throws ParseException, NumberFormatException {
+        id= jObj.get(JSON_TAG_ID).getAsInt();
+        name= jObj.get(JSON_TAG_NAME).getAsString();
 
-        humidityTarget= jObj.getInt(JSON_TAG_HUMIDITY_TARGET);
+        humidityTarget= jObj.get(JSON_TAG_HUMIDITY_TARGET).getAsInt();
 
-        JSONArray jSectors= jObj.getJSONArray(JSON_TAG_SECTORS);
+        JsonArray jSectors= jObj.getAsJsonArray(JSON_TAG_SECTORS);
 
-        for(int i=0; i<jSectors.length(); i++){
-            Log.d("Room "+id, "Parsing sector "+i+" "+jSectors.getJSONObject(i).toString());
-            sectors.add(new Sector(jSectors.getJSONObject(i), id));
+        for(int i=0; i<jSectors.size(); i++){
+            Log.d("Room "+id, "Parsing sector "+i+" "+jSectors.get(i).toString());
+            sectors.add(new Sector(jSectors.get(i).getAsJsonObject(), id));
         }
     }
 

@@ -84,7 +84,7 @@
     <string name="label_lights_list">🔆 Lights</string>
     <string name="label_air_params">☁️ Air</string>
     <string name="label_plants_list">🪴 Plants</string>
-    <string name="label_device_server_role">Act as server</string>
+    <string name="label_server_role">Server role</string>
 
     <string name="hint_login">Login</string>
     <string name="hint_ssid">Wifi name</string>
@@ -104,6 +104,7 @@
     <string name="hint_password">Password</string>
     <string name="hint_repassword">Repeat password</string>
     <string name="hint_none" translatable="false">None</string>
+    <string name="hint_tap_to_learn_more">Tap to learn more</string>
 
     <string name="helper_password_rules">Minimum 8 characters long, at least one special character, one uppercase letter and one digit</string>
 
@@ -190,6 +191,12 @@
     <string name="cont_descr_plant_state_icon">Plant state icon</string>
     <string name="cont_descr_sector_more_button">Sector\'s menu</string>
     <string name="cont_descr_room_more_button">Room\'s menu</string>
+
+
+    <string name="message_connect_step_gen2_connecting">Connecting…</string>
+    <string name="message_connect_step_gen2_encrypting_connection">Encrypting connection…</string>
+    <string name="message_connect_step_gen2_authorisation">Authorisation…</string>
+    <string name="message_connect_step_gen2_reading_config">Reading current config…</string>
 
     <string-array name="timezones_names">
         <item>Africa/Abidjan</item>

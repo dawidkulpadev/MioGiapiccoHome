@@ -1,7 +1,6 @@
-package pl.dawidkulpa.miogiapiccohome.API;
+package pl.dawidkulpa.miogiapiccohome.API.data;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 
 import java.text.ParseException;
 
@@ -12,15 +11,13 @@ public class SoilDevice extends Device {
     int soilHumidity;
     int batteryLevel;
 
-    public SoilDevice(Plant parent, JSONObject jobj) throws JSONException, ParseException {
+    public SoilDevice(Plant parent, JsonObject jobj) throws ParseException {
         super(jobj, Type.Soil);
         this.parent= parent;
-        airHumidity= jobj.getInt("AH");
-        airTemperature= jobj.getInt("AT");
-
-        soilHumidity= jobj.getInt("SH");
-
-        batteryLevel= jobj.getInt("BTRY");
+        airHumidity= jobj.get("AH").getAsInt();
+        airTemperature= jobj.get("AT").getAsInt();
+        soilHumidity= jobj.get("SH").getAsInt();
+        batteryLevel= jobj.get("BTRY").getAsInt();
     }
 
     public Plant getParent(){

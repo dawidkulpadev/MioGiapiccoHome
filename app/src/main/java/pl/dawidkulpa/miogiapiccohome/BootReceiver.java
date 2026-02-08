@@ -9,7 +9,7 @@ import android.os.SystemClock;
 
 import java.util.Objects;
 
-import pl.dawidkulpa.miogiapiccohome.API.StateWatcher;
+import pl.dawidkulpa.miogiapiccohome.API.BackgroundWatcher;
 
 public class BootReceiver extends BroadcastReceiver {
     @Override
@@ -18,7 +18,7 @@ public class BootReceiver extends BroadcastReceiver {
             AlarmManager alarmManager =
                     (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
-            Intent i = new Intent(context, StateWatcher.class);
+            Intent i = new Intent(context, BackgroundWatcher.class);
             PendingIntent pi= PendingIntent.getBroadcast(context,0,i, PendingIntent.FLAG_IMMUTABLE);
 
             alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,

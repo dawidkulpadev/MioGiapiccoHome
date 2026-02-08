@@ -1,12 +1,10 @@
-package pl.dawidkulpa.miogiapiccohome.API;
+package pl.dawidkulpa.miogiapiccohome.API.data;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -15,18 +13,18 @@ public class AirData {
     private static final String JSON_TAG_AIR_TEMPERATURE= "at";
     private static final String JSON_TAG_TIMESTAMP= "ts";
 
-    public static SimpleDateFormat sqlSDF= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+    public static SimpleDateFormat sqlSDF= new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
     public static SimpleDateFormat hmTimeSDF= new SimpleDateFormat("HH:mm", Locale.getDefault());
 
     private final float temp;
     private final float hum;
     private final Calendar timestamp;
 
-    public AirData(JSONObject jobj) throws JSONException, ParseException {
-        temp= (float) jobj.getDouble(JSON_TAG_AIR_TEMPERATURE);
-        hum= (float) jobj.getDouble(JSON_TAG_AIR_HUMIDITY);
+    public AirData(JsonObject jobj) throws ParseException {
+        temp= (float) jobj.get(JSON_TAG_AIR_TEMPERATURE).getAsDouble();
+        hum= (float) jobj.get(JSON_TAG_AIR_HUMIDITY).getAsDouble();
 
-        String strLS= jobj.getString(JSON_TAG_TIMESTAMP);
+        String strLS= jobj.get(JSON_TAG_TIMESTAMP).getAsString();
         timestamp= Calendar.getInstance();
         timestamp.setTime(Objects.requireNonNull(sqlSDF.parse(strLS)));
     }

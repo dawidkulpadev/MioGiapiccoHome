@@ -39,6 +39,10 @@
         <item name="iconTint">?attr/colorOnSecondaryContainer</item>
     </style>
 
+    <style name="Theme.TextAppearance.SettingsDescription" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:textColor">?attr/colorOnContainer</item>
+    </style>
+
     <style name="Theme.MyApplication" parent="Base.Theme.MyApplication" />
 
     <style name="Theme.MyApplication.Background" parent="Theme.MyApplication">

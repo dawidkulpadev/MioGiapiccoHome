@@ -61,6 +61,27 @@
                     android:text="@string/message_device_found"
                     android:textAlignment="center"/>
 
+                <com.google.android.material.progressindicator.LinearProgressIndicator
+                    android:id="@+id/step2_found_progress"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/step2_found_message"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginTop="24dp"
+                    android:indeterminate="false"
+                    android:progress="0"/>
+                <TextView
+                    android:id="@+id/step2_found_progress_message"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:text="Connecting..."
+                    android:layout_marginTop="4dp"
+                    style="@style/TextAppearance.Material3.BodySmall"
+                    app:layout_constraintTop_toBottomOf="@id/step2_found_progress"/>
+
 
                 <TextView
                     android:id="@+id/step3_label"
@@ -69,15 +90,18 @@
                     android:text="@string/label_addnewdevice_step3"
                     android:layout_marginTop="8dp"
                     android:textSize="20sp"
-                    app:layout_constraintTop_toBottomOf="@id/step2_found_message"
+                    app:layout_constraintTop_toBottomOf="@id/step2_found_progress_message"
                     app:layout_constraintStart_toStartOf="parent"/>
 
                 <TextView
                     android:id="@+id/found_device_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
+                    android:layout_marginTop="48dp"
                     android:textSize="20sp"
+                    android:text="Light Device"
+                    android:textAlignment="center"
+                    style="@style/TextAppearance.Material3.LabelLarge.Emphasized"
                     app:layout_constraintTop_toBottomOf="@id/step3_label"
                     app:layout_constraintStart_toStartOf="parent"/>
 
@@ -85,7 +109,7 @@
                     android:id="@+id/device_name_input_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
+                    android:layout_marginTop="32dp"
                     android:textColorHint="@color/textSecondaryLight"
                     app:layout_constraintTop_toBottomOf="@id/found_device_text"
                     app:layout_constraintStart_toStartOf="parent">
@@ -98,50 +122,80 @@
                         android:hint="@string/hint_light_device_name"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/device_role_layout"
+                <com.google.android.material.divider.MaterialDivider
+                    android:id="@+id/name_divider"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:layout_constraintTop_toBottomOf="@id/device_name_input_layout"
                     app:layout_constraintStart_toStartOf="parent"
-                    android:layout_marginTop="12dp">
-                    <TextView
-                        android:id="@+id/device_role_label"
-                        android:layout_width="wrap_content"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginTop="@dimen/new_device_configs_separation_margin"/>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/role_card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    style="@style/Widget.Material3.CardView.Elevated"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginTop="@dimen/new_device_configs_separation_margin"
+                    app:layout_constraintTop_toBottomOf="@id/name_divider">
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/role_layout"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="18sp"
-                        android:text="@string/label_device_server_role"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/device_role_help_button"/>
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/device_role_help_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:layout_constraintStart_toEndOf="@id/device_role_label"
-                        style="@style/Widget.Material3.Button.IconButton"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:icon="@drawable/icon_help"
-                        />
-                    <com.google.android.material.materialswitch.MaterialSwitch
-                        android:id="@+id/device_role_server_switch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"/>
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp">
+
+                        <TextView
+                            android:id="@+id/role_server_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/label_server_role"
+                            style="@style/TextAppearance.Material3.BodyLarge.Emphasized"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toTopOf="@id/role_server_help_text"
+                            />
+                        <TextView
+                            android:id="@+id/role_server_help_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintTop_toBottomOf="@id/role_server_label"
+                            app:layout_constraintStart_toStartOf="@id/role_server_label"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:text="@string/hint_tap_to_learn_more"
+                            style="@style/Theme.TextAppearance.SettingsDescription"/>
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/role_server_switch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"/>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:id="@+id/role_divider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/role_card"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginTop="@dimen/new_device_configs_separation_margin"/>
 
                 <TextView
                     android:id="@+id/wifi_config_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/label_config_wifi"
-                    android:layout_marginTop="24dp"
-                    android:textSize="18sp"
-                    app:layout_constraintTop_toBottomOf="@id/device_role_layout"
+                    android:layout_marginTop="@dimen/new_device_configs_separation_margin"
+                    style="@style/TextAppearance.Material3.LabelMedium"
+                    app:layout_constraintTop_toBottomOf="@id/role_divider"
                     app:layout_constraintStart_toStartOf="parent"/>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -180,14 +234,23 @@
                         android:maxLines="1"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <com.google.android.material.divider.MaterialDivider
+                    android:id="@+id/wifi_divider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/wifi_psk_layout"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginTop="@dimen/new_device_configs_separation_margin"/>
+
                 <TextView
                     android:id="@+id/placement_config_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/label_placement"
-                    android:layout_marginTop="24dp"
-                    android:textSize="18sp"
-                    app:layout_constraintTop_toBottomOf="@id/wifi_psk_layout"
+                    android:layout_marginTop="@dimen/new_device_configs_separation_margin"
+                    style="@style/TextAppearance.Material3.LabelMedium"
+                    app:layout_constraintTop_toBottomOf="@id/wifi_divider"
                     app:layout_constraintStart_toStartOf="parent"/>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -323,14 +386,23 @@
                     </com.google.android.material.textfield.TextInputLayout>
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
+                <com.google.android.material.divider.MaterialDivider
+                    android:id="@+id/placement_divider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/plant_select_box"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginTop="@dimen/new_device_configs_separation_margin"/>
+
                 <TextView
                     android:id="@+id/timezone_config_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/label_timezone"
-                    android:layout_marginTop="24dp"
-                    android:textSize="18sp"
-                    app:layout_constraintTop_toBottomOf="@id/plant_select_box"
+                    android:layout_marginTop="@dimen/new_device_configs_separation_margin"
+                    style="@style/TextAppearance.Material3.LabelMedium"
+                    app:layout_constraintTop_toBottomOf="@id/placement_divider"
                     app:layout_constraintStart_toStartOf="parent"/>
 
                 <com.google.android.material.textfield.TextInputLayout

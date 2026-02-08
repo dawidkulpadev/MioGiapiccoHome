@@ -1,11 +1,10 @@
-package pl.dawidkulpa.miogiapiccohome.API;
+package pl.dawidkulpa.miogiapiccohome.API.data;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonObject;;
 
 import java.text.ParseException;
 
-public class LightDevice extends Device{
+public class LightDevice extends Device {
     private static final String JSON_TAG_NAME="n";
     private static final String JSON_TAG_DLI="dli";
     private static final String JSON_TAG_DS="ds";
@@ -42,20 +41,20 @@ public class LightDevice extends Device{
     public int getSrd() {return sunriseEndAt-dayStartAt;}
     public int getSsd() {return dayEndAt-sunsetStartAt;}
 
-    public LightDevice(JSONObject jobj, int roomId, int sectorId) throws JSONException, ParseException {
+    public LightDevice(JsonObject jobj, int roomId, int sectorId) throws ParseException {
         super(jobj, Type.Light);
 
         sectorParentId= sectorId;
         roomParentId= roomId;
 
-        name= jobj.getString(JSON_TAG_NAME);
+        name= jobj.get(JSON_TAG_NAME).getAsString();
 
-        dli = jobj.getInt(JSON_TAG_DLI);
+        dli = jobj.get(JSON_TAG_DLI).getAsInt();
 
-        dayStartAt = jobj.getInt(JSON_TAG_DS);
-        sunriseEndAt = dayStartAt + jobj.getInt(JSON_TAG_SRD);
-        dayEndAt = jobj.getInt(JSON_TAG_DE);
-        sunsetStartAt = dayEndAt - jobj.getInt(JSON_TAG_SSD);
+        dayStartAt = jobj.get(JSON_TAG_DS).getAsInt();
+        sunriseEndAt = dayStartAt + jobj.get(JSON_TAG_SRD).getAsInt();
+        dayEndAt = jobj.get(JSON_TAG_DE).getAsInt();
+        sunsetStartAt = dayEndAt - jobj.get(JSON_TAG_SSD).getAsInt();
     }
 
     public String getStringDs(){

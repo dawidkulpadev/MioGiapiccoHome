@@ -9,4 +9,6 @@
     <dimen name="details_sensor_icon_size">28dp</dimen>
 
     <dimen name="pin_input_margin_start">6dp</dimen>
+
+    <dimen name="new_device_configs_separation_margin">32dp</dimen>
 </resources>

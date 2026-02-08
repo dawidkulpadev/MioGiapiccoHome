@@ -21,9 +21,9 @@ import com.google.android.material.progressindicator.LinearProgressIndicator;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import pl.dawidkulpa.miogiapiccohome.API.Device;
-import pl.dawidkulpa.miogiapiccohome.API.LightDevice;
-import pl.dawidkulpa.miogiapiccohome.API.Room;
+import pl.dawidkulpa.miogiapiccohome.API.data.Device;
+import pl.dawidkulpa.miogiapiccohome.API.data.LightDevice;
+import pl.dawidkulpa.miogiapiccohome.API.data.Room;
 import pl.dawidkulpa.miogiapiccohome.R;
 import pl.dawidkulpa.miogiapiccohome.dialogs.DLIPickerDialog;
 import pl.dawidkulpa.miogiapiccohome.dialogs.LightDeviceSettingsDialog;

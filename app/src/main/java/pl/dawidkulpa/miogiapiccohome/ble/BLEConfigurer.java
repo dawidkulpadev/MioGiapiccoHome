@@ -9,7 +9,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
 
-import pl.dawidkulpa.miogiapiccohome.API.Device;
+import pl.dawidkulpa.miogiapiccohome.API.data.Device;
 
 public class BLEConfigurer {
     /** Constants */
@@ -30,6 +30,7 @@ public class BLEConfigurer {
         void deviceSearchStarted();
         void onError(ErrorCode errorCode);
         void onDeviceFound(String name);
+        void onConnectProgress(int progress, String msg);
         void onDeviceConnected();
         void onDeviceReady();
         void onDeviceConfigured();
@@ -90,7 +91,7 @@ public class BLEConfigurer {
         @Override
         public void run() {
             BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            if(state==BLEConfigurer.ConfigurerState.WaitingForBluetooth){
+            if(state== BLEConfigurer.ConfigurerState.WaitingForBluetooth){
                 if(mBluetoothAdapter!=null && mBluetoothAdapter.isEnabled()){
                     state= BLEConfigurer.ConfigurerState.SearchingDevice;
                     Log.d("NewDeviceActivity", "System state: SearchingForDevice");
@@ -142,6 +143,11 @@ public class BLEConfigurer {
             }
 
             @Override
+            public void onSyncProgress(int progress, String msg) {
+                callbacks.onConnectProgress(progress, msg);
+            }
+
+            @Override
             public void onWiFisRefresh(String wifis) {
                 callbacks.onWiFiListRefreshed(wifis);
             }
@@ -182,13 +188,7 @@ public class BLEConfigurer {
     public void finish(Context c){
         scanStopHandler.removeCallbacks(scanStopTask);
         bleConfigurerGatt.finish(c);
-        try {
-            c.unregisterReceiver(bleConfigurerGatt);
-        } catch (IllegalArgumentException e){
-            Log.w("NewDeviceActivity", "Gatt update receiver not registered");
-        }
     }
-
 
     public void startConnectingSystem(){
         state= ConfigurerState.WaitingForBluetooth;
@@ -220,8 +220,8 @@ public class BLEConfigurer {
         return bleConfigurerGatt.getFoundDeviceName();
     }
 
-    public void writeDeviceConfig(String wifiSSID, String wifiPSK, String uid, String picklock, String timezone){
+    public void writeDeviceConfig(String wifiSSID, String wifiPSK, String uid, String picklock, String timezone, int role){
         state= ConfigurerState.WritingConfiguration;
-        bleConfigurerGatt.startConfigWrite(wifiSSID, wifiPSK, uid, picklock, timezone);
+        bleConfigurerGatt.startConfigWrite(wifiSSID, wifiPSK, uid, picklock, timezone, role);
     }
 }

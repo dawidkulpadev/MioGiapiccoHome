@@ -69,7 +69,7 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".API.StateWatcher"
+            android:name=".API.BackgroundWatcher"
             android:enabled="true"
             android:exported="true" />
 

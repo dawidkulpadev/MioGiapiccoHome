@@ -23,13 +23,13 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
 
-import pl.dawidkulpa.miogiapiccohome.API.AirDevice;
-import pl.dawidkulpa.miogiapiccohome.API.Device;
-import pl.dawidkulpa.miogiapiccohome.API.Plant;
-import pl.dawidkulpa.miogiapiccohome.API.LightDevice;
-import pl.dawidkulpa.miogiapiccohome.API.Room;
-import pl.dawidkulpa.miogiapiccohome.API.Sector;
-import pl.dawidkulpa.miogiapiccohome.API.SoilDevice;
+import pl.dawidkulpa.miogiapiccohome.API.data.AirDevice;
+import pl.dawidkulpa.miogiapiccohome.API.data.Device;
+import pl.dawidkulpa.miogiapiccohome.API.data.Plant;
+import pl.dawidkulpa.miogiapiccohome.API.data.LightDevice;
+import pl.dawidkulpa.miogiapiccohome.API.data.Room;
+import pl.dawidkulpa.miogiapiccohome.API.data.Sector;
+import pl.dawidkulpa.miogiapiccohome.API.data.SoilDevice;
 import pl.dawidkulpa.miogiapiccohome.EditTextWatcher;
 import pl.dawidkulpa.miogiapiccohome.R;
 import pl.dawidkulpa.miogiapiccohome.dialogs.AirDataPlotDialog;
