@@ -30,6 +30,7 @@ public class BLEConfigurer {
         void deviceSearchStarted();
         void onError(ErrorCode errorCode);
         void onDeviceFound(String name);
+        void onConnectProgress(int progress, String msg);
         void onDeviceConnected();
         void onDeviceReady();
         void onDeviceConfigured();
@@ -139,6 +140,11 @@ public class BLEConfigurer {
             public void onDeviceReady() {
                 state= ConfigurerState.WaitingForUserInput;
                 callbacks.onDeviceReady();
+            }
+
+            @Override
+            public void onSyncProgress(int progress, String msg) {
+                callbacks.onConnectProgress(progress, msg);
             }
 
             @Override

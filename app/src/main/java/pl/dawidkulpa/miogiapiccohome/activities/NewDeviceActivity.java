@@ -21,8 +21,10 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.JsonObject;
@@ -153,6 +155,20 @@ public class NewDeviceActivity extends AppCompatActivity {
             @Override
             public void onDeviceFound(String name) {
                 runOnUiThread(() -> findViewById(R.id.step2_found_message).setVisibility(View.VISIBLE));
+                progressBar.setVisibility(View.GONE);
+                ((LinearProgressIndicator)findViewById(R.id.step2_found_progress)).setProgress(0, false);
+                ((TextView)findViewById(R.id.step2_found_progress_message)).setText(R.string.message_connect_step_gen2_connecting);
+                findViewById(R.id.step2_found_progress).setVisibility(View.VISIBLE);
+                findViewById(R.id.step2_found_progress_message).setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onConnectProgress(int progress, String msg) {
+                runOnUiThread(() -> {
+                    ((LinearProgressIndicator)findViewById(R.id.step2_found_progress)).setProgress(progress, true);
+                    if(!msg.isEmpty()) ((TextView)findViewById(R.id.step2_found_progress_message)).setText(msg);
+                });
+
             }
 
             @Override
@@ -366,6 +382,12 @@ public class NewDeviceActivity extends AppCompatActivity {
         inputWifiSSID= wifiSSIDsAutoComplete.getText().toString();
         inputWifiPSK= wifiPskEdit.getText().toString();
 
+        if(((SwitchMaterial)findViewById(R.id.role_server_switch)).isChecked()){
+            inputRole= 1;
+        } else {
+            inputRole= 0;
+        }
+
         // Remove trailing and leading spaces
         deviceName= deviceName.trim();
 
@@ -455,29 +477,43 @@ public class NewDeviceActivity extends AppCompatActivity {
         if(devType== Device.Type.Light) {
             // Name
             ((View) devicesNameEdit.getParent()).setVisibility(state);
+            findViewById(R.id.name_divider).setVisibility(state);
+
+            // Role
+            findViewById(R.id.role_layout).setVisibility(state);
+            findViewById(R.id.role_divider).setVisibility(state);
 
             // WiFi
             findViewById(R.id.wifi_config_label).setVisibility(state);
             wifiSSIDsMenu.setVisibility(state);
             ((View)wifiPskEdit.getParent()).setVisibility(state);
+            findViewById(R.id.wifi_divider).setVisibility(state);
+
+            findViewById(R.id.placement_divider).setVisibility(state);
 
             // Timezone
             findViewById(R.id.timezone_config_label).setVisibility(state);
             timezonesMenu.setVisibility(state);
         } else {
             ((View) devicesNameEdit.getParent()).setVisibility(View.GONE);
+            findViewById(R.id.name_divider).setVisibility(View.GONE);
+
+            // Role
+            findViewById(R.id.role_layout).setVisibility(View.GONE);
+            findViewById(R.id.role_divider).setVisibility(View.GONE);
 
             // WiFi
             findViewById(R.id.wifi_config_label).setVisibility(View.GONE);
             wifiSSIDsMenu.setVisibility(View.GONE);
             ((View)wifiPskEdit.getParent()).setVisibility(View.GONE);
+            findViewById(R.id.wifi_divider).setVisibility(View.GONE);
+
+            findViewById(R.id.placement_divider).setVisibility(View.GONE);
 
             // Timezone
             findViewById(R.id.timezone_config_label).setVisibility(View.GONE);
             timezonesMenu.setVisibility(View.GONE);
         }
-
-
 
         findViewById(R.id.placement_config_label).setVisibility(state);
         roomsMenu.setVisibility(state);
@@ -503,6 +539,8 @@ public class NewDeviceActivity extends AppCompatActivity {
 
                 // Step 2 messages
                 findViewById(R.id.step2_found_message).setVisibility(View.GONE);
+                findViewById(R.id.step2_found_progress).setVisibility(View.GONE);
+                findViewById(R.id.step2_found_progress_message).setVisibility(View.GONE);
 
                 // User input form
                 hideUserInputs(true, Device.Type.Unknown);
@@ -526,6 +564,8 @@ public class NewDeviceActivity extends AppCompatActivity {
 
                 // Step 2 messages
                 findViewById(R.id.step2_found_message).setVisibility(View.GONE);
+                findViewById(R.id.step2_found_progress).setVisibility(View.GONE);
+                findViewById(R.id.step2_found_progress_message).setVisibility(View.GONE);
 
                 // User input form
                 hideUserInputs(true, Device.Type.Unknown);
@@ -550,6 +590,8 @@ public class NewDeviceActivity extends AppCompatActivity {
 
                 // Step 2 messages
                 findViewById(R.id.step2_found_message).setVisibility(View.GONE);
+                findViewById(R.id.step2_found_progress).setVisibility(View.GONE);
+                findViewById(R.id.step2_found_progress_message).setVisibility(View.GONE);
 
                 // User input form
                 hideUserInputs(false, bleConfigurer.getConnectedDevType());
@@ -578,6 +620,8 @@ public class NewDeviceActivity extends AppCompatActivity {
 
                 // Step 2 messages
                 findViewById(R.id.step2_found_message).setVisibility(View.GONE);
+                findViewById(R.id.step2_found_progress).setVisibility(View.GONE);
+                findViewById(R.id.step2_found_progress_message).setVisibility(View.GONE);
 
                 // User input form
                 hideUserInputs(true, Device.Type.Unknown);
@@ -606,6 +650,8 @@ public class NewDeviceActivity extends AppCompatActivity {
 
                 // Step 2 messages
                 findViewById(R.id.step2_found_message).setVisibility(View.GONE);
+                findViewById(R.id.step2_found_progress).setVisibility(View.GONE);
+                findViewById(R.id.step2_found_progress_message).setVisibility(View.GONE);
 
                 // User input form
                 hideUserInputs(true, Device.Type.Unknown);
@@ -635,6 +681,8 @@ public class NewDeviceActivity extends AppCompatActivity {
 
                 // Step 2 messages
                 findViewById(R.id.step2_found_message).setVisibility(View.GONE);
+                findViewById(R.id.step2_found_progress_message).setVisibility(View.GONE);
+                findViewById(R.id.step2_found_progress).setVisibility(View.GONE);
 
                 // User input form
                 hideUserInputs(true, Device.Type.Unknown);

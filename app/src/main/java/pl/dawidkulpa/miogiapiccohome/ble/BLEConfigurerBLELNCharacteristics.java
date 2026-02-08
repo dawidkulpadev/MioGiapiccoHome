@@ -10,6 +10,7 @@ import java.util.HexFormat;
 import java.util.List;
 import java.util.Objects;
 
+import pl.dawidkulpa.miogiapiccohome.R;
 import pl.dawidkulpa.miogiapiccohome.ble.bleln_encryption.BLELNAuthentication;
 import pl.dawidkulpa.miogiapiccohome.ble.bleln_encryption.BLELNCert;
 import pl.dawidkulpa.miogiapiccohome.ble.bleln_encryption.BLELNConnCtx;
@@ -84,6 +85,12 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
         }
     }
 
+    public void sendUpdateProgress(int progress, int msgResId){
+        if(actionsListener!=null){
+            actionsListener.onSyncProgress(progress, msgResId);
+        }
+    }
+
     @Override
     boolean discoverCharacteristics(BluetoothGattService gattService) {
         keyTxChar = null;
@@ -91,8 +98,11 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
         dataRxChar = null;
         dataTxChar = null;
 
+        sendUpdateProgress(10, -1);
+
         List<BluetoothGattCharacteristic> gattCharacteristics =
                 gattService.getCharacteristics();
+
 
         for(BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics){
             String uuid = gattCharacteristic.getUuid().toString();
@@ -116,6 +126,8 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
                     break;
             }
         }
+
+        sendUpdateProgress(15, R.string.message_connect_step_gen2_encrypting_connection);
 
         // Check if every characteristic was loaded
         return (keyTxChar !=null && keyRxChar !=null &&
@@ -249,6 +261,7 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
                 bleService.writeCharacteristic(keyRxChar, connCtx.createMyKeyExMessage());
                 state= State.Authentication;
                 Log.e(TAG, "Key write started");
+                sendUpdateProgress(25, R.string.message_connect_step_gen2_authorisation);
             } else if(state == State.Authentication){
                 if(connCtx!=null){
                     if(connCtx.getState() == BLELNConnCtx.State.WaitingForCert){
@@ -271,6 +284,7 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
                                 Log.e(TAG, "WaitingForCert - wrong message");
                                 actionsListener.onError(ErrorCode.SyncFailed);
                             }
+                            sendUpdateProgress(40, -1);
                         } else {
                             actionsListener.onError(ErrorCode.SyncFailed);
                         }
@@ -285,6 +299,7 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
                             } else {
                                 actionsListener.onError(ErrorCode.SyncFailed);
                             }
+                            sendUpdateProgress(55, -1);
                         } else {
                             actionsListener.onError(ErrorCode.SyncFailed);
                         }
@@ -310,6 +325,7 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
                                             Log.e(TAG, "Error sending wssid get command");
                                             actionsListener.onError(ErrorCode.SyncFailed);
                                         }
+                                        sendUpdateProgress(70, R.string.message_connect_step_gen2_reading_config);
                                     } else {
                                         Log.e(TAG, "failed encrypting cert msg");
                                     }
@@ -348,6 +364,7 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
                                 actionsListener.onError(ErrorCode.SyncFailed);
                                 return;
                             }
+                            sendUpdateProgress(75, -1);
                             break;
                         case "pcklk":
                             Log.d(TAG, "Picklock read");
@@ -357,6 +374,7 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
                                 actionsListener.onError(ErrorCode.SyncFailed);
                                 return;
                             }
+                            sendUpdateProgress(80, -1);
                             break;
                         case "tzone":
                             Log.d(TAG, "Timezone read");
@@ -366,6 +384,7 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
                                 actionsListener.onError(ErrorCode.SyncFailed);
                                 return;
                             }
+                            sendUpdateProgress(85, -1);
                             break;
                         case "mac":
                             Log.d(TAG, "MAC read: "+ val);
@@ -375,11 +394,13 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
                                 actionsListener.onError(ErrorCode.SyncFailed);
                                 return;
                             }
+                            sendUpdateProgress(90, -1);
                             break;
                         case "role":
                             timeoutWatchdog.stop();
                             configRole= Integer.parseInt(val);
                             state = State.Ready;
+                            sendUpdateProgress(100, -1);
                             break;
                         default:
                             Log.e(TAG, "Received unknown message: "+msg);

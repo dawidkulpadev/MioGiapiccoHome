@@ -19,6 +19,7 @@ abstract public class BLEConfigurerCharacteristics {
     final TimeoutWatchdog timeoutWatchdog= new TimeoutWatchdog();
 
     public interface ActionsListener {
+        void onSyncProgress(int progress, int msgResId);
         void onRefresh(String wifis);
         void onError(ErrorCode ec);
     }

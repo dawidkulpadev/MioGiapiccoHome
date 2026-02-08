@@ -8,6 +8,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 
+import pl.dawidkulpa.miogiapiccohome.R;
+
 public class BLEConfigurerRawCharacteristics extends BLEConfigurerCharacteristics{
     public static final String BLE_CHAR_UUID_WIFI_SSID      = "345ac506-c96e-45c6-a418-56a2ef2d6072";
     public static final String BLE_CHAR_UUID_WIFI_PSK       = "b675ddff-679e-458d-9960-939d8bb03572";
@@ -97,6 +99,8 @@ public class BLEConfigurerRawCharacteristics extends BLEConfigurerCharacteristic
             }
         }
 
+        actionsListener.onSyncProgress(20, R.string.message_connect_step_gen2_reading_config);
+
         // Check if every characteristic was loaded
         return (picklockChar !=null && macChar !=null &&
                 uidChar !=null && wifiSSIDChar !=null &&
@@ -157,31 +161,37 @@ public class BLEConfigurerRawCharacteristics extends BLEConfigurerCharacteristic
                 Log.e("NewDeviceActivity", "Picklock characteristic data received!: "+dataStr);
                 configPicklock = dataStr;
                 picklockCharRead = true;
+                actionsListener.onSyncProgress(30, -1);
                 break;
             case BLE_CHAR_UUID_WIFI_SSID:
                 Log.e("NewDeviceActivity", "WiFi SSID characteristic data received!: "+dataStr);
                 configWifiSSID = dataStr;
                 wifiSSIDCharRead = true;
+                actionsListener.onSyncProgress(40, -1);
                 break;
             case BLE_CHAR_UUID_WIFI_PSK:
                 Log.e("NewDeviceActivity", "WiFi PSK characteristic data received!: "+dataStr);
                 configWifiPSK = dataStr;
                 wifiPSKCharRead = true;
+                actionsListener.onSyncProgress(50, -1);
                 break;
             case BLE_CHAR_UUID_UID:
                 Log.e("NewDeviceActivity", "UID characteristic data received!: "+dataStr);
                 configUID = dataStr;
                 uidCharRead = true;
+                actionsListener.onSyncProgress(60, -1);
                 break;
             case BLE_CHAR_UUID_MAC:
                 Log.e("NewDeviceActivity", "MAC characteristic data received!:= "+dataStr);
                 configMAC = dataStr;
                 macCharRead = true;
+                actionsListener.onSyncProgress(70, -1);
                 break;
             case BLE_CHAR_UUID_TIMEZONE:
                 Log.e("NewDeviceActivity", "Timezone characteristic data received!: "+dataStr);
                 configTimezone = dataStr;
                 timezoneCharRead = true;
+                actionsListener.onSyncProgress(80, -1);
                 break;
             case BLE_CHAR_UUID_WIFI_SCAN_RES:
                 wifiSSIDsCSV= dataStr;
@@ -191,6 +201,7 @@ public class BLEConfigurerRawCharacteristics extends BLEConfigurerCharacteristic
         }
 
         if(allCharsRead()){
+            actionsListener.onSyncProgress(90, -1);
             state= State.EnablingSetFlagNotifications;
             bleService.allowNotificationsFor(setFlagChar);
         }
@@ -201,7 +212,9 @@ public class BLEConfigurerRawCharacteristics extends BLEConfigurerCharacteristic
         if(state==State.EnablingSetFlagNotifications){
             state= State.EnablingWiFiScanNotifications;
             bleService.allowNotificationsFor(wifiScanResChar);
+            actionsListener.onSyncProgress(95, -1);
         } else if(state==State.EnablingWiFiScanNotifications){
+            actionsListener.onSyncProgress(100, -1);
             state= State.Ready;
         }
     }

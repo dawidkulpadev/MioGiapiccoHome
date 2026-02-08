@@ -31,6 +31,7 @@ public class BLEConfigurerGatt implements BLEGattListener {
         void onDeviceReady();
         void onWiFisRefresh(String wifis);
         void onConfigFinished();
+        void onSyncProgress(int progress, String msg);
         void onError(ErrorCode ec);
     }
 
@@ -58,7 +59,7 @@ public class BLEConfigurerGatt implements BLEGattListener {
                     if(bleAddress!=null && !bleAddress.isEmpty()) {
                         bluetoothService.connect(bleAddress);
                         state= State.Connecting;
-
+                        listener.onSyncProgress(5, "");
                     } else {
                         Log.e("ServiceConnection", "Address empty");
                         listener.onError(ErrorCode.ConnectFailed);
@@ -234,6 +235,15 @@ public class BLEConfigurerGatt implements BLEGattListener {
                             @Override
                             public void onRefresh(String wifis) {
                                 listener.onWiFisRefresh(wifis);
+                            }
+
+                            @Override
+                            public void onSyncProgress(int progress, int msgResId) {
+                                String msg="";
+                                if(msgResId>=0)
+                                    msg= context.getString(msgResId);
+
+                                listener.onSyncProgress(progress, msg);
                             }
 
                             @Override

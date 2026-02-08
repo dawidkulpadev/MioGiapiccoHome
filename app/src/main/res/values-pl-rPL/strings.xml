@@ -48,6 +48,7 @@
     <string name="label_lights_list">🔆 Światło</string>
     <string name="label_air_params">☁️ Powietrze</string>
     <string name="label_plants_list">🪴 Rośliny</string>
+    <string name="label_server_role">Tryb serwera</string>
     <string name="hint_login">Login</string>
     <string name="hint_ssid">Nazwa wifi</string>
     <string name="hint_psk">Hasło</string>
@@ -119,6 +120,7 @@
     <string name="error_field_empty">To pole nie może być puste</string>
     <string name="error_password_short">Minimum 8 znaków</string>
     <string name="error_password_weak">Hasło musi zawierać conajmniej jednen znak specjalny, jedną dużą literę i jedną cyfrę</string>
+    <string name="hint_tap_to_learn_more">Dotknij żeby dowiedzieć się więcej</string>
     <string name="helper_password_rules">Minimum 8 znaków, conajmniej jednen znak specjalny, jedną dużą literę i jedną cyfrę</string>
     <string name="message_activation_pin_sent">Na podany adres email wysłałem wiadomość z kodem aktywacyjnym (nic więcej nie będę wysyłał)</string>
     <string name="message_activation_pin_input">Wpisz ten kod w polu poniżej</string>
@@ -153,5 +155,8 @@
     <string name="cont_descr_sector_more_button">Menu sektora</string>
     <string name="cont_descr_room_more_button">Menu pokoju</string>
     <string name="title_rename_sector">Zmień nazwę sektora %s</string>
-
+    <string name="message_connect_step_gen2_connecting">Łączenie…</string>
+    <string name="message_connect_step_gen2_encrypting_connection">Szyfrowanie połączenia…</string>
+    <string name="message_connect_step_gen2_authorisation">Autoryzacja…</string>
+    <string name="message_connect_step_gen2_reading_config">Czytanie aktualnych ustawień…</string>
 </resources>
