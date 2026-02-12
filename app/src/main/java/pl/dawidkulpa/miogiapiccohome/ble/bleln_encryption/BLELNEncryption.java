@@ -5,9 +5,14 @@ import android.util.Log;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
@@ -32,6 +37,36 @@ public class BLELNEncryption {
     private static final String SIGNATURE_ALGORITHM = "SHA256withECDSA";
 
     private static final SecureRandom RNG = new SecureRandom();
+
+    public static class RawKeyPair {
+        public byte[] privateKey; // 32 bajty (skalar d)
+        public byte[] publicKey;  // 65 bajtów (0x04 + X + Y)
+
+        public RawKeyPair(byte[] privateKey, byte[] publicKey) {
+            this.privateKey = privateKey;
+            this.publicKey = publicKey;
+        }
+    }
+
+    public static RawKeyPair generateSigningKeys() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
+        keyPairGenerator.initialize(new ECGenParameterSpec(CURVE));
+
+        KeyPair keyPair = keyPairGenerator.generateKeyPair();
+        ECPrivateKey priv = (ECPrivateKey) keyPair.getPrivate();
+        ECPublicKey pub = (ECPublicKey) keyPair.getPublic();
+
+        byte[] privateKeyBytes = to32Bytes(priv.getS());
+
+        byte[] x = to32Bytes(pub.getW().getAffineX());
+        byte[] y = to32Bytes(pub.getW().getAffineY());
+
+        byte[] publicKeyBytes = new byte[64];
+        System.arraycopy(x, 0, publicKeyBytes, 0, 32);
+        System.arraycopy(y, 0, publicKeyBytes, 32, 32);
+
+        return new RawKeyPair(privateKeyBytes, publicKeyBytes);
+    }
 
     public static byte[] leftPad(byte[] in, int len) {
         if (in.length == len) return in;
@@ -148,7 +183,7 @@ public class BLELNEncryption {
             return sig.verify(signatureDer);
 
         } catch (Exception e) {
-            Log.e("BLELNEncryption", "Failed veryfing signature: "+ e.getMessage());
+            Log.e("BLELNEncryption", "Failed veryfing signature: "+ e.getMessage()+" pub key len: "+pubKeyRaw.length);
             return false;
         }
     }

@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import pl.dawidkulpa.miogiapiccohome.API.requests.ActivationRequest;
 import pl.dawidkulpa.miogiapiccohome.API.requests.AddPlantRequest;
 import pl.dawidkulpa.miogiapiccohome.API.requests.AirDataHistoryRequest;
+import pl.dawidkulpa.miogiapiccohome.API.requests.AppSignRequest;
 import pl.dawidkulpa.miogiapiccohome.API.requests.DeletePlantRequest;
 import pl.dawidkulpa.miogiapiccohome.API.requests.LoginRequest;
 import pl.dawidkulpa.miogiapiccohome.API.requests.RegisterDeviceRequest;
@@ -18,6 +19,7 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
+import retrofit2.http.Query;
 
 public interface MioGiapiccoApi {
     @POST("user/login")
@@ -31,6 +33,9 @@ public interface MioGiapiccoApi {
 
     @GET("user/get-devices")
     Call<JsonObject> getDevices(@Header("authorization") String token);
+
+    @GET("user/get-app-signature")
+    Call<JsonObject> getAppSignature(@Header("authorization") String token, @Query("mac") String mac, @Query("pub") String pubKey);
 
     @POST("room/create")
     Call<JsonObject> createRoom(@Header("authorization") String token, @Body RoomCreateRequest body);

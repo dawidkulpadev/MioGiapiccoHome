@@ -38,6 +38,10 @@ public class BLELNConnCtx {
         return friendTestNonce48;
     }
 
+    public byte[] getPubKey(){
+        return friendsPubKey64;
+    }
+
     public String getTestNonceBase64(){
         if(friendTestNonce48!=null)
             return Base64.encodeToString(friendTestNonce48, Base64.NO_WRAP);

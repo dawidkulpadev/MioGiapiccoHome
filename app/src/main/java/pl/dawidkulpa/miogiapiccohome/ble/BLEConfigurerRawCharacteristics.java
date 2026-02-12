@@ -289,6 +289,11 @@ public class BLEConfigurerRawCharacteristics extends BLEConfigurerCharacteristic
     }
 
     @Override
+    String getDevicesPubKey() {
+        return "";
+    }
+
+    @Override
     void restart() {
         finish();
         state= State.Init;

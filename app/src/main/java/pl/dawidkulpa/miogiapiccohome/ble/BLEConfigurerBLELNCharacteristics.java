@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Objects;
 
 import pl.dawidkulpa.miogiapiccohome.R;
+import pl.dawidkulpa.miogiapiccohome.ble.bleln_encryption.BLELNAuthSecrets;
 import pl.dawidkulpa.miogiapiccohome.ble.bleln_encryption.BLELNAuthentication;
 import pl.dawidkulpa.miogiapiccohome.ble.bleln_encryption.BLELNCert;
 import pl.dawidkulpa.miogiapiccohome.ble.bleln_encryption.BLELNConnCtx;
@@ -62,18 +63,11 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
     BLELNAuthentication authStore;
     BLELNConnCtx connCtx;
 
-    BLEConfigurerBLELNCharacteristics(BLEGattService bleService, ActionsListener listener) {
+    BLEConfigurerBLELNCharacteristics(BLEGattService bleService, ActionsListener listener, BLELNCert myCert, BLELNAuthSecrets myAuthSecrets) {
         super(bleService, listener);
         state= State.Init;
 
-        byte[] mac= HexFormat.of().parseHex("112233445566");
-        byte[] certSign= HexFormat.of().parseHex("69043bd37c6d74df9792a64fc4d868868454297bcc96a7377d0a2f658e6d2cd7af47f02b607d9ecfe3ca6ac133cc673d1bbdf3c1be7e857417d43ed2ad5ce9c3");
-        byte[] manuPubKey= HexFormat.of().parseHex("f1b64c144a0789f56815ac8e900a216c4a713cd066f77cbd979a1205ef7a4f6bac99ccb4f06fbd03b2032698e72c00c58b2846e56a6712d537e7167e2fd1bfe3");
-        byte[] myPrivateKey= HexFormat.of().parseHex("aa67c7f5edb0690e46deaf5e2d5952bfbf702ad8535d18b15f3fc72d574c40b7");
-        byte[] myPublicKey= HexFormat.of().parseHex("06f01d7befa683d3eb1f4081c44cb036015d282cc42d8fd9cb3a557d0eb6d67cfc8ed94368811ca6a0df28fd1ac5e2be8c2516ff5bc5caf62240c13ec26894a0");
-
-        // TODO: set authStore keys and cert!!!!!!
-        authStore= new BLELNAuthentication(mac, certSign, manuPubKey, myPrivateKey, myPublicKey);
+        authStore= new BLELNAuthentication(myAuthSecrets, myCert);
     }
 
     public void onTimeout(){
@@ -273,20 +267,29 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
                                 BLELNCert cert= authStore.verifyCert(parts[1], parts[2]);
 
                                 if(cert != null){
-                                    connCtx.setFriendsCertData(cert.getMac(), cert.getPubKey());
-                                    sendCertToServer();
-                                    connCtx.setState(BLELNConnCtx.State.ChallengeResponseCli);
+                                    if(cert.getUid()==-1 || cert.getUid()==authStore.getUserId()) {
+                                        connCtx.setFriendsCertData(cert.getMac(), cert.getPubKey());
+                                        sendCertToServer();
+                                        connCtx.setState(BLELNConnCtx.State.ChallengeResponseCli);
+                                    } else {
+                                        actionsListener.onError(ErrorCode.SyncFailed);
+                                        Log.e(TAG, "WaitingForCert - not my device");
+                                        connCtx.setState(BLELNConnCtx.State.AuthFailed);
+                                    }
                                 } else {
+                                    connCtx.setState(BLELNConnCtx.State.AuthFailed);
                                     actionsListener.onError(ErrorCode.SyncFailed);
                                     Log.e(TAG, "WaitingForCert - invalid cert");
                                 }
                             } else {
+                                connCtx.setState(BLELNConnCtx.State.AuthFailed);
                                 Log.e(TAG, "WaitingForCert - wrong message");
                                 actionsListener.onError(ErrorCode.SyncFailed);
                             }
                             sendUpdateProgress(40, -1);
                         } else {
                             actionsListener.onError(ErrorCode.SyncFailed);
+                            connCtx.setState(BLELNConnCtx.State.AuthFailed);
                         }
                     } else if(connCtx.getState() == BLELNConnCtx.State.ChallengeResponseCli){
                         Log.e(TAG, "Received keyTx message while ChallengeResponseCli");
@@ -412,10 +415,11 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
         }
     }
 
-    /*** Connection context not protected! */
     private void sendCertToServer() {
         String msg= "$CERT";
         msg += "," + authStore.getSignedCert();
+
+        Log.e(TAG, "Cert: "+msg);
 
         byte[] encMsg= connCtx.encrypt(msg);
         if(encMsg != null) {
@@ -514,6 +518,13 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
                             break;
                         case "role":
                             Log.d(TAG, "Role written");
+                            if(!sendSetConfigCmd("certsign", String.valueOf(configDevSignBase64))){
+                                actionsListener.onError(ErrorCode.WriteFailed);
+                                return;
+                            }
+                            break;
+                        case "certsign":
+                            Log.d(TAG, "certsign written");
                             sendRebootCmd();
                             timeoutWatchdog.stop();
                             state = State.ConfigWritten;
@@ -526,6 +537,15 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
                 }
             }
         }
+    }
+
+    @Override
+    String getDevicesPubKey() {
+        if(connCtx!=null){
+            return Base64.encodeToString(connCtx.getPubKey(), Base64.NO_WRAP);
+        }
+
+        return "";
     }
 
     @Override

@@ -13,6 +13,8 @@ import java.util.List;
 import pl.dawidkulpa.miogiapiccohome.API.data.Device;
 import pl.dawidkulpa.miogiapiccohome.R;
 import pl.dawidkulpa.miogiapiccohome.TimeoutWatchdog;
+import pl.dawidkulpa.miogiapiccohome.ble.bleln_encryption.BLELNAuthSecrets;
+import pl.dawidkulpa.miogiapiccohome.ble.bleln_encryption.BLELNCert;
 
 public class BLEConfigurerGatt implements BLEGattListener {
     private static final String TAG= "BLEConfigurerGatt";
@@ -40,6 +42,9 @@ public class BLEConfigurerGatt implements BLEGattListener {
     private String bleName;
     private String bleAddress;
     private Context context;
+    private int uid;
+    private BLELNCert myCert;
+    private BLELNAuthSecrets myAuthSecrets;
 
     BLEGattService bluetoothService=null;
     ConfigurerGattListener listener;
@@ -88,10 +93,12 @@ public class BLEConfigurerGatt implements BLEGattListener {
         state= State.Idle;
     }
 
-    void startConnectAndReceiving(Context c, String address, String name){
+    void startConnectAndReceiving(Context c, String address, String name, BLELNCert cert, BLELNAuthSecrets authSecrets){
         bleName= name;
         bleAddress= address;
         context= c;
+        myCert= cert;
+        myAuthSecrets= authSecrets;
         bindGattService(c, address);
     }
 
@@ -171,7 +178,7 @@ public class BLEConfigurerGatt implements BLEGattListener {
         return foundDeviceName;
     }
 
-    public void startConfigWrite(String wifiSSID, String wifiPSK, String uid, String picklock, String timezone, int role){
+    public void startConfigWrite(String wifiSSID, String wifiPSK, String uid, String picklock, String timezone, int role, String devSignatureBase64){
         state= State.WritingConfig;
         characteristicsManager.setConfigWifiSSID(wifiSSID);
         characteristicsManager.setConfigWifiPSK(wifiPSK);
@@ -179,6 +186,7 @@ public class BLEConfigurerGatt implements BLEGattListener {
         characteristicsManager.setConfigPicklock(picklock);
         characteristicsManager.setConfigTimezone(timezone);
         characteristicsManager.setConfigRole(role);
+        characteristicsManager.setConfigDevSignBase64(devSignatureBase64);
 
         characteristicsManager.startWrite();
     }
@@ -212,6 +220,10 @@ public class BLEConfigurerGatt implements BLEGattListener {
 
         if(characteristicsManager!=null)
             characteristicsManager.restart();
+    }
+
+    public String getDevicesPubKey(){
+        return characteristicsManager.getDevicesPubKey();
     }
 
 
@@ -257,7 +269,7 @@ public class BLEConfigurerGatt implements BLEGattListener {
 
                 if (bleName.contains("Gen2")) {
                     characteristicsManager = new BLEConfigurerBLELNCharacteristics(bluetoothService,
-                            charListener);
+                            charListener, myCert, myAuthSecrets);
                 } else {
                     characteristicsManager = new BLEConfigurerRawCharacteristics(bluetoothService,
                             charListener);

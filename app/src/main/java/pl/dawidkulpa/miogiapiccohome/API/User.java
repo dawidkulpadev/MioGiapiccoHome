@@ -2,6 +2,7 @@ package pl.dawidkulpa.miogiapiccohome.API;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Base64;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -9,10 +10,13 @@ import androidx.annotation.NonNull;
 import com.google.gson.JsonObject;
 
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.Random;
 import java.util.TimeZone;
 
 import pl.dawidkulpa.miogiapiccohome.API.data.AirDataHistory;
@@ -25,6 +29,7 @@ import pl.dawidkulpa.miogiapiccohome.API.data.UserData;
 import pl.dawidkulpa.miogiapiccohome.API.requests.ActivationRequest;
 import pl.dawidkulpa.miogiapiccohome.API.requests.AddPlantRequest;
 import pl.dawidkulpa.miogiapiccohome.API.requests.AirDataHistoryRequest;
+import pl.dawidkulpa.miogiapiccohome.API.requests.AppSignRequest;
 import pl.dawidkulpa.miogiapiccohome.API.requests.LoginRequest;
 import pl.dawidkulpa.miogiapiccohome.API.requests.RegisterDeviceRequest;
 import pl.dawidkulpa.miogiapiccohome.API.requests.RoomCreateRequest;
@@ -32,6 +37,9 @@ import pl.dawidkulpa.miogiapiccohome.API.requests.RoomDeleteRequest;
 import pl.dawidkulpa.miogiapiccohome.API.requests.SectorCreateRequest;
 import pl.dawidkulpa.miogiapiccohome.API.requests.SectorDeleteRequest;
 import pl.dawidkulpa.miogiapiccohome.API.requests.UnregisterDeviceRequest;
+import pl.dawidkulpa.miogiapiccohome.ble.bleln_encryption.BLELNAuthSecrets;
+import pl.dawidkulpa.miogiapiccohome.ble.bleln_encryption.BLELNCert;
+import pl.dawidkulpa.miogiapiccohome.ble.bleln_encryption.BLELNEncryption;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -91,6 +99,8 @@ public class User implements Parcelable {
     private String token;
     private String picklock;
     private final UserData data;
+    private BLELNCert appCert;
+    private BLELNAuthSecrets authSecrets;
 
     private final MioGiapiccoApi api = ApiClient.getClient();
 
@@ -272,7 +282,7 @@ public class User implements Parcelable {
     }
 
     public void registerDevice(String id, int roomId, int sectorId, int plantId, String name,
-                               Device.Type devType,
+                               String devPubKey, Device.Type devType,
                                ActionListener actionListener){
         Call<JsonObject> call = api.registerDevice(
                 token, new RegisterDeviceRequest(
@@ -281,7 +291,8 @@ public class User implements Parcelable {
                         roomId,
                         sectorId,
                         plantId,
-                        name));
+                        name,
+                        devPubKey));
 
         call.enqueue(new Callback<JsonObject>() {
             @Override
@@ -343,6 +354,70 @@ public class User implements Parcelable {
                     }
                 }
             );
+    }
+
+    public boolean generateAppAuthSecrets() {
+        authSecrets= BLELNAuthSecrets.generate();
+
+        return authSecrets!=null;
+    }
+
+    public BLELNAuthSecrets getAppAuthSecrets(){
+        return authSecrets;
+    }
+
+    public void signAppCert(final ActionListener actionListener){
+        Random rand = new Random();
+        byte[] macAddr = new byte[6];
+        rand.nextBytes(macAddr);
+
+        macAddr[0] = (byte)(macAddr[0] & (byte)254);
+        macAddr[0] = (byte)(macAddr[0] | (byte)2);
+
+        String macBase64= Base64.encodeToString(macAddr, Base64.NO_WRAP);
+        String pubBase64= Base64.encodeToString(authSecrets.getDevPubKey(), Base64.NO_WRAP);
+
+        Call<JsonObject> call = api.getAppSignature(token, macBase64, pubBase64);
+
+        call.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
+
+                if(response.isSuccessful() && response.body()!=null){
+                    Log.e(TAG, response.body().toString());
+                    String signBase64= response.body().get("signature").getAsString();
+                    String macBase64= response.body().get("mac").getAsString();
+
+                    byte[] certSign= Base64.decode(signBase64, Base64.NO_WRAP);
+                    byte[] mac= Base64.decode(macBase64, Base64.NO_WRAP);
+
+                    if(certSign.length!=64 || mac.length!=6 || authSecrets==null){
+                        actionListener.onFinished(false, null);
+                        return;
+                    }
+
+                    appCert= new BLELNCert(2, mac, authSecrets.getDevPubKey(), uid, certSign);
+                    actionListener.onFinished(true, response.body());
+                } else {
+                    try {
+                        Log.e(TAG, response.errorBody().string());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    actionListener.onFinished(false, null);
+                }
+
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) {
+                actionListener.onFinished(false, null);
+            }
+        });
+    }
+
+    public BLELNCert getAppCert(){
+        return appCert;
     }
 
     public void downloadData(final DownloadDataListener ddl){

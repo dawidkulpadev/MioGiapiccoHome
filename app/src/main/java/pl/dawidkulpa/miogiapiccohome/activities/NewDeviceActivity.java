@@ -11,7 +11,6 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.icu.util.TimeZone;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
@@ -112,7 +111,7 @@ public class NewDeviceActivity extends AppCompatActivity {
 
         toolbar.setNavigationOnClickListener(v -> exitActivity());
 
-        user= getIntent().getParcelableExtra("UserAPI");
+        user= getIntent().getParcelableExtra("UserAPI", User.class);
 
         step1Label = findViewById(R.id.step1_label);
         step2Label= findViewById(R.id.step2_label);
@@ -140,15 +139,17 @@ public class NewDeviceActivity extends AppCompatActivity {
         prepareNextStep(UIState.PrepareBluetooth);
 
         userDataReceiveState= UserDataReceiveState.WaitingForResponse;
-        user.downloadData(this::onDownloadUserDataResult);
+
+        if(user.generateAppAuthSecrets()){
+            user.signAppCert(this::onAppCertResult);
+        } else {
+            // TODO: Show error message
+        }
 
 
-
-        findViewById(R.id.role_card).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                BottomSheetDialog bsd= new BottomSheetDialog(view.getContext());
-            }
+        // TODO: Create role info bottom dialog
+        findViewById(R.id.role_card).setOnClickListener(view -> {
+            BottomSheetDialog bsd= new BottomSheetDialog(view.getContext());
         });
 
         bleConfigurer = new BLEConfigurer(this, new BLEConfigurer.BLEConfigurerCallbacks() {
@@ -212,14 +213,21 @@ public class NewDeviceActivity extends AppCompatActivity {
                 runOnUiThread(() -> refreshAvailableWiFiSSIDs(wifis));
             }
         });
+    }
 
-        Log.d("NewDeviceActivity", "System state: CheckingPermissions");
-        checkAndRequestPermissions();
+    private void onAppCertResult(boolean success, JsonObject obj){
+        if(success) {
+            user.downloadData(this::onDownloadUserDataResult);
+        } else {
+            userDataReceiveState = UserDataReceiveState.Failed;
+        }
     }
 
     private void onDownloadUserDataResult(boolean success, UserData userData){
         if(success) {
             userDataReceiveState = UserDataReceiveState.Success;
+            Log.d("NewDeviceActivity", "System state: CheckingPermissions");
+            checkAndRequestPermissions();
         } else {
             userDataReceiveState = UserDataReceiveState.Failed;
         }
@@ -303,14 +311,12 @@ public class NewDeviceActivity extends AppCompatActivity {
         timezonesAutoComplete.setOnItemClickListener((parent, view, position, id) ->
                 inputTimezone= timezoneCodes[position]);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            String tzName= TimeZone.getDefault().getID();
-            int tzIdx= timezones.indexOf(tzName);
-            if(tzIdx>=0){
-                timezonesAutoComplete.setText(tzName, false);
-                inputTimezone= timezoneCodes[tzIdx];
-                Log.d("ASD", "tzIdx>=0");
-            }
+        String tzName = TimeZone.getDefault().getID();
+        int tzIdx= timezones.indexOf(tzName);
+        if(tzIdx>=0){
+            timezonesAutoComplete.setText(tzName, false);
+            inputTimezone= timezoneCodes[tzIdx];
+            Log.d("ASD", "tzIdx>=0");
         }
     }
 
@@ -327,24 +333,20 @@ public class NewDeviceActivity extends AppCompatActivity {
     }
 
     public void checkAndRequestPermissions(){
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-            boolean bluetoothConnectPermited=
-                    ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED;
-            boolean bluetoothScanPermited=
-                    ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED;
-            boolean fineLocationPermited=
-                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        boolean bluetoothConnectPermited =
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED;
+        boolean bluetoothScanPermited=
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED;
+        boolean fineLocationPermited=
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
 
-            if(!bluetoothConnectPermited || !bluetoothScanPermited || !fineLocationPermited){
-                Log.d("NewDeviceActivity", "System state: WaitingForPermissionsUserResponse");
-                requestPermissions(
-                        new String[]{Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.ACCESS_FINE_LOCATION},
-                        1);
-            } else {
-                bleConfigurer.startConnectingSystem();
-            }
+        if(!bluetoothConnectPermited || !bluetoothScanPermited || !fineLocationPermited){
+            Log.d("NewDeviceActivity", "System state: WaitingForPermissionsUserResponse");
+            requestPermissions(
+                    new String[]{Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.ACCESS_FINE_LOCATION},
+                    1);
         } else {
-            bleConfigurer.startConnectingSystem();
+            startConnectingNewDevice();
         }
     }
 
@@ -360,8 +362,12 @@ public class NewDeviceActivity extends AppCompatActivity {
             }
 
             if (granted == grantResults.length)
-                bleConfigurer.startConnectingSystem();
+                startConnectingNewDevice();
         }
+    }
+
+    public void startConnectingNewDevice(){
+        bleConfigurer.startConnectingSystem(user.getAppCert(), user.getAppAuthSecrets());
     }
 
     public void onNextClick(View v){
@@ -384,7 +390,7 @@ public class NewDeviceActivity extends AppCompatActivity {
         bleConfigurer.restart();
         prepareNextStep(UIState.PrepareBluetooth);
         prepareNextStep(UIState.SearchForDevice);
-        bleConfigurer.startConnectingSystem();
+        startConnectingNewDevice();
     }
 
     private void onWriteConfigClick(){
@@ -441,19 +447,20 @@ public class NewDeviceActivity extends AppCompatActivity {
             Log.e(TAG, "MAC: "+bleConfigurer.getConfigMAC());
 
             user.registerDevice(bleConfigurer.getConfigMAC(), roomId, sectorId, plantId,
-                    deviceName, bleConfigurer.getConnectedDevType(),
+                    deviceName, bleConfigurer.getDevicesPubKey(), bleConfigurer.getConnectedDevType(),
                     this::onDeviceRegisterResult);
         }
     }
 
     private void onDeviceRegisterResult(boolean success, JsonObject data){
         stopUITimeoutWatchdog();
-        if(success && data!=null && data.has("picklock")){
+        if(success && data!=null && data.has("picklock") && data.has("signature")){
             Log.d("NewDeviceActivity", "New version");
             Log.d("NewDeviceActivity", "System state: WritingCharacteristics");
             Log.d("NewDeviceActivity", "Populate device in database success");
             String picklock= data.get("picklock").getAsString();
-            bleConfigurer.writeDeviceConfig(inputWifiSSID, inputWifiPSK, String.valueOf(user.getUid()), picklock, inputTimezone, inputRole);
+            String devSign= data.get("signature").getAsString();
+            bleConfigurer.writeDeviceConfig(inputWifiSSID, inputWifiPSK, String.valueOf(user.getUid()), picklock, inputTimezone, inputRole, devSign);
         } else {
             Log.e("NewDeviceActivity", "Populate device in database failed");
             onBLEError(BLEConfigurer.ErrorCode.ConfigWriteFailed);

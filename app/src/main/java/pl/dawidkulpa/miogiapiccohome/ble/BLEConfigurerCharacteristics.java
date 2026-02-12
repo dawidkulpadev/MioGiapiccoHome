@@ -14,6 +14,10 @@ abstract public class BLEConfigurerCharacteristics {
     protected String wifiSSIDsCSV="";
     protected int configRole=0;
 
+
+
+    protected String configDevSignBase64="";
+
     public enum ErrorCode {SyncFailed, WriteFailed}
 
     final TimeoutWatchdog timeoutWatchdog= new TimeoutWatchdog();
@@ -50,6 +54,8 @@ abstract public class BLEConfigurerCharacteristics {
     abstract boolean writingComplete();
     abstract void restart();
     abstract void finish();
+
+    abstract String getDevicesPubKey();
 
     public String getWiFiSSID(){
         return configWifiSSID;
@@ -97,4 +103,7 @@ abstract public class BLEConfigurerCharacteristics {
         this.configRole= role;
     }
 
+    public void setConfigDevSignBase64(String configDevSignBase64) {
+        this.configDevSignBase64 = configDevSignBase64;
+    }
 }

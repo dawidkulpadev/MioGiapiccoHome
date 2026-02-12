@@ -13,6 +13,13 @@ android {
         versionName "1.4.7"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        Properties properties = new Properties()
+        if (project.rootProject.file('local.properties').exists()) {
+            properties.load(project.rootProject.file('local.properties').newDataInputStream())
+        }
+        def publicKey = properties.getProperty('manufacturer.publicKey', "")
+        buildConfigField "String", "MANUFACTURER_PUBLIC_KEY", publicKey
     }
 
     buildTypes {
@@ -38,6 +45,9 @@ android {
         jvmTarget = '1.8'
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
@@ -51,7 +61,6 @@ dependencies {
 
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
-    implementation 'com.github.1dawidk:scm:v2.4'
     implementation 'androidx.preference:preference:1.2.1'
 
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'

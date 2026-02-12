@@ -10,6 +10,8 @@ import android.os.Handler;
 import android.util.Log;
 
 import pl.dawidkulpa.miogiapiccohome.API.data.Device;
+import pl.dawidkulpa.miogiapiccohome.ble.bleln_encryption.BLELNAuthSecrets;
+import pl.dawidkulpa.miogiapiccohome.ble.bleln_encryption.BLELNCert;
 
 public class BLEConfigurer {
     /** Constants */
@@ -44,7 +46,8 @@ public class BLEConfigurer {
     private boolean scanning;
     private final Context c;
     private final BLEConfigurerCallbacks callbacks;
-
+    private BLELNCert myCert;
+    private BLELNAuthSecrets myAuthSecrets;
 
 
     // Device scan callback.
@@ -64,7 +67,7 @@ public class BLEConfigurer {
                             bluetoothLeScanner.stopScan(leScanCallback);
                             state= ConfigurerState.ConnectingWithDevice;
                             Log.d("NewDeviceActivity", "System state: ConnectingWithDevice");
-                            bleConfigurerGatt.startConnectAndReceiving(c,result.getDevice().getAddress(), result.getDevice().getName());
+                            bleConfigurerGatt.startConnectAndReceiving(c,result.getDevice().getAddress(), result.getDevice().getName(), myCert, myAuthSecrets);
                         }
                     }
                 }
@@ -190,7 +193,9 @@ public class BLEConfigurer {
         bleConfigurerGatt.finish(c);
     }
 
-    public void startConnectingSystem(){
+    public void startConnectingSystem(BLELNCert cert, BLELNAuthSecrets authSecrets){
+        myCert= cert;
+        myAuthSecrets= authSecrets;
         state= ConfigurerState.WaitingForBluetooth;
         Log.d("NewDeviceActivity", "System state: WaitingForBluetooth");
         checkBluetoothHandler.post(checkBluetoothRunnable);
@@ -216,12 +221,16 @@ public class BLEConfigurer {
         return bleConfigurerGatt.getConfigMAC();
     }
 
+    public String getDevicesPubKey(){
+        return bleConfigurerGatt.getDevicesPubKey();
+    }
+
     public String getFoundDeviceName() {
         return bleConfigurerGatt.getFoundDeviceName();
     }
 
-    public void writeDeviceConfig(String wifiSSID, String wifiPSK, String uid, String picklock, String timezone, int role){
+    public void writeDeviceConfig(String wifiSSID, String wifiPSK, String uid, String picklock, String timezone, int role, String devSignatureBase64){
         state= ConfigurerState.WritingConfiguration;
-        bleConfigurerGatt.startConfigWrite(wifiSSID, wifiPSK, uid, picklock, timezone, role);
+        bleConfigurerGatt.startConfigWrite(wifiSSID, wifiPSK, uid, picklock, timezone, role, devSignatureBase64);
     }
 }
