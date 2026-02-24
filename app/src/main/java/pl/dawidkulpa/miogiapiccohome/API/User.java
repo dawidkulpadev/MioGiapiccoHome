@@ -297,32 +297,15 @@ public class User implements Parcelable {
         call.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
+                logAPIResponse(response);
                 if(actionListener!=null)
                     actionListener.onFinished(response.isSuccessful(), response.body());
-
-                if(response.isSuccessful()){
-                    if(response.body()!=null){
-                        Log.e(TAG, "registerDevice: "+response.body().toString());
-                    } else {
-                        Log.e(TAG, "registerDevice: received empty body");
-                    }
-                } else {
-                    if(response.errorBody()!=null){
-                        try {
-                            Log.e(TAG, "registerDevice: " + response.errorBody().string());
-                        } catch (IOException e){
-                            Log.e(TAG, "registerDevice: received empty error body");
-                        }
-                    }
-                }
             }
 
             @Override
             public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) {
                 if(actionListener!=null)
                     actionListener.onFinished(false, null);
-
-                Log.e(TAG, "registerDevice: WTF?");
             }
         });
     }
@@ -335,16 +318,6 @@ public class User implements Parcelable {
                     public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
                         if(actionListener!=null)
                             actionListener.onFinished(response.isSuccessful(), response.body());
-
-                        if(response.isSuccessful())
-                            Log.e(TAG, "Unregister: "+response.body().toString());
-                        else {
-                            try {
-                                Log.e(TAG, "Unregister: "+response.errorBody().string());
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
                     }
 
                     @Override
@@ -399,11 +372,6 @@ public class User implements Parcelable {
                     appCert= new BLELNCert(2, mac, authSecrets.getDevPubKey(), uid, certSign);
                     actionListener.onFinished(true, response.body());
                 } else {
-                    try {
-                        Log.e(TAG, response.errorBody().string());
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
                     actionListener.onFinished(false, null);
                 }
 
@@ -418,6 +386,20 @@ public class User implements Parcelable {
 
     public BLELNCert getAppCert(){
         return appCert;
+    }
+
+    public void logAPIResponse(@NonNull Response<JsonObject> response){
+        if(response.isSuccessful()) {
+            if(response.body()!=null)
+                Log.e(TAG, "API response: " + response.body().toString());
+        } else {
+            try {
+                if(response.errorBody()!=null)
+                    Log.e(TAG, "API response: "+response.errorBody().string());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     public void downloadData(final DownloadDataListener ddl){
@@ -446,11 +428,12 @@ public class User implements Parcelable {
         String strStart = (start != null) ? isoDateFormatter.format(start.getTime()) : null;
         String strEnd = (end != null) ? isoDateFormatter.format(end.getTime()) : null;
 
-        Call<JsonObject> call = api.getAirDataHistory(token, new AirDataHistoryRequest(airDevice.getId(), strStart, strEnd));
+        Call<JsonObject> call = api.getAirDataHistory(token, airDevice.getId(), strStart, strEnd);
         call.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
                 if(response.isSuccessful() && response.body()!=null){
+
                     try {
                         AirDataHistory airData= new AirDataHistory(response.body());
                         dadhl.onResult(true, airData);
@@ -620,7 +603,7 @@ public class User implements Parcelable {
         out.writeString(picklock);
     }
 
-    public static final Parcelable.Creator<User> CREATOR= new Parcelable.Creator<User>() {
+    public static final Creator<User> CREATOR= new Creator<User>() {
         public User createFromParcel(Parcel in) {
             return new User(in);
         }

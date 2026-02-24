@@ -57,8 +57,6 @@ public class AirDataPlotDialog extends BottomSheetDialogFragment {
 
     Button nextButton;
     Button prevButton;
-    TextView batteryLevelTextView;
-    ImageView batteryLevelIcon;
 
     int adhPeriodLen= 1;
 
@@ -76,9 +74,6 @@ public class AirDataPlotDialog extends BottomSheetDialogFragment {
 
         nextButton= rootView.findViewById(R.id.next_btn);
         prevButton= rootView.findViewById(R.id.prev_btn);
-
-        batteryLevelTextView= rootView.findViewById(R.id.battery_level_text);
-        batteryLevelIcon= rootView.findViewById(R.id.battery_icon);
 
         adhPeriodSelectorGroup= rootView.findViewById(R.id.adh_periods_group);
         adhPeriodSelectorGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
@@ -147,15 +142,6 @@ public class AirDataPlotDialog extends BottomSheetDialogFragment {
 
         airDataChart.init();
         downloadAirData();
-
-        if(device.getBatteryVoltage()==0){
-            batteryLevelTextView.setVisibility(View.GONE);
-            batteryLevelIcon.setVisibility(View.GONE);
-        } else {
-            batteryLevelTextView.setText(
-                    dialog.getContext().getString(R.string.value_battery_voltage, device.getBatteryVoltage())
-            );
-        }
 
         airDataChart.init();
 

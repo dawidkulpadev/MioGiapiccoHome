@@ -59,7 +59,7 @@ public interface MioGiapiccoApi {
     Call<JsonObject> unregisterDevice(@Header("authorization") String token, @Body UnregisterDeviceRequest body);
 
     @GET("device/air-history")
-    Call<JsonObject> getAirDataHistory(@Header("authorization") String token, @Body AirDataHistoryRequest body);
+    Call<JsonObject> getAirDataHistory(@Header("authorization") String token, @Query("aid") String dev_id, @Query("hs") String hs, @Query("he") String he);
 
     @POST("plant/create")
     Call<JsonObject> createPlant(@Header("authorization") String token, @Body AddPlantRequest body);

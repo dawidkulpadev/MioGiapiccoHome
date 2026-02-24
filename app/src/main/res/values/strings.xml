@@ -173,6 +173,22 @@
     <string name="value_battery_voltage" translatable="false">%.2fV</string>
     <string name="value_no_battery" translatable="false">-</string>
 
+    <string name="value_last_seen_now">seconds ago</string>
+
+    <plurals name="value_last_seen_min">
+        <item quantity="one">an minute ago</item>
+        <item quantity="few">%d minutes ago</item>
+        <item quantity="many">%d minutes ago</item>
+        <item quantity="other">%d minutes ago</item>
+    </plurals>
+
+    <plurals name="value_last_seen_h">
+        <item quantity="one">an hour ago</item>
+        <item quantity="few">%d hours ago</item>
+        <item quantity="many">%d hours ago</item>
+        <item quantity="other">%d hours ago</item>
+    </plurals>
+
     <string name="error_empty_name">Name cannot be empty</string>
     <string name="error_field_empty">This field cannot be empty</string>
     <string name="error_email_invalid">Invalid email format</string>

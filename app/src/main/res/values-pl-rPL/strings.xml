@@ -159,4 +159,20 @@
     <string name="message_connect_step_gen2_encrypting_connection">Szyfrowanie połączenia…</string>
     <string name="message_connect_step_gen2_authorisation">Autoryzacja…</string>
     <string name="message_connect_step_gen2_reading_config">Czytanie aktualnych ustawień…</string>
+
+    <string name="value_last_seen_now">przed sekundą</string>
+
+    <plurals name="value_last_seen_min">
+        <item quantity="one">minutę temu</item>
+        <item quantity="few">%d minuty temu</item>
+        <item quantity="many">%d minut temu</item>
+        <item quantity="other">%d minut temu</item>
+    </plurals>
+
+    <plurals name="value_last_seen_h">
+        <item quantity="one">godzinę temu</item>
+        <item quantity="few">%d godziny temu</item>
+        <item quantity="many">%d godzin temu</item>
+        <item quantity="other">%d godzin temu</item>
+    </plurals>
 </resources>

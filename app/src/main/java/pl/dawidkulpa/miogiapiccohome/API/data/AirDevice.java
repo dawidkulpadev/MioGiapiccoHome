@@ -19,7 +19,7 @@ public class AirDevice extends Device {
     private final double airHumidity;
     private final double aitTemperature;
     private final int humidWaterLvl;
-    private final double batteryVoltage;
+    private final int batteryVoltage;
 
     public AirDevice(JsonObject jobj, int roomId, int sectorId) throws ParseException {
         super(jobj, Type.Air);
@@ -32,7 +32,7 @@ public class AirDevice extends Device {
         airHumidity= jobj.get(JSON_TAG_AIR_HUM).getAsDouble();
         aitTemperature= jobj.get(JSON_TAG_AIR_TEMP).getAsDouble();
         humidWaterLvl= jobj.get(JSON_TAG_HUMIDIFIER_WATER_LEVEL).getAsInt();
-        batteryVoltage= jobj.get(JSON_TAG_BATTERY_VOLTAGE).getAsDouble();
+        batteryVoltage= jobj.get(JSON_TAG_BATTERY_VOLTAGE).getAsInt();
     }
 
     public double getAirHumidity() {
@@ -47,7 +47,7 @@ public class AirDevice extends Device {
         return humidWaterLvl;
     }
 
-    public double getBatteryVoltage(){ return batteryVoltage;}
+    public int getBatteryVoltage(){ return batteryVoltage;}
 
     public String getName(){
         return name;

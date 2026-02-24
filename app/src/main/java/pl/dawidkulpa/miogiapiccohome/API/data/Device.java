@@ -1,12 +1,16 @@
 package pl.dawidkulpa.miogiapiccohome.API.data;
 
+import android.util.Log;
+
 import com.google.gson.JsonObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.TimeZone;
 
 public class Device {
     public enum Type {Unknown, Light, Soil, Air};
@@ -69,8 +73,10 @@ public class Device {
             updateAllowed= false;
         }
 
+
         String strLS= jobj.get(JSON_TAG_LAST_SEEN).getAsString();
-        lastSeen= Calendar.getInstance();
+        lastSeen= Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        sqlSDF.setTimeZone(TimeZone.getTimeZone("UTC"));
         lastSeen.setTime(Objects.requireNonNull(sqlSDF.parse(strLS)));
         //updateAvailable= (jobj.getInt(JSON_TAG_UPDATE_AVAILABLE)==1);
         updateAvailable= false;
@@ -81,7 +87,7 @@ public class Device {
     }
 
     public int getLastSeen() {
-        Calendar c= Calendar.getInstance();
+        Calendar c= Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         long diff= c.getTimeInMillis()-lastSeen.getTimeInMillis();
         return (int)(diff/60000);
     }

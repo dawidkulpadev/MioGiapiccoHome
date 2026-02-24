@@ -1,11 +1,13 @@
 package pl.dawidkulpa.miogiapiccohome.adapters;
 
 import android.os.Build;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
@@ -15,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.chip.Chip;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
@@ -63,10 +66,10 @@ public class SectorsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         LightDevicesListAdapter lightsListAdapter;
 
         Button airParamsChartButton;
-        TextView airHumLabelText;
-        TextView airHumValueText;
-        TextView airTempLabelText;
-        TextView airTempValueText;
+        Chip airHumidityChip;
+        Chip airTemperatureChip;
+        TextView airBatteryText;
+        TextView airLastMeasurementText;
         Button sectorMoreButton;
         AirDataPlotDialog.AirDataRequestListener adrListener;
         AirDataPlotDialog airDataPlotDialog;
@@ -80,11 +83,10 @@ public class SectorsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
             nameText= v.findViewById(R.id.sector_name_text);
             airParamsChartButton = v.findViewById(R.id.air_chart_button);
-            airHumLabelText= v.findViewById(R.id.air_humidity_label);
-            airHumValueText= v.findViewById(R.id.air_humidity_value_text);
-            airTempLabelText= v.findViewById(R.id.air_temperature_label);
-            airTempValueText= v.findViewById(R.id.air_temperature_value_text);
-
+            airHumidityChip= v.findViewById(R.id.chipHumidity);
+            airTemperatureChip= v.findViewById(R.id.chipTemperature);
+            airBatteryText= v.findViewById(R.id.tvBatteryLevel);
+            airLastMeasurementText= v.findViewById(R.id.tvLastMeasurement);
             plantsRecyclerView= v.findViewById(R.id.sector_plants_list);
             RecyclerView.LayoutManager plantsLayoutManager = new LinearLayoutManager(v.getContext());
             plantsRecyclerView.setLayoutManager(plantsLayoutManager);
@@ -109,20 +111,31 @@ public class SectorsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             } else {
                 float hum = (float)s.getAirDevice().getAirHumidity();
                 float temp = (float)s.getAirDevice().getAitTemperature();
+                float batteryV= (float)s.getAirDevice().getBatteryVoltage()/1000;
+                int lastSeenM= s.getAirDevice().getLastSeen();
 
                 root.findViewById(R.id.air_device_box).setVisibility(View.VISIBLE);
 
-                airTempValueText.setText(root.getContext().getString(R.string.value_temperature, temp));
-                airHumValueText.setText(root.getContext().getString(R.string.value_humidity, hum));
+                airTemperatureChip.setText(root.getContext().getString(R.string.value_temperature, temp));
+                airHumidityChip.setText(root.getContext().getString(R.string.value_humidity, hum));
+                airBatteryText.setText(root.getContext().getString(R.string.value_battery_voltage,batteryV));
+
+                if(lastSeenM==0){
+                    airLastMeasurementText.setText(root.getContext().getString(R.string.value_last_seen_now));
+                } else if(lastSeenM<60) {
+                    airLastMeasurementText.setText(root.getContext().getResources().getQuantityString(R.plurals.value_last_seen_min, lastSeenM, lastSeenM));
+                } else {
+                    airLastMeasurementText.setText(root.getContext().getResources().getQuantityString(R.plurals.value_last_seen_h, lastSeenM / 60, lastSeenM / 60));
+                }
+
+                updateBatteryIcon(root.findViewById(R.id.ivBattery), s.getAirDevice().getBatteryVoltage());
             }
 
             sectorMoreButton.setOnClickListener(v -> {
                 PopupMenu popup = new PopupMenu(root.getContext(), v);
                 popup.getMenuInflater().inflate(R.menu.room_menu, popup.getMenu());
                 popup.setGravity(Gravity.END);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    popup.setForceShowIcon(true);
-                }
+                popup.setForceShowIcon(true);
                 popup.setOnMenuItemClickListener(item -> {
                     if (item.getItemId() == R.id.action_remove) {
                         onSectorDeleteClick();
@@ -136,6 +149,30 @@ public class SectorsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 });
                 popup.show();
             });
+        }
+
+        public void updateBatteryIcon(ImageView batteryIcon, int batteryVoltage) {
+            if (batteryIcon == null) {
+                return;
+            }
+
+            if (batteryVoltage > 4100) {
+                batteryIcon.setImageResource(R.drawable.icon_battery_full);
+            } else if (batteryVoltage > 3950) {
+                batteryIcon.setImageResource(R.drawable.icon_battery_6);
+            } else if (batteryVoltage > 3850) {
+                batteryIcon.setImageResource(R.drawable.icon_battery_5);
+            } else if (batteryVoltage > 3780) {
+                batteryIcon.setImageResource(R.drawable.icon_battery_4);
+            } else if (batteryVoltage > 3720) {
+                batteryIcon.setImageResource(R.drawable.icon_battery_3);
+            } else if (batteryVoltage > 3650) {
+                batteryIcon.setImageResource(R.drawable.icon_battery_2);
+            } else if (batteryVoltage > 3450) {
+                batteryIcon.setImageResource(R.drawable.icon_battery_1);
+            } else {
+                batteryIcon.setImageResource(R.drawable.icon_battery_empty);
+            }
         }
 
         void onSectorDeleteClick(){

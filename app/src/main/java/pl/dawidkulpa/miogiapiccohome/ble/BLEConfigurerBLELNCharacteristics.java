@@ -6,10 +6,10 @@ import android.util.Base64;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.HexFormat;
 import java.util.List;
 import java.util.Objects;
 
+import kotlin.text.HexFormat;
 import pl.dawidkulpa.miogiapiccohome.R;
 import pl.dawidkulpa.miogiapiccohome.ble.bleln_encryption.BLELNAuthSecrets;
 import pl.dawidkulpa.miogiapiccohome.ble.bleln_encryption.BLELNAuthentication;
@@ -240,6 +240,15 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
         }
     }
 
+    static String bytesToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) {
+            // %02X - formatuje na 2 znaki Hex, wielkie litery, z wiodącym zerem
+            sb.append(String.format("%02X", b));
+        }
+        return sb.toString();
+    }
+
     @Override
     void preparingStateOnNotify(String uuid, byte[] data) {
         if(Objects.equals(uuid, BLE_CHAR_UUID_KEY_TX)){
@@ -267,6 +276,7 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
                                 BLELNCert cert= authStore.verifyCert(parts[1], parts[2]);
 
                                 if(cert != null){
+                                    configMAC= bytesToHex(cert.getMac());
                                     if(cert.getUid()==-1 || cert.getUid()==authStore.getUserId()) {
                                         connCtx.setFriendsCertData(cert.getMac(), cert.getPubKey());
                                         sendCertToServer();
@@ -279,6 +289,7 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
                                 } else {
                                     connCtx.setState(BLELNConnCtx.State.AuthFailed);
                                     actionsListener.onError(ErrorCode.SyncFailed);
+                                    Log.e(TAG, plainMsg);
                                     Log.e(TAG, "WaitingForCert - invalid cert");
                                 }
                             } else {
@@ -362,42 +373,22 @@ public class BLEConfigurerBLELNCharacteristics extends BLEConfigurerCharacterist
                         case "wssid":
                             Log.d(TAG, "WiFi SSID read");
                             configWifiSSID = val;
-                            if(!sendGetConfigCmd("pcklk")){
-                                Log.e(TAG, "Error sending pcklk get command");
-                                actionsListener.onError(ErrorCode.SyncFailed);
-                                return;
-                            }
-                            sendUpdateProgress(75, -1);
-                            break;
-                        case "pcklk":
-                            Log.d(TAG, "Picklock read");
-                            configPicklock = val;
                             if(!sendGetConfigCmd("tzone")){
                                 Log.e(TAG, "Error sending tzone get command");
                                 actionsListener.onError(ErrorCode.SyncFailed);
                                 return;
                             }
-                            sendUpdateProgress(80, -1);
+                            sendUpdateProgress(85, -1);
                             break;
                         case "tzone":
                             Log.d(TAG, "Timezone read");
                             configWifiSSID = val;
-                            if(!sendGetConfigCmd("mac")){
+                            if(!sendGetConfigCmd("role")){
                                 Log.e(TAG, "Error sending mac get command");
                                 actionsListener.onError(ErrorCode.SyncFailed);
                                 return;
                             }
-                            sendUpdateProgress(85, -1);
-                            break;
-                        case "mac":
-                            Log.d(TAG, "MAC read: "+ val);
-                            configMAC = val;
-                            if(!sendGetConfigCmd("role")){
-                                Log.e(TAG, "Error sending role get command");
-                                actionsListener.onError(ErrorCode.SyncFailed);
-                                return;
-                            }
-                            sendUpdateProgress(90, -1);
+                            sendUpdateProgress(95, -1);
                             break;
                         case "role":
                             timeoutWatchdog.stop();

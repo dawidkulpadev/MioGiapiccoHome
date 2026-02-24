@@ -58,7 +58,7 @@ public class BLEConfigurer {
                 public void onScanResult(int callbackType, ScanResult result) {
                     super.onScanResult(callbackType, result);
 
-                    if(state== BLEConfigurer.ConfigurerState.SearchingDevice) {
+                    if(state== ConfigurerState.SearchingDevice) {
                         if (result.getDevice().getName() != null &&
                                 result.getDevice().getName().contains(MG_SSID_PREFIX)) {
                             callbacks.onDeviceFound(result.getDevice().getName());
@@ -94,9 +94,9 @@ public class BLEConfigurer {
         @Override
         public void run() {
             BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            if(state== BLEConfigurer.ConfigurerState.WaitingForBluetooth){
+            if(state== ConfigurerState.WaitingForBluetooth){
                 if(mBluetoothAdapter!=null && mBluetoothAdapter.isEnabled()){
-                    state= BLEConfigurer.ConfigurerState.SearchingDevice;
+                    state= ConfigurerState.SearchingDevice;
                     Log.d("NewDeviceActivity", "System state: SearchingForDevice");
                     bluetoothLeScanner= BluetoothAdapter.
                             getDefaultAdapter().
